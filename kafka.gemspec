@@ -29,7 +29,10 @@ Gem::Specification.new do |spec|
   end
 
   spec.require_paths = ["lib"]
+  spec.extensions    = %w[ext/Rakefile]
 
-  spec.add_development_dependency "rake"
+  spec.add_dependency "ffi"
+  spec.add_dependency "mini_portile2"
+
   spec.add_development_dependency "rspec"
 end

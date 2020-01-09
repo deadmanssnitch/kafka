@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
-require "kafka/version"
-
 module Kafka
   class Error < StandardError; end
+
+  require "kafka/ffi"
+  require "kafka/config"
+  require "kafka/version"
 end

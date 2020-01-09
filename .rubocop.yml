@@ -2,12 +2,8 @@ AllCops:
   TargetRubyVersion: 2.6
   Exclude:
     - "bin/*"
-    - "db/schema.rb"
-    - "db/migrate/*.rb"
-    - "vendor/**/*"
-    # Ignore generated protobuf definitions
-    - "lib/dms/proto/*.rb"
-    - "lib/dms/rpc/**/*"
+    - "ext/tmp/*"
+    - "ext/ports/*"
 
 require:
   - rubocop-performance
@@ -21,8 +17,6 @@ Layout/ArgumentAlignment:
 
 Layout/HashAlignment:
   EnforcedLastArgumentHashStyle: ignore_implicit
-  EnforcedHashRocketStyle: table
-  EnforcedColonStyle: key
 
 # Align ends correctly.
 Layout/EndAlignment:
@@ -39,6 +33,9 @@ Layout/SpaceInsideHashLiteralBraces:
 
 Style/StringLiterals:
   EnforcedStyle: double_quotes
+
+Style/SymbolArray:
+  EnforcedStyle: brackets
 
 Style/CollectionMethods:
   # Mapping from undesired method to desired_method
@@ -97,6 +94,11 @@ Style/EmptyMethod:
 
 Metrics/PerceivedComplexity:
   Max: 11
+
+# As a wrapper around librdkafka there is little we can do to properly limit
+# this.
+Metrics/ParameterLists:
+  Max: 6
 
 #################
 # Disabled cops #

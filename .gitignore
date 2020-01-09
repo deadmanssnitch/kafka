@@ -7,3 +7,8 @@
 /spec/reports/
 /tmp/
 /Gemfile.lock
+
+# Ignore librdkafka build artifacts
+/ext/librdkafka.*
+/ext/tmp
+/ext/ports

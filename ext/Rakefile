@@ -1,0 +1,69 @@
+# frozen_string_literal: true
+
+require_relative "../lib/kafka/version"
+
+require "mini_portile2"
+require "fileutils"
+
+desc "Compile librdkafka v#{Kafka::LIBRDKAFKA_VERSION}"
+task :default do
+  Rake::Task["build:release"].invoke(Kafka::LIBRDKAFKA_VERSION, Kafka::LIBRDKAFKA_CHECKSUM)
+end
+
+desc "Clean up and remove build artifacts"
+task :clean do
+  Dir.chdir(__dir__) do
+    FileUtils.rm_rf([
+      "tmp",
+      "ports",
+      Dir.glob("librdkafka.*"),
+    ])
+  end
+end
+
+namespace :build do
+  # Build librdkafka and store the library into ext/
+  #
+  # NOTE: To speed up the build try:
+  #   MAKE="make -j${nproc}" rake
+  def build(version:, checksum: nil)
+    recipe = MiniPortile.new("librdkafka", version)
+    recipe.files << {
+      url: "https://github.com/edenhill/librdkafka/archive/#{version}.tar.gz",
+      sha256: checksum,
+    }
+    recipe.configure_options = ["--host=#{recipe.host}"]
+    recipe.cook
+
+    ext = recipe.host.include?("darwin") ? "dylib" : "so"
+    lib = File.join(recipe.path, "lib", "librdkafka.#{ext}")
+
+    # cp will copy the content following any symlinks
+    FileUtils.cp(lib, __dir__)
+
+    # Remove build directories
+    FileUtils.rm_rf([
+      File.join(__dir__, "tmp"),
+      File.join(__dir__, "ports"),
+    ])
+  end
+
+  desc "Download and build an official release of librdkafka"
+  task :release, [:version, :checksum] do |_task, args|
+    version  = args[:version]
+    checksum = args[:checksum]
+
+    raise ArgumentError, "version is required" if version.nil?
+    raise ArgumentError, "checksum is required" if checksum.nil?
+
+    # Prefix the version string to look like "v1.3.0" so the URL is correct.
+    version = version.start_with?("v") ? str : "v#{version}"
+
+    build(version: version, checksum: checksum)
+  end
+
+  desc "Build librdkafka at the given git sha or tag"
+  task :git, [:ref, :checksum] do |_task, args|
+    build(version: args[:ref], checksum: args[:checksum])
+  end
+end
