@@ -16,14 +16,36 @@ module Kafka::FFI
       :_private,  :pointer # DO NOT TOUCH. Internal to librdkafka
     )
 
+    # Retrieve the error associated with this message. For consumers this is
+    # used to report per-topic+partition consumer errors. For producers this is
+    # set when received in the dr_msg_cb callback to signify a fatal error
+    # publishing the message.
+    #
+    # @return [nil] Message does not have an error
+    # @return [Integer] RD_KAFKA_RESP_ERR__* error code
+    def error
+      err = self[:err]
+      err == :ok ? nil : err
+    end
+
+    # Returns the name of the Topic the Message was published to.
+    #
+    # @return [nil] Topic information was not available
+    # @return [String] Name of the Topic the message was published to.
     def topic
       if self[:rkt].nil?
         return nil
       end
 
-      ::Kafka::FFI.rd_kafka_topic_name(self[:rkt])
+      self[:rkt].name
     end
 
+    # Returns the optional message key used to publish the message. This key is
+    # used for partition assignment based on the `partitioner` or
+    # `partitioner_cb` config options.
+    #
+    # @return [nil] No partitioning key was provided
+    # @return [String] The partitioning key
     def key
       if self[:key].null?
         return nil
@@ -32,14 +54,27 @@ module Kafka::FFI
       self[:key].read_string(self[:key_len])
     end
 
+    # Returns the partition the message was published to.
+    #
+    # @return [Integer] Partition
     def partition
       self[:partition]
     end
 
+    # Returns the message's offset as published in the topic's partition. When
+    # error != nil, offset the error occurred at.
+    #
+    # @return [Integer] Message offset
+    # @return [RD_KAFKA_OFFSET_INVALID] Message was retried and idempotence is
+    #   enabled.
     def offset
       self[:offset]
     end
 
+    # Returns the message's payload. When error != nil, will contain a string
+    # describing the error.
+    #
+    # @return [String] Message payload or error string.
     def payload
       if self[:payload].null?
         return nil
