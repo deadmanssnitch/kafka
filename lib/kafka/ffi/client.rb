@@ -198,6 +198,51 @@ module Kafka::FFI
       ::Kafka::FFI.rd_kafka_resume_partitions(self, list)
     end
 
+    # rubocop:disable Naming/AccessorMethodName
+
+    # Get a reference to the main librdkafka event queue. This is the queue
+    # that is served by rd_kafka_poll.
+    #
+    # @note Application must call #destroy on this queue when finished.
+    #
+    # @return [Queue] Main client Event queue
+    def get_main_queue
+      ::Kafka::FFI.rd_kafka_queue_get_main(self)
+    end
+
+    # Get a reference to the background thread queue. The background queue is
+    # automatically polled by librdkafka and is fully managed internally.
+    #
+    # @note The returned Queue must not be polled, forwarded, or otherwise
+    #   manage by the application. It may only be used as the destination queue
+    #   passed to queue-enabled APIs.
+    #
+    # @note The caller must call #destroy on the Queue when finished with it
+    #
+    # @return [Queue] Background queue
+    # @return [nil] Background queue is disabled
+    def get_background_queue
+      ::Kafka::FFI.rd_kafka_queue_get_background(self)
+    end
+
+    # Forward librdkafka and debug logs to the specified queue. This allows the
+    # application to serve logg callbacks in its thread of choice.
+    #
+    # @param dest [Queue] Destination Queue for logs
+    # @param dest [nil] Forward logs to the Client's main queue
+    #
+    # @raise [ResponseError] Error setting the log Queue
+    def set_log_queue(dest)
+      err = ::Kafka::FFI.rd_kafka_set_log_queue(self, dest)
+      if err != :ok
+        raise ResponseError, err
+      end
+
+      nil
+    end
+
+    # rubocop:enable Naming/AccessorMethodName
+
     # Query the broker for the oldest and newest offsets for the partition.
     #
     # @param topic [String] Name of the topic to get offsets for

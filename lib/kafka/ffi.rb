@@ -98,9 +98,10 @@ module Kafka
       :persisted,          RD_KAFKA_MSG_STATUS_PERSISTED,
     ]
 
-    typedef :int,   :timeout_ms
-    typedef :int32, :partition
-    typedef :int64, :offset
+    typedef :int,    :timeout_ms
+    typedef :int32,  :partition
+    typedef :int64,  :offset
+    typedef :string, :topic
 
     # Load types after enums and constants so they're able to reference them.
     require "kafka/ffi/error"
@@ -301,6 +302,20 @@ module Kafka
 
     # Producer
     # @todo
+
+    # Queue
+    attach_function :rd_kafka_queue_new, [Client], Queue
+    attach_function :rd_kafka_queue_poll, [Queue, :timeout_ms], Event
+    attach_function :rd_kafka_queue_get_main, [Client], Queue
+    attach_function :rd_kafka_queue_get_consumer, [Consumer], Queue
+    attach_function :rd_kafka_queue_get_partition, [Consumer, :topic, :partition], Queue
+    attach_function :rd_kafka_queue_get_background, [Client], Queue
+    attach_function :rd_kafka_queue_forward, [Queue, Queue], :void
+    attach_function :rd_kafka_set_log_queue, [Client, Queue], :error_code
+    attach_function :rd_kafka_queue_length, [Queue], :size_t
+    # :rd_kafka_queue_io_event_enable
+    # :rd_kafka_queue_cb_event_enable
+    attach_function :rd_kafka_queue_destroy, [Queue], :void
 
     # Topics
 

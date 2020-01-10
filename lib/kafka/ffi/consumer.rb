@@ -50,6 +50,28 @@ module Kafka::FFI
       [low.read_int64, high.read_int64]
     end
 
+    # rubocop:disable Naming/AccessorMethodName
+
+    # Returns a reference to the consume queue. This is the queue served by
+    # consumer_poll.
+    #
+    # @note Caller must call #destroy when done with the Queue.
+    #
+    # @return [Queue] Consumer queue
+    def get_consumer_queue
+      ::Kafka::FFI.rd_kafka_queue_get_consumer(self)
+    end
+    # rubocop:enable Naming/AccessorMethodName
+
+    # Returns a reference to the partition's queue.
+    #
+    # @note Caller must call #destroy when done with the Queue.
+    #
+    # @return [Queue] Partition Queue
+    def get_partition_queue(topic, partition)
+      ::Kafka::FFI.rd_kafka_queue_get_partition(self, topic, partition)
+    end
+
     # Redirect the main event queue to the Consumer's queue so the consumer
     # doesn't need to poll from it separately for event callbacks to fire.
     #

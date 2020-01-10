@@ -20,7 +20,6 @@ RSpec.describe Kafka::FFI::Consumer do
     list = Kafka::FFI::TopicPartitionList.new
     list.add("topic")
     list.add("snitches", 5)
-
     expect(consumer.subscribe(list)).to eq(:ok)
 
     tpl = consumer.subscription
@@ -128,5 +127,25 @@ RSpec.describe Kafka::FFI::Consumer do
   ensure
     consumer.destroy
     list.destroy if list
+  end
+
+  specify "#get_consumer_queue" do
+    client = Kafka::FFI::Consumer.new
+
+    queue = client.get_consumer_queue
+    expect(queue).to be_a(Kafka::FFI::Queue)
+  ensure
+    client.destroy
+    queue.destroy if queue
+  end
+
+  specify "#get_partition_queue" do
+    client = Kafka::FFI::Consumer.new
+
+    queue = client.get_partition_queue("test", 1)
+    expect(queue).to be_a(Kafka::FFI::Queue)
+  ensure
+    client.destroy
+    queue.destroy if queue
   end
 end
