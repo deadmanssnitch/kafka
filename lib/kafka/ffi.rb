@@ -105,6 +105,7 @@ module Kafka
     typedef :string, :topic
 
     # Load types after enums and constants so they're able to reference them.
+    require "kafka/ffi/admin"
     require "kafka/ffi/error"
     require "kafka/ffi/event"
     require "kafka/ffi/queue"
@@ -372,5 +373,25 @@ module Kafka
     attach_function :rd_kafka_topic_partition_list_sort, [TopicPartitionList.by_ref, :topic_list_cmp_func, :pointer ], :void
 
     attach_function :rd_kafka_topic_partition_list_destroy, [TopicPartitionList.by_ref], :void
+
+    # Admin Commands
+
+    ## Create Topics / NewTopic
+
+    attach_function :rd_kafka_CreateTopics, [Client, :pointer, :size_t, :pointer, Queue], :void
+    attach_function :rd_kafka_CreateTopics_result_topics, [Event, :pointer], :pointer
+    attach_function :rd_kafka_NewTopic_new, [:topic, :int, :int, :pointer, :size_t], Admin::NewTopic
+    attach_function :rd_kafka_NewTopic_set_replica_assignment, [Admin::NewTopic, :partition, :pointer, :size_t, :pointer, :size_t], :error_code
+    attach_function :rd_kafka_NewTopic_set_config, [Admin::NewTopic, :string, :string], :error_code
+    attach_function :rd_kafka_NewTopic_destroy, [Admin::NewTopic], :void
+    # :rd_kafka_NewTopic_destroy_array
+
+    # DeleteTopics / DeleteTopic
+
+    attach_function :rd_kafka_DeleteTopics, [Client, :pointer, :size_t, :pointer, Queue], :void
+    attach_function :rd_kafka_DeleteTopics_result_topics, [Event, :pointer], :pointer
+    attach_function :rd_kafka_DeleteTopic_new, [:string], Admin::DeleteTopic
+    attach_function :rd_kafka_DeleteTopic_destroy, [Admin::DeleteTopic], :void
+    # :rd_kafka_DeleteTopic_destroy_array
   end
 end
