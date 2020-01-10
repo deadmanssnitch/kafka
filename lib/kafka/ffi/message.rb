@@ -154,18 +154,16 @@ module Kafka::FFI
 
     # Retrieve the timestamp for a consumed message.
     #
-    # @return [Time] Message timestamp
+    # @example Convert timestamp to a Time
+    #   ts = message.timestamp
+    #   ts = ts && Time.at(0, ts, :millisecond).utc
+    #
+    # @return [Integer] Message timestamp as milliseconds since unix epoch
     # @return [nil] Timestamp is not available
     def timestamp
-      # @todo: Return Integer? Optimization for storage in downstream object since creating a Time is expensive
       # @todo: Type (second param) [rd_kafka_timestamp_type_t enum]
       ts = ::Kafka::FFI.rd_kafka_message_timestamp(self, nil)
-
-      if ts == -1
-        return nil
-      end
-
-      Time.at(Rational(ts) / 1000.0).utc
+      ts == -1 ? nil : ts
     end
 
     # Retrieve the latency since the Message was published to Kafka.
