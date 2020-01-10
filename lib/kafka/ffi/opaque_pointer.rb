@@ -21,10 +21,16 @@ module Kafka::FFI
       #
       # @param value [FFI::Pointer]
       #
+      # @return [nil] Passed ::FFI::Pointer::NULL
       # @return Instance of the class backed by the pointer.
       def from_native(value, _ctx)
         if !value.is_a?(::FFI::Pointer)
           raise TypeError, "from_native can only convert from a ::FFI::Pointer to #{self}"
+        end
+
+        # The equivalent of a native NULL pointer is nil.
+        if value.null?
+          return nil
         end
 
         new(value)
