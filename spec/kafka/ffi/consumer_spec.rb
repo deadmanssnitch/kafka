@@ -130,7 +130,7 @@ RSpec.describe Kafka::FFI::Consumer do
   end
 
   specify "#get_consumer_queue" do
-    client = Kafka::FFI::Consumer.new
+    client = Kafka::FFI::Consumer.new(config.native)
 
     queue = client.get_consumer_queue
     expect(queue).to be_a(Kafka::FFI::Queue)
@@ -140,7 +140,7 @@ RSpec.describe Kafka::FFI::Consumer do
   end
 
   specify "#get_partition_queue" do
-    client = Kafka::FFI::Consumer.new
+    client = Kafka::FFI::Consumer.new(config.native)
 
     queue = client.get_partition_queue("test", 1)
     expect(queue).to be_a(Kafka::FFI::Queue)
