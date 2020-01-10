@@ -32,11 +32,11 @@ RSpec.describe Kafka::FFI::Client do
     queue.destroy if queue
   end
 
-  specify "#get_background_queue" do
+  specify "#get_background_queue is nil with no configured background_event_cb" do
     client = Kafka::FFI::Client.new(:producer)
 
     queue = client.get_background_queue
-    expect(queue).to be_a(Kafka::FFI::Queue)
+    expect(queue).to be(nil)
   ensure
     client.destroy
     queue.destroy if queue
