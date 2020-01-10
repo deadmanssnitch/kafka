@@ -178,11 +178,11 @@ module Kafka
     attach_function :rd_kafka_conf_set_background_event_cb, [Config, :background_event_cb], :void
 
     # @test
-    callback :dr_msg_cb, [Client, Message, :pointer], :void
+    callback :dr_msg_cb, [Client, Message.by_ref, :pointer], :void
     attach_function :rd_kafka_conf_set_dr_msg_cb, [Config, :dr_msg_cb], :void
 
     # @test
-    callback :consume_cb, [Message, :pointer], :void
+    callback :consume_cb, [Message.by_ref, :pointer], :void
     attach_function :rd_kafka_conf_set_consume_cb, [Config, :consume_cb], :void
 
     # @test
@@ -305,6 +305,7 @@ module Kafka
     # @todo
 
     # Queue
+
     attach_function :rd_kafka_queue_new, [Client], Queue
     attach_function :rd_kafka_queue_poll, [Queue, :timeout_ms], Event
     attach_function :rd_kafka_queue_get_main, [Client], Queue
@@ -317,6 +318,25 @@ module Kafka
     # :rd_kafka_queue_io_event_enable
     # :rd_kafka_queue_cb_event_enable
     attach_function :rd_kafka_queue_destroy, [Queue], :void
+
+    # Event
+
+    attach_function :rd_kafka_event_type, [Event], :event_type
+    attach_function :rd_kafka_event_name, [Event], :string
+
+    attach_function :rd_kafka_event_message_next, [Event], Message.by_ref
+    attach_function :rd_kafka_event_message_array, [Event, :pointer, :size_t], :size_t
+    attach_function :rd_kafka_event_message_count, [Event], :size_t
+    attach_function :rd_kafka_event_config_string, [Event], :string
+    attach_function :rd_kafka_event_error, [Event], :error_code
+    attach_function :rd_kafka_event_error_string, [Event], :string
+    attach_function :rd_kafka_event_error_is_fatal, [Event], :bool
+    # :rd_kafka_event_opaque
+    attach_function :rd_kafka_event_log, [Event, :pointer, :pointer, :pointer], :int
+    attach_function :rd_kafka_event_stats, [Event], :string
+    attach_function :rd_kafka_event_topic_partition_list, [Event], TopicPartitionList.by_ref
+    attach_function :rd_kafka_event_topic_partition, [Event], TopicPartition.by_ref
+    attach_function :rd_kafka_event_destroy, [Event], :void
 
     # Topics
 
