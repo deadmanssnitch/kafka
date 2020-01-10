@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "ffi"
+require "kafka/error"
 
 module Kafka
   # Module FFI provides both a (mostly) complete set of low level function
