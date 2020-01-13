@@ -116,4 +116,154 @@ RSpec.describe Kafka::FFI::Config do
   ensure
     config.destroy
   end
+
+  specify "#set_background_event_cb" do
+    config = Kafka::FFI::Config.new
+    callback = lambda {}
+
+    expect { config.set_background_event_cb(&callback) }
+      .to change { config.get("background_event_cb") }.from(:unknown)
+  ensure
+    config.destroy
+  end
+
+  specify "#set_dr_msg_cb" do
+    config = Kafka::FFI::Config.new
+    callback = lambda {}
+
+    expect { config.set_dr_msg_cb(&callback) }
+      .to change { config.get("dr_msg_cb") }.from(:unknown)
+  ensure
+    config.destroy
+  end
+
+  specify "#set_consume_cb" do
+    config = Kafka::FFI::Config.new
+    callback = lambda {}
+
+    expect { config.set_consume_cb(&callback) }
+      .to change { config.get("consume_cb") }.from(:unknown)
+  ensure
+    config.destroy
+  end
+
+  specify "#set_rebalance_cb" do
+    config = Kafka::FFI::Config.new
+    callback = lambda {}
+
+    expect { config.set_rebalance_cb(&callback) }
+      .to change { config.get("rebalance_cb") }.from(:unknown)
+  ensure
+    config.destroy
+  end
+
+  specify "#set_offset_commit_cb" do
+    config = Kafka::FFI::Config.new
+    callback = lambda {}
+
+    expect { config.set_offset_commit_cb(&callback) }
+      .to change { config.get("offset_commit_cb") }.from(:unknown)
+  ensure
+    config.destroy
+  end
+
+  specify "#set_error_cb" do
+    config = Kafka::FFI::Config.new
+    callback = lambda {}
+
+    expect { config.set_error_cb(&callback) }
+      .to change { config.get("error_cb") }.from(:unknown)
+  ensure
+    config.destroy
+  end
+
+  specify "#set_throttle_cb" do
+    config = Kafka::FFI::Config.new
+    callback = lambda {}
+
+    expect { config.set_throttle_cb(&callback) }
+      .to change { config.get("throttle_cb") }.from(:unknown)
+  ensure
+    config.destroy
+  end
+
+  specify "#set_log_cb" do
+    config = Kafka::FFI::Config.new
+    callback = lambda {}
+
+    expect { config.set_log_cb(&callback) }
+      .to change { config.get("log_cb") }
+  ensure
+    config.destroy
+  end
+
+  specify "#set_stats_cb" do
+    config = Kafka::FFI::Config.new
+    callback = lambda {}
+
+    expect { config.set_stats_cb(&callback) }
+      .to change { config.get("stats_cb") }.from(:unknown)
+  ensure
+    config.destroy
+  end
+
+  specify "#set_oauthbearer_token_refresh_cb" do
+    config = Kafka::FFI::Config.new
+    callback = lambda {}
+
+    expect { config.set_oauthbearer_token_refresh_cb(&callback) }
+      .to change { config.get("oauthbearer_token_refresh_cb") }.from(:unknown)
+  ensure
+    config.destroy
+  end
+
+  specify "#set_socket_cb" do
+    config = Kafka::FFI::Config.new
+    callback = lambda {}
+
+    expect { config.set_socket_cb(&callback) }
+      .to change { config.get("socket_cb") }
+  ensure
+    config.destroy
+  end
+
+  specify "#set_connect_cb" do
+    config = Kafka::FFI::Config.new
+    callback = lambda {}
+
+    expect { config.set_connect_cb(&callback) }
+      .to change { config.get("connect_cb") }.from(:unknown)
+  ensure
+    config.destroy
+  end
+
+  specify "#set_closesocket_cb" do
+    config = Kafka::FFI::Config.new
+    callback = lambda {}
+
+    expect { config.set_closesocket_cb(&callback) }
+      .to change { config.get("closesocket_cb") }.from(:unknown)
+  ensure
+    config.destroy
+  end
+
+  specify "#set_open_cb" do
+    config = Kafka::FFI::Config.new
+    callback = lambda {}
+
+    expect { config.set_open_cb(&callback) }
+      .to change { config.get("open_cb") }
+  ensure
+    config.destroy
+  end
+
+  specify "#set_ssl_cert_verify_cb" do
+    config = Kafka::FFI::Config.new
+    callback = lambda {}
+
+    expect { config.set_ssl_cert_verify_cb(&callback) }
+      .to change { config.get("ssl.certificate.verify_cb") }.from(:unknown)
+  ensure
+    config.destroy
+  end
 end

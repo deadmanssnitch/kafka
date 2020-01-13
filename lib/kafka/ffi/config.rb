@@ -98,6 +98,7 @@ module Kafka::FFI
     end
 
     # rubocop:disable Naming/AccessorMethodName
+    #   Disabled to allow matching librdkafka naming convention
 
     # Enable event sourcing. Convenience method to set the `enabled_events`
     # option as an integer.
@@ -128,7 +129,225 @@ module Kafka::FFI
 
       ::Kafka::FFI.rd_kafka_conf_set_events(self, mask)
     end
+
+    # Set the callback that will be used for events published to the background
+    # queue. This enables a background thread that runs internal to librdkafka
+    # and can be used as a standard receiver for APIs that take a queue.
+    #
+    # @see Client#get_background_queue
+    #
+    # @note The application is responsible for calling #destroy on the event.
+    # @note The application must not called #destroy on the Client inside the
+    #   callback.
+    #
+    # @yield [client, event, opaque] Called when a event is received by the
+    #   queue.
+    # @yieldparam client [Client] Kafka Client for the event
+    # @yieldparam event [Event] The event that occurred
+    # @yieldparam opaque [::FFI::Pointer] Pointer to the configuration's opaque
+    #   pointer that was set via set_opaque.
+    def set_background_event_cb(&block)
+      ::Kafka::FFI.rd_kafka_conf_set_background_event_cb(self, &block)
+    end
+    alias background_event_cb= set_background_event_cb
+
+    # Set delivery report callback for the config. The delivery report callback
+    # will be called once for each message accepted by Producer#produce. The
+    # Message will have #error set in the event of a producer error.
+    #
+    # The callback is called when a message is successfully produced or if
+    # librdkafka encountered a permanent failure.
+    #
+    # @note Producer only
+    #
+    # @yield [client, message, opaque] Called for each Message produced.
+    # @yieldparam client [Client] Kafka Client for the event
+    # @yieldparam message [Message] Message that was produced
+    # @yieldparam opaque [::FFI::Pointer] Pointer to the configuration's opaque
+    #   pointer that was set via set_opaque.
+    def set_dr_msg_cb(&block)
+      ::Kafka::FFI.rd_kafka_conf_set_dr_msg_cb(self, &block)
+    end
+    alias dr_msg_cb= set_dr_msg_cb
+
+    # Set consume callback for use with consumer_poll.
+    #
+    # @note Consumer only
+    #
+    # @yield [message, opaque]
+    # @yieldparam message [Message]
+    # @yieldparam opaque [::FFI::Pointer]
+    def set_consume_cb(&block)
+      ::Kafka::FFI.rd_kafka_conf_set_consume_cb(self, &block)
+    end
+    alias consume_cb= set_consume_cb
+
+    # Set rebalance callback for use with consumer group balancing. Setting the
+    # rebalance callback will turn off librdkafka's automatic handling of
+    # assignment/revocation and delegates the responsibility to the
+    # application's callback.
+    #
+    # @see rdkafka.h rd_kafka_conf_set_rebalance_cb
+    # @note Consumer only
+    #
+    # @yield [client, error, partitions, opaque]
+    # @yieldparam client [Client]
+    # @yieldparam error [RD_KAFKA_RESP_ERR__ASSIGN_PARTITIONS] Callback
+    #   contains new assignments for the consumer.
+    # @yieldparam error [RD_KAFKA_RESP_ERR__REVOKE_PARTITIONS] Callback
+    #   contains revocation of assignments for the consumer.
+    # @yieldparam error [Integer] Other error code
+    # @yieldparam partitions [TopicPartitionList] Set of partitions to assign
+    #   or revoke.
+    def set_rebalance_cb(&block)
+      ::Kafka::FFI.rd_kafka_conf_set_rebalance_cb(self, &block)
+    end
+    alias rebalance_cb= set_rebalance_cb
+
+    # Set offset commit callback which is called when offsets are committed by
+    # the consumer.
+    #
+    # @note Consumer only
+    #
+    # @yield [client, error, offets]
+    # @yieldparam client [Client]
+    # @yieldparam error [RD_KAFKA_RESP_ERR__NO_OFFSET] No partitions had valid
+    #   offsets to commit. This should not be considered an error.
+    # @yieldparam error [Integer] Error committing the offsets
+    # @yieldparam offsets [TopicPartitionList] Committed offsets
+    def set_offset_commit_cb(&block)
+      ::Kafka::FFI.rd_kafka_conf_set_offset_commit_cb(self, &block)
+    end
+    alias offset_commit_cb= set_offset_commit_cb
+
+    # Set error callback that is used by librdkafka to signal warnings and
+    # errors back to the application. These errors should generally be
+    # considered informational and non-permanent, librdkafka will try to
+    # recover from all types of errors.
+    #
+    # @yield [client, error, reason, opaque]
+    # @yieldparam client [Client]
+    # @yieldparam error [RD_KAFKA_RESP_ERR__FATAL] Fatal error occurred
+    # @yieldparam error [Integer] Other error occurred
+    # @yieldparam reason [String]
+    # @yieldparam opaque [::FFI::Pointer]
+    def set_error_cb(&block)
+      ::Kafka::FFI.rd_kafka_conf_set_error_cb(self, &block)
+    end
+    alias error_cb= set_error_cb
+
+    # Set throttle callback that is used to forward broker throttle times to
+    # the application.
+    #
+    # @yield [client, broker_name, broker_id, throttle_ms, opaque]
+    # @yieldparam client [Client]
+    # @yieldparam broker_name [String]
+    # @yieldparam broker_id [Integer]
+    # @yieldparam throttle_ms [Integer] Throttle time in milliseconds
+    # @yieldparam opaque [::FFI::Pointer]
+    def set_throttle_cb(&block)
+      ::Kafka::FFI.rd_kafka_conf_set_throttle_cb(self, &block)
+    end
+    alias throttle_cb= set_throttle_cb
+
+    # Set the logging callback. By default librdkafka will print to stderr (or
+    # syslog if configured).
+    #
+    # @note The application MUST NOT call any librdkafka APIs or do any
+    #   prolonged work in a log_cb unless logs have been forwarded to a queue
+    #   via set_log_queue.
+    #
+    # @yield [client, level, facility, message]
+    # @yieldparam client [Client]
+    # @yieldparam level [Integer] Log level
+    # @yieldparam facility [String] Log facility
+    # @yieldparam message [String] Log message
+    def set_log_cb(&block)
+      ::Kafka::FFI.rd_kafka_conf_set_log_cb(self, &block)
+    end
+    alias log_cb= set_log_cb
+
+    # Set statistics callback that is triggered every `statistics.interval.ms`
+    # with a JSON document containing connection statistics.
+    #
+    # @see https://github.com/edenhill/librdkafka/blob/master/STATISTICS.md
+    #
+    # @yield [client, json, json_len, opaque]
+    # @yieldparam client [Client]
+    # @yieldparam json [String] Statistics payload
+    # @yieldparam json_len [Integer] Length of the JSON payload
+    # @yieldparam opaque [::FFI::Pointer]
+    def set_stats_cb(&block)
+      ::Kafka::FFI.rd_kafka_conf_set_stats_cb(self, &block)
+    end
+    alias stats_cb= set_stats_cb
+
+    def set_oauthbearer_token_refresh_cb(&block)
+      ::Kafka::FFI.rd_kafka_conf_set_oauthbearer_token_refresh_cb(self, &block)
+    end
+    alias oauthbearer_token_refresh_cb= set_oauthbearer_token_refresh_cb
+
+    def set_socket_cb(&block)
+      ::Kafka::FFI.rd_kafka_conf_set_socket_cb(self, &block)
+    end
+    alias socket_cb= set_socket_cb
+
+    def set_connect_cb(&block)
+      ::Kafka::FFI.rd_kafka_conf_set_connect_cb(self, &block)
+    end
+    alias connect_cb= set_connect_cb
+
+    def set_closesocket_cb(&block)
+      ::Kafka::FFI.rd_kafka_conf_set_closesocket_cb(self, &block)
+    end
+    alias closesocket_cb= set_closesocket_cb
+
+    def set_open_cb(&block)
+      if ::FFI::Platform.windows?
+        raise Error, "set_open_cb is not available on Windows"
+      end
+
+      ::Kafka::FFI.rd_kafka_conf_set_open_cb(self, &block)
+    end
+    alias open_cb= set_open_cb
+
+    def set_ssl_cert_verify_cb(&block)
+      ::Kafka::FFI.rd_kafka_conf_set_ssl_cert_verify_cb(self, &block)
+    end
+    alias ssl_cert_verify_cb= set_ssl_cert_verify_cb
+
     # rubocop:enable Naming/AccessorMethodName
+
+    # Set the certificate for secure communication with the Kafka cluster.
+    #
+    # @note The private key may require a password which must be specified with
+    #   the `ssl.key.password` property prior to calling this function.
+    #
+    # @note Private and public keys, in PEM format, can be set with the
+    #   `ssl.key.pem` and `ssl.certificate.pem` configuration properties.
+    #
+    # @param cert_type [:public, :private, :ca]
+    # @param cert_enc [:pkcs12, :der, :pem]
+    # @param certificate [String] Encoded certificate
+    # @param certificate [nil] Clear the stored certificate
+    #
+    # @raise [ConfigError] Certificate was not properly encoded or librdkafka
+    #   was not compiled with SSL/TLS.
+    def set_ssl_cert(cert_type, cert_enc, certificate)
+      error = ::MemoryPointer.new(:char, 512)
+
+      err = ::Kafka::FFI.rd_kafka_conf_set_ssl_cert(cert_type, cert_enc, certificate, certificate.bytesize, error, error.size)
+      if err != :ok
+        # Property name isn't exact since this appears to have some routing
+        # based on cert type to determine the exact key.
+        raise ConfigError, "ssl_cert", error.read_string
+      end
+
+      nil
+    ensure
+      error.free
+    end
+    alias ssl_cert= set_ssl_cert
 
     # Free all resources used by the config.
     #

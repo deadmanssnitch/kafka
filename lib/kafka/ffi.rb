@@ -42,11 +42,31 @@ module Kafka
     ]
 
     # Response Errors
+    RD_KAFKA_RESP_ERR__ASSIGN_PARTITIONS = -175
+    RD_KAFKA_RESP_ERR__REVOKE_PARTITIONS = -174
+    RD_KAFKA_RESP_ERR__NO_OFFSET = -168
     RD_KAFKA_RESP_ERR__NOENT = -156
+    RD_KAFKA_RESP_ERR__FATAL = -150
 
-    # See: rd_kafka_resp_err_t
+    # @see rdkafka.h rd_kafka_resp_err_t
     enum :error_code, [
       :ok, 0,
+    ]
+
+    # @see rdkafka.h rd_kafka_cert_type_t
+    enum :cert_type, [
+      :public,  0,
+      :private, 1,
+      :ca,      2,
+      :_cnt,    3,
+    ]
+
+    # @see rdkafka.h rd_kafka_cert_enc_t
+    enum :cert_enc, [
+      :pkcs12, 0,
+      :der,    1,
+      :pem,    2,
+      :_cnt,   3,
     ]
 
     RD_KAFKA_OFFSET_BEGINNING = -2
@@ -99,10 +119,11 @@ module Kafka
       :persisted,          RD_KAFKA_MSG_STATUS_PERSISTED,
     ]
 
-    typedef :int,    :timeout_ms
-    typedef :int32,  :partition
-    typedef :int64,  :offset
-    typedef :string, :topic
+    typedef :int,     :timeout_ms
+    typedef :int32,   :partition
+    typedef :int64,   :offset
+    typedef :string,  :topic
+    typedef :pointer, :opaque
 
     # Load types after enums and constants so they're able to reference them.
     require "kafka/ffi/admin"
@@ -174,56 +195,43 @@ module Kafka
     # @param event_type is a bitmask of RD_KAFKA_EVENT_* constants.
     attach_function :rd_kafka_conf_set_events, [Config, :event_type], :void
 
-    # @test
-    callback :background_event_cb, [Client, Event, :pointer], :void
+    callback :background_event_cb, [Client, Event, :opaque], :void
     attach_function :rd_kafka_conf_set_background_event_cb, [Config, :background_event_cb], :void
 
-    # @test
     callback :dr_msg_cb, [Client, Message.by_ref, :pointer], :void
     attach_function :rd_kafka_conf_set_dr_msg_cb, [Config, :dr_msg_cb], :void
 
-    # @test
     callback :consume_cb, [Message.by_ref, :pointer], :void
     attach_function :rd_kafka_conf_set_consume_cb, [Config, :consume_cb], :void
 
-    # @test
     callback :rebalance_cb, [Client, :error_code, TopicPartitionList.by_ref, :pointer], :void
     attach_function :rd_kafka_conf_set_rebalance_cb, [Config, :rebalance_cb], :void
 
-    # @test
     callback :offset_commit_cb, [Client, :error_code, TopicPartitionList.by_ref, :pointer], :void
     attach_function :rd_kafka_conf_set_offset_commit_cb, [Config, :offset_commit_cb], :void
 
-    # @test
     callback :error_cb, [Client, :error_code, :string, :pointer], :void
     attach_function :rd_kafka_conf_set_error_cb, [Config, :error_cb], :void
 
-    # @test
     callback :throttle_cb, [Client, :string, :int32, :int, :pointer], :void
     attach_function :rd_kafka_conf_set_throttle_cb, [Config, :throttle_cb], :void
 
-    # @test
     callback :log_cb, [Client, :int, :string, :string], :void
     attach_function :rd_kafka_conf_set_log_cb, [Config, :log_cb], :void
 
-    # @test
     callback :stats_cb, [Client, :string, :size_t, :pointer], :void
     attach_function :rd_kafka_conf_set_stats_cb, [Config, :stats_cb], :void
 
-    # @test
     callback :oauth_bearer_token_refresh_cb, [Client, :string, :pointer], :void
     attach_function :rd_kafka_conf_set_oauthbearer_token_refresh_cb, [Config, :oauth_bearer_token_refresh_cb], :void
 
-    # @test
     callback :socket_cb, [:int, :int, :int, :pointer], :int
     attach_function :rd_kafka_conf_set_socket_cb, [Config, :socket_cb], :void
 
-    # @test
     # @todo first :pointer is to struct sockaddr
     callback :connect_cb, [:int, :pointer, :int, :string, :pointer], :int
     attach_function :rd_kafka_conf_set_connect_cb, [Config, :connect_cb], :void
 
-    # @test
     callback :closesocket_cb, [:int, :pointer], :int
     attach_function :rd_kafka_conf_set_closesocket_cb, [Config, :closesocket_cb], :void
 
@@ -237,9 +245,8 @@ module Kafka
     callback :ssl_cert_verify_cb, [Client, :string, :int32, :pointer, :int, :string, :size_t, :string, :size_t, :pointer], :int
     attach_function :rd_kafka_conf_set_ssl_cert_verify_cb, [Config, :ssl_cert_verify_cb], :config_result
 
-    # NOTE: See rd_kafka_cert_type_t
-    # NOTE: See rd_kafka_enc_t
-    # rd_kafka_conf_set_ssl_cert (rd_kafka_conf_t *conf, rd_kafka_cert_type_t cert_type, rd_kafka_cert_enc_t cert_enc, const void *buffer, size_t size, char *errstr, size_t errstr_size);
+    attach_function :rd_kafka_conf_set_ssl_cert, [Config, :cert_type, :cert_enc, :buffer_in, :size_t, :pointer, :size_t], :config_result
+    # :rd_kafka_conf_set_opaque
 
     # NOTE: Never call rd_kafka_conf_destroy on a Config that has been passed
     #   to rd_kafka_new as librdkafka takes ownership at that point.
