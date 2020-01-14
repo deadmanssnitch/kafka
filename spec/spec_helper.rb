@@ -109,8 +109,7 @@ RSpec.configure do |config|
 
     out, status = Open3.capture2e(cmd, stdin_data: payload)
     if !status.success?
-      puts out
-      exit status.exitstatus
+      expect(status).to be_success, out
     end
 
     nil
@@ -148,8 +147,7 @@ RSpec.configure do |config|
     # Exit 124 is returned by `timeout` when the command times out.
     out, err, status = Open3.capture3(cmd)
     if !status.success? && status.exitstatus != 124
-      puts err
-      expect(status).to be_success
+      expect(status).to be_success, err
     end
 
     out.each_line.map do |line|
