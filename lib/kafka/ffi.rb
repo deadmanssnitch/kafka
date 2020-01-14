@@ -119,6 +119,56 @@ module Kafka
       :persisted,          RD_KAFKA_MSG_STATUS_PERSISTED,
     ]
 
+    # Flags for rd_kafka_produce, rd_kafka_producev, and
+    # rd_kafka_produce_batch.
+    #
+    # @see rdkafka.h
+    RD_KAFKA_MSG_F_FREE      = 0x01
+    RD_KAFKA_MSG_F_COPY      = 0x02
+    RD_KAFKA_MSG_F_BLOCK     = 0x04
+    RD_KAFKA_MSG_F_PARTITION = 0x04
+
+    # Flags for rd_kafka_purge
+    #
+    # @see rdkafka.h
+    RD_KAFKA_PURGE_F_QUEUE        = 0x01
+    RD_KAFKA_PURGE_F_INFLIGHT     = 0x02
+    RD_KAFKA_PURGE_F_NON_BLOCKING = 0x04
+
+    # rd_kafka_producev va-arg vtype constants.
+    RD_KAFKA_VTYPE_END       = 0
+    RD_KAFKA_VTYPE_TOPIC     = 1
+    RD_KAFKA_VTYPE_RKT       = 2
+    RD_KAFKA_VTYPE_PARTITION = 3
+    RD_KAFKA_VTYPE_VALUE     = 4
+    RD_KAFKA_VTYPE_KEY       = 5
+    RD_KAFKA_VTYPE_OPAQUE    = 6
+    RD_KAFKA_VTYPE_MSGFLAGS  = 7
+    RD_KAFKA_VTYPE_TIMESTAMP = 8
+    RD_KAFKA_VTYPE_HEADER    = 9
+    RD_KAFKA_VTYPE_HEADERS   = 10
+
+    # Use for partition when it should be assigned by the configured
+    # partitioner.
+    RD_KAFKA_PARTITION_UA = -1
+
+    # Enum of va-arg vtypes for calling rd_kafka_producev
+    #
+    # @see rdkafka.h rd_kafka_producev
+    enum :vtype, [
+      :end,       RD_KAFKA_VTYPE_END,
+      :topic,     RD_KAFKA_VTYPE_TOPIC,
+      :rkt,       RD_KAFKA_VTYPE_RKT,
+      :partition, RD_KAFKA_VTYPE_PARTITION,
+      :value,     RD_KAFKA_VTYPE_VALUE,
+      :key,       RD_KAFKA_VTYPE_KEY,
+      :opaque,    RD_KAFKA_VTYPE_OPAQUE,
+      :msgflags,  RD_KAFKA_VTYPE_MSGFLAGS,
+      :timestamp, RD_KAFKA_VTYPE_TIMESTAMP,
+      :header,    RD_KAFKA_VTYPE_HEADER,
+      :headers,   RD_KAFKA_VTYPE_HEADERS,
+    ]
+
     typedef :int,     :timeout_ms
     typedef :int32,   :partition
     typedef :int64,   :offset
@@ -310,7 +360,11 @@ module Kafka
     # attach_function :rd_kafka_position, [Consumer, TopicPartitionList.by_ref], :error_code
 
     # Producer
-    # @todo
+    attach_function :rd_kafka_produce, [Topic, :partition, :int, :pointer, :size_t, :string, :size_t, :pointer], :int
+    attach_function :rd_kafka_producev, [Producer, :varargs], :error_code
+    attach_function :rd_kafka_produce_batch, [Topic, :partition, :int, Message.by_ref, :int], :int
+    attach_function :rd_kafka_flush, [Producer, :timeout_ms], :error_code, blocking: true
+    attach_function :rd_kafka_purge, [Producer, :int], :error_code, blocking: true
 
     # Queue
 

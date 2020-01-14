@@ -4,7 +4,9 @@ require "bundler/setup"
 require "securerandom"
 require "kafka"
 require "open3"
-require "json"
+
+# Require supporting files in spec/support
+Dir[File.join(__dir__, "support/**/*.rb")].sort.each { |f| require f }
 
 RSpec.configure do |config|
   # Disable RSpec exposing methods globally on `Module` and `main`
@@ -40,6 +42,44 @@ RSpec.configure do |config|
     }
 
     Kafka::Config.new(defaults.merge(options))
+  end
+
+  # with_topic creates a named topic for use in tests, passing the name of the
+  # topic to the block. with_topic handles all of the API calls to clean up the
+  # topic at the end of the block.
+  #
+  # @param topic [String] Name of the topic to create. Generates a random topic
+  #   name if not provided.
+  # @param partitions [Integer] Number of partitions for the topic
+  #
+  # @yield [topic]
+  # @yieldparam topic [String] name of the topic
+  def with_topic(topic = SecureRandom.uuid, partitions: 3)
+    if !block_given?
+      raise ArgumentError, "with_topic requires a block"
+    end
+
+    # Tests are run against a cluster of 1 so the replication factor can't go
+    # above 1.
+    replicas = 1
+
+    # TODO: Can we reuse the same admin client across multiple tests?
+    admin = Kafka::FFI::Admin::Client.new(config.native)
+
+    # TODO: Test that the topic was created
+    create = Kafka::FFI::Admin::NewTopic.new(topic, partitions, replicas)
+    admin.create_topics(create)
+    create.destroy
+
+    begin
+      yield(topic)
+    ensure
+      delete = Kafka::FFI::Admin::DeleteTopic.new(topic)
+      admin.delete_topics(delete)
+      delete.destroy
+    end
+  ensure
+    admin.destroy if admin
   end
 
   # publish shells out to kafkacat to write a message to the specified topic.
@@ -83,9 +123,16 @@ RSpec.configure do |config|
   #    -<value>  (relative offset from end)
   #    s@<value> (timestamp in ms to start at)
   #    e@<value> (timestamp in ms to stop at (not included))
-  def fetch(topic, count: 1, offset: -1)
+  # @param timeout [Number] Wait timeout in seconds
+  def fetch(topic, count: 1, offset: -1, timeout: 2.5)
     cmd = Shellwords.join([
-      "kafkacat", "-C",
+      # Use timeout to limit how long kafkacat can wait for messages to be
+      # visible. This usually happens quickly be is proving to be quite
+      # variable.
+      "timeout", timeout,
+
+      # Call kafkacat to fetch message(s)
+      "kafkacat", "-C", "-q",
       "-b", "127.0.0.1:9092",
       "-t", topic,
       "-o", offset,
@@ -93,26 +140,22 @@ RSpec.configure do |config|
       # Fetch at most `count` messages
       "-c", count,
 
-      # Exit when the last message is read. This will avoid blocking for empty
-      # topics.
-      "-e",
-
       # Print the message(s) out as JSON so we get metadata as well as the
       # payload.
       "-J",
     ])
 
+    # Exit 124 is returned by `timeout` when the command times out.
     out, err, status = Open3.capture3(cmd)
-    if !status.success?
+    if !status.success? && status.exitstatus != 124
       puts err
-      exit status.exitstatus
+      expect(status).to be_success
     end
 
     out.each_line.map do |line|
       next if line.empty?
 
-      # TODO: Convert to a Message
-      JSON.parse(line)
-    end
+      KafkacatMessage.new(line)
+    end.compact
   end
 end
