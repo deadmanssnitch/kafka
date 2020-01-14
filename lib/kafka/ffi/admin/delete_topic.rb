@@ -21,7 +21,9 @@ module Kafka::FFI::Admin
     # Release the resources used by the DeleteTopic. It is the application's
     # responsibility to call #destroy when it is done with the object.
     def destroy
-      ::Kafka::FFI.rd_kafka_DeleteTopic_destroy(self)
+      if !pointer.null?
+        ::Kafka::FFI.rd_kafka_DeleteTopic_destroy(self)
+      end
     end
   end
 end
