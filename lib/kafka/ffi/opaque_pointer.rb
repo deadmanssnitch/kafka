@@ -53,8 +53,8 @@ module Kafka::FFI
         value.pointer
       end
 
-      # Provide API compatility for consistency with attach_function is called
-      # with an OpaquePointer.
+      # Provide ::FFI::Struct API compatility for consistency with
+      # attach_function is called with an OpaquePointer.
       def by_ref
         self
       end
