@@ -25,14 +25,19 @@ module Kafka::FFI
     # Add header with name and value.
     #
     # @param name [String] Header key name
-    # @param value [String] Header key value
+    # @param value [#to_s, nil] Header key value
     #
     # @raise [ResponseError] Error that occurred adding the header
     def add(name, value)
       name = name.to_s
-      value = value.to_s
 
-      err = ::Kafka::FFI.rd_kafka_header_add(self, name, name.length, value, value.length)
+      value_size = 0
+      if value
+        value = value.to_s
+        value_size = value.bytesize
+      end
+
+      err = ::Kafka::FFI.rd_kafka_header_add(self, name, name.length, value, value_size)
       if err != :ok
         raise ResponseError, err
       end
@@ -182,7 +187,7 @@ module Kafka::FFI
       end
 
       ptr = value.read_pointer
-      ptr.read_string(size.read(:size_t))
+      ptr.null? ? nil : ptr.read_string(size.read(:size_t))
     ensure
       value.free
       size.free

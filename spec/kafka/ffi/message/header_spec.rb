@@ -20,6 +20,26 @@ RSpec.describe Kafka::FFI::Message::Header do
     header.destroy
   end
 
+  specify "#add" do
+    header = Kafka::FFI::Message::Header.new(3)
+    expect(header.count).to eq(0)
+
+    # Can add a key+value pair
+    expect { header.add("key", "value") }
+      .to change(header, :count).by(1)
+    expect(header.get_last("key")).to eq("value")
+
+    # Can add an empty value
+    header.add("empty", "")
+    expect(header.get_last("empty")).to eq("")
+
+    # Can add a NULL value
+    header.add("NULL", nil)
+    expect(header.get_last("NULL")).to eq(nil)
+  ensure
+    header.destroy
+  end
+
   specify "#copy" do
     header = Kafka::FFI::Message::Header.new
     header.add("meta", "data")
@@ -65,6 +85,10 @@ RSpec.describe Kafka::FFI::Message::Header do
     # Header has multiple values
     header.add("meta", "datum")
     expect(header.get("meta")).to eq(["data", "datum"])
+
+    # Header with nil value
+    header.add("NULL", nil)
+    expect(header.get("NULL")).to eq([nil])
   ensure
     header.destroy
   end
@@ -88,6 +112,14 @@ RSpec.describe Kafka::FFI::Message::Header do
       "meta" => ["data", "datum"],
       "name" => ["value"],
     })
+
+    # Header with nil value
+    header.add("NULL", nil)
+    expect(header.get_all).to eq({
+      "meta" => ["data", "datum"],
+      "name" => ["value"],
+      "NULL" => [nil],
+    })
   ensure
     header.destroy
   end
@@ -106,6 +138,10 @@ RSpec.describe Kafka::FFI::Message::Header do
 
     # Get a header that hasn't been set
     expect(header.get_last("foo")).to eq(nil)
+
+    # Header with nil value
+    header.add("NULL", nil)
+    expect(header.get_last("NULL")).to eq(nil)
   ensure
     header.destroy
   end
