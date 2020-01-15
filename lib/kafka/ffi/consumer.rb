@@ -200,16 +200,43 @@ module Kafka::FFI
       list
     end
 
-    # Poll the consumer's queue for a waiting Message.
+    # Poll the consumer's queue for a waiting Message and yields that message.
+    # The yielded message must not be cached in the application as it becomes
+    # unusable once the block completes.
+    #
+    # @see max.poll.interal.ms configuration option.
     #
     # @param timeout [Integer] How long to wait for a message in milliseconds.
     #
-    # @return [Message, nil] The polled Message or nil if no messages were
-    #   available within the timeout.
+    # @raise [ArgumentError] consumer_poll was called without a block.
+    # @raise [ResponseError] Error occurred while polling.
+    #
+    # @yield [message]
+    # @yieldparam message [Message] Message received from Kafka. Application
+    #   must not call #destroy as it is owned by the Consumer.
+    #
+    # @return Either nil or the result of the block
     def consumer_poll(timeout)
+      if !block_given?
+        raise ArgumentError, "consumer_poll must be passed a block"
+      end
+
       msg = ::Kafka::FFI.rd_kafka_consumer_poll(self, timeout.to_i)
 
-      msg.null? ? nil : msg
+      # No message was available
+      if msg.null?
+        return nil
+      end
+
+      begin
+        if msg.error
+          raise ResponseError, msg.error
+        end
+
+        yield(msg)
+      ensure
+        msg.destroy
+      end
     end
 
     # Commit the set of offsets from the given TopicPartitionList.
