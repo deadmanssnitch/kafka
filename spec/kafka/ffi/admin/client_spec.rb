@@ -32,7 +32,7 @@ RSpec.describe Kafka::FFI::Admin::Client do
 
     create = Kafka::FFI::Admin::NewTopic.new(topic, 1, 1)
     client.create_topics(create)
-    sleep 0.25
+    sleep 0.5
 
     delete = Kafka::FFI::Admin::DeleteTopic.new(topic)
     result = client.delete_topics(delete)
