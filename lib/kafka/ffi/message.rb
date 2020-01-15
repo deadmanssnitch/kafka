@@ -22,10 +22,11 @@ module Kafka::FFI
     # publishing the message.
     #
     # @return [nil] Message does not have an error
-    # @return [Integer] RD_KAFKA_RESP_ERR__* error code
+    # @return [ResponseError] RD_KAFKA_RESP_ERR__* error code
     def error
-      err = self[:err]
-      err == :ok ? nil : err
+      if self[:err] != :ok
+        ResponseError.new(self[:err])
+      end
     end
 
     # Returns the name of the Topic the Message was published to.
