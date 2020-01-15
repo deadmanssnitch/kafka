@@ -44,8 +44,8 @@ module Kafka::FFI
     # Add a topic + partition combination to the list
     #
     # @param topic [String] Name of the topic to add
-    # @param partition [Integer] Partition of the topic to add to the list. Use
-    #   -1 to subscribe to all partitions for the topic.
+    # @param partition [Integer] Partition of the topic to add to the list.
+    # @param partition [-1] Add all partitions of the topic to the list.
     #
     # @return [TopicPartition] TopicPartition for the combination
     def add(topic, partition = -1)
