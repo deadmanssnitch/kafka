@@ -178,24 +178,39 @@ module Kafka::FFI
       ::Kafka::FFI.rd_kafka_poll(self, timeout)
     end
 
-    # Pause producing or consuming of the provided list of partitions.
+    # Pause producing or consuming of the provided list of partitions. The list
+    # is updated to include any errors.
     #
     # @param list [TopicPartitionList] Set of partitions to pause
     #
-    # @return [:ok] Success or error is set on to the error field for each
-    #   partition in the provided list.
+    # @raise [ResponseError] Invalid request
+    #
+    # @return [TopicPartitionList] List of partitions with errors set for any
+    #   of the TopicPartitions that failed.
     def pause_partitions(list)
-      ::Kafka::FFI.rd_kafka_pause_partitions(self, list)
+      err = ::Kafka::FFI.rd_kafka_pause_partitions(self, list)
+      if err != :ok
+        raise ResponseError, err
+      end
+
+      list
     end
 
     # Resume producing or consuming of the provided list of partitions.
     #
     # @param list [TopicPartitionList] Set of partitions to unpause
     #
-    # @return [:ok] Success or error is set on to the error field for each
-    #   partition in the provided list.
+    # @raise [ResponseError] Invalid request
+    #
+    # @return [TopicPartitionList] List of partitions with errors set for any
+    #   of the TopicPartitions that failed.
     def resume_partitions(list)
-      ::Kafka::FFI.rd_kafka_resume_partitions(self, list)
+      err = ::Kafka::FFI.rd_kafka_resume_partitions(self, list)
+      if err != :ok
+        raise ResponseError, err
+      end
+
+      list
     end
 
     # rubocop:disable Naming/AccessorMethodName
@@ -271,14 +286,20 @@ module Kafka::FFI
     #   for. The TopicPartitions in the list will be modified based on the
     #   results of the query.
     #
-    # @return [:ok, Integer] :ok on success and a RD_KAFKA_RESP_ERR_* code on
-    #  error.
+    # @raise [ResponseError] Invalid request
+    #
+    # @return [TopicPartitionList] List of topics with offset set.
     def offsets_for_times(list, timeout: 1000)
       if list.nil?
         raise ArgumentError, "list cannot be nil"
       end
 
-      ::Kafka::FFI.rd_kafka_offsets_for_times(self, list, timeout)
+      err = ::Kafka::FFI.rd_kafka_offsets_for_times(self, list, timeout)
+      if err != :ok
+        raise ResponseError, err
+      end
+
+      list
     end
 
     # Create a copy of the Client's default topic configuration object. The
