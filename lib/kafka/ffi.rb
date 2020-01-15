@@ -184,6 +184,7 @@ module Kafka
     require "kafka/ffi/client"
     require "kafka/ffi/config"
     require "kafka/ffi/message"
+    require "kafka/ffi/metadata"
     require "kafka/ffi/topic_config"
     require "kafka/ffi/opaque_pointer"
     require "kafka/ffi/topic_partition"
@@ -366,8 +367,11 @@ module Kafka
     attach_function :rd_kafka_flush, [Producer, :timeout_ms], :error_code, blocking: true
     attach_function :rd_kafka_purge, [Producer, :int], :error_code, blocking: true
 
-    # Queue
+    # Metadata
+    attach_function :rd_kafka_metadata, [Client, :bool, Topic, :pointer, :timeout_ms], :error_code
+    attach_function :rd_kafka_metadata_destroy, [Metadata.by_ref], :void
 
+    # Queue
     attach_function :rd_kafka_queue_new, [Client], Queue
     attach_function :rd_kafka_queue_poll, [Queue, :timeout_ms], Event
     attach_function :rd_kafka_queue_get_main, [Client], Queue

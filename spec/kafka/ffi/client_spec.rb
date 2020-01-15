@@ -12,6 +12,17 @@ RSpec.describe Kafka::FFI::Client do
     client.destroy
   end
 
+  specify "#metadata" do
+    client = Kafka::FFI::Client.new(:consumer, config.native)
+
+    md = client.metadata(topic: "__consumer_offsets")
+    expect(md).to be_a(Kafka::FFI::Metadata)
+    expect(md.topics.size).to eq(1)
+  ensure
+    md.destroy
+    client.destroy
+  end
+
   specify "#default_topic_conf_dup" do
     client = Kafka::FFI::Client.new(:consumer)
 

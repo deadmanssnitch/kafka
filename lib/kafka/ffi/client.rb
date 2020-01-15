@@ -302,6 +302,35 @@ module Kafka::FFI
       list
     end
 
+    # Retrieve metadata from the Kafka cluster
+    #
+    # @param local_only [Boolean] Only request info about locally known topics,
+    #   don't query all topics in the cluster.
+    # @param topic [String, Topic] Only request info about this topic.
+    # @param timeout [Integer] Request timeout in milliseconds
+    #
+    # @raise [ResponseError] Error retrieving metadata
+    #
+    # @return [Metadata] Details about the state of the cluster.
+    def metadata(local_only: false, topic: nil, timeout: 1000)
+      ptr = ::FFI::MemoryPointer.new(:pointer)
+
+      # Need to use a Topic reference if asking for only information about a
+      # single topic.
+      if topic.is_a?(String)
+        topic = self.topic(topic)
+      end
+
+      err = ::Kafka::FFI.rd_kafka_metadata(self, local_only, topic, ptr, timeout)
+      if err != :ok
+        raise ResponseError, err
+      end
+
+      Kafka::FFI::Metadata.new(ptr.read_pointer)
+    ensure
+      ptr.free
+    end
+
     # Create a copy of the Client's default topic configuration object. The
     # caller is now responsible for ownership of the new config.
     #

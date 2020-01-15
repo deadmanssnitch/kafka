@@ -77,6 +77,15 @@ module Kafka::FFI::Admin
       queue.destroy if queue
     end
 
+    # Retrieve metadata for the cluster
+    #
+    # @see Kafka::FFI::Client#metadata
+    #
+    # @return [Metadata]
+    def metadata(local_only: false, topic: nil, timeout: 1000)
+      @client.metadata(local_only: local_only, topic: topic, timeout: timeout)
+    end
+
     # Destroy the Client, releasing all used resources back to the system. It
     # is the application's responsbility to call #destroy when done with the
     # client.
