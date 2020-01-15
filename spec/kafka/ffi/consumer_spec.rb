@@ -20,16 +20,27 @@ RSpec.describe Kafka::FFI::Consumer do
     list = Kafka::FFI::TopicPartitionList.new
     list.add("topic")
     list.add("snitches", 5)
-    expect(consumer.subscribe(list)).to eq(:ok)
+    expect(consumer.subscribe(list)).to eq(nil)
 
     tpl = consumer.subscription
     expect(tpl.size).to eq(2)
     expect(tpl.find("topic", -1)).not_to be(nil)
     expect(tpl.find("snitches", 5)).not_to be(nil)
-
   ensure
-    consumer.destroy if consumer
+    consumer.destroy
     list.destroy if list
+  end
+
+  specify "#subscribe with bad topic list" do
+    consumer = Kafka::FFI::Consumer.new(config.native)
+
+    list = Kafka::FFI::TopicPartitionList.new
+    list.add("")
+    expect { consumer.subscribe(list) }
+      .to raise_error(Kafka::FFI::ResponseError)
+  ensure
+    consumer.destroy
+    list.destroy
   end
 
   specify "#subscription with no subscriptions" do
@@ -49,8 +60,7 @@ RSpec.describe Kafka::FFI::Consumer do
     list = Kafka::FFI::TopicPartitionList.new
     list.add("topic")
     list.add("snitches", 5)
-
-    expect(consumer.subscribe(list)).to eq(:ok)
+    consumer.subscribe(list)
 
     # Retrieves the list of subscriptions
     tpl = consumer.subscription
@@ -66,18 +76,18 @@ RSpec.describe Kafka::FFI::Consumer do
     consumer = Kafka::FFI::Consumer.new(config.native)
 
     # Successful even when there are no existing subscriptions.
-    expect(consumer.unsubscribe).to eq(:ok)
+    consumer.unsubscribe
 
     begin
       list = Kafka::FFI::TopicPartitionList.new
       list.add_range("topic", 1..10)
-      expect(consumer.subscribe(list)).to eq(:ok)
+      consumer.subscribe(list)
     ensure
       list.destroy
     end
 
     # Removes all subscriptions
-    expect(consumer.unsubscribe).to eq(:ok)
+    consumer.unsubscribe
 
     tpl = consumer.subscription
     expect(tpl).to be_empty
@@ -86,12 +96,28 @@ RSpec.describe Kafka::FFI::Consumer do
     consumer.destroy if consumer
   end
 
+  specify "#assign" do
+    consumer = Kafka::FFI::Consumer.new(config.native)
+
+    list = Kafka::FFI::TopicPartitionList.new
+    list.add_range("topic", 1..10)
+    consumer.subscribe(list)
+
+    # Just verifies that calling `assign` doesn't explode. At this level it's
+    # impossible to verify that assignments are happening. It will be checked
+    # at the integration level.
+    consumer.assign(list)
+  ensure
+    consumer.destroy
+    list.destroy
+  end
+
   specify "#assignment" do
     consumer = Kafka::FFI::Consumer.new(config.native)
 
     list = Kafka::FFI::TopicPartitionList.new
     list.add_range("topic", 1..10)
-    expect(consumer.subscribe(list)).to eq(:ok)
+    consumer.subscribe(list)
 
     # Just verifies that calling `assignment` doesn't explode. At this level
     # it's impossible to verify that assignments are happening. It will be
@@ -110,23 +136,27 @@ RSpec.describe Kafka::FFI::Consumer do
   specify "#committed" do
     consumer = Kafka::FFI::Consumer.new(config.native)
 
-    list = Kafka::FFI::TopicPartitionList.new
-    list.add("topic", 1)
+    with_topic(partitions: 2) do |topic|
+      list = Kafka::FFI::TopicPartitionList.new
+      list.add(topic, 1)
 
-    # Short timeout to force a timeout error
-    expect(consumer.committed(list, timeout: 1)).to eq(-185) # TIMED_OUT
+      # Short timeout to force a timeout error
+      expect { consumer.committed(list, timeout: 1) }
+        .to raise_error(Kafka::FFI::ResponseError, "Local: Timed out")
 
-    # Actually takes about 1s locally
-    expect(consumer.committed(list, timeout: 10000)).to eq(:ok)
+      # Actually takes about 1s locally
+      consumer.committed(list, timeout: 2000)
 
-    # In this test setup there are no committed offsets
-    list.find("topic", 1).tap do |tp|
-      expect(tp.offset).to eq(Kafka::FFI::RD_KAFKA_OFFSET_INVALID)
-      expect(tp.error).to eq(:ok)
+      # In this test setup there are no committed offsets
+      list.find(topic, 1).tap do |tp|
+        expect(tp.offset).to eq(Kafka::FFI::RD_KAFKA_OFFSET_INVALID)
+        expect(tp.error).to eq(nil)
+      end
+    ensure
+      list.destroy if list
     end
   ensure
     consumer.destroy
-    list.destroy if list
   end
 
   specify "#get_consumer_queue" do
