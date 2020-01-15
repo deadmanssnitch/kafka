@@ -158,7 +158,7 @@ module Kafka::FFI
     #
     # @raise [ResponseError] Error that occurred retrieving the assignments.
     #
-    # @retunr [TopicPartitionList] List of current assignments
+    # @return [TopicPartitionList] List of current assignments
     def assignment
       ptr = ::FFI::MemoryPointer.new(:pointer)
 
@@ -230,7 +230,7 @@ module Kafka::FFI
 
       begin
         if msg.error
-          raise ResponseError, msg.error
+          raise msg.error
         end
 
         yield(msg)
