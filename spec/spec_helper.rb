@@ -123,7 +123,7 @@ RSpec.configure do |config|
   #    s@<value> (timestamp in ms to start at)
   #    e@<value> (timestamp in ms to stop at (not included))
   # @param timeout [Number] Wait timeout in seconds
-  def fetch(topic, count: 1, offset: -1, timeout: 2.5)
+  def fetch(topic, count: 1, offset: -1, timeout: 4)
     cmd = Shellwords.join([
       # Use timeout to limit how long kafkacat can wait for messages to be
       # visible. This usually happens quickly be is proving to be quite
