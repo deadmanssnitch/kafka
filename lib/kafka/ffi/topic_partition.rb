@@ -15,10 +15,13 @@ module Kafka::FFI
       :_private,      :pointer # DO NOT TOUCH. Internal to librdkafka
     )
 
-    # @return [:ok, Integer] :ok on success and a RD_KAFKA_RESP_ERR_* code on
-    #   an error. Will only be set under certain circumstances.
+    # @return [nil] The TopicPartition does not have an error set
+    # @return [ResponseError] Error for this topic occurred related to the
+    #   action the TopicPartition (or TopicPartitionList) was passed to.
     def error
-      self[:err]
+      if self[:err] != :ok
+        ResponseError.new(self[:err])
+      end
     end
 
     # @return [String] Name of the topic
