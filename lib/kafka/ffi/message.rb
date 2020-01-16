@@ -13,7 +13,7 @@ module Kafka::FFI
       :key,       :pointer,
       :key_len,   :size_t,
       :offset,    :int64,
-      :_private,  :pointer # DO NOT TOUCH. Internal to librdkafka
+      :private,   :pointer
     )
 
     # Retrieve the error associated with this message. For consumers this is
@@ -70,6 +70,25 @@ module Kafka::FFI
     #   enabled.
     def offset
       self[:offset]
+    end
+
+    # Returns the per message opaque pointer that was given to produce. This is
+    # a pointer to a Ruby object owned by the application.
+    #
+    # @note Using the opaque is dangerous and requires that the application
+    #   maintain a reference to the object passed to produce. Failing to do so
+    #   will cause segfaults due to the object having been garbage collected.
+    #
+    # @example Retrieve object from opaque
+    #   require "fiddle"
+    #   obj = Fiddle::Pointer.new(msg.opaque.to_i).to_value
+    #
+    # @return [nil] Opaque was not set
+    # @return [FFI::Pointer] Pointer to opaque address
+    def opaque
+      if !self[:private].null?
+        self[:private]
+      end
     end
 
     # Returns the message's payload. When error != nil, will contain a string
