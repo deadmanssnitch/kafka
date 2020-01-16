@@ -145,7 +145,7 @@ module Kafka::FFI
     # @see Client#get_background_queue
     #
     # @note The application is responsible for calling #destroy on the event.
-    # @note The application must not called #destroy on the Client inside the
+    # @note The application must not call #destroy on the Client inside the
     #   callback.
     #
     # @yield [client, event, opaque] Called when a event is received by the
