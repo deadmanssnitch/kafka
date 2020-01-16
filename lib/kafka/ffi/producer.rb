@@ -27,7 +27,12 @@ module Kafka::FFI
     #
     # @param timestamp [Time, Integer]
     # @param timestamp [nil] Timestamp is assigned by librdkafka
-    def produce(topic, payload, key: nil, partition: nil, headers: nil, timestamp: nil)
+    #
+    # @param opaque [Object] Ruby object that will be available (as an
+    #   FFI::Pointer) in some callbacks. The caller MUST maintain a reference
+    #   to the object until all callbacks are finished otherwise it will cause
+    #   a segfault when the object is garbage collected.
+    def produce(topic, payload, key: nil, partition: nil, headers: nil, timestamp: nil, opaque: nil)
       args = [
         # Ensure librdkafka copies the payload into its own memory since the
         # string backing it could be garbage collected.
@@ -65,6 +70,11 @@ module Kafka::FFI
         raise ArgumentError, "topic must be either a Topic or String"
       end
 
+      if opaque
+        ptr = ::FFI::Pointer.new(:pointer, opaque.object_id << 1)
+        args.append(:vtype, :opaque, :pointer, ptr)
+      end
+
       if timestamp
         ts =
           case timestamp
@@ -82,9 +92,9 @@ module Kafka::FFI
 
       err = ::Kafka::FFI.rd_kafka_producev(self, *args)
       if err != :ok
-        # The only documented error is RD_KAFKA_RESP_ERR__CONFLICT should
-        # bother HEADER and HEADERS keys be passed in. There is no way for
-        # HEADER to be passed to producev based on the above implementation.
+        # The only documented error is RD_KAFKA_RESP_ERR__CONFLICT should both
+        # HEADER and HEADERS keys be passed in. There is no way for HEADER to
+        # be passed to producev based on the above implementation.
         raise ResponseError, err
       end
 

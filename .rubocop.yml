@@ -98,7 +98,7 @@ Metrics/PerceivedComplexity:
 # As a wrapper around librdkafka there is little we can do to properly limit
 # this.
 Metrics/ParameterLists:
-  Max: 6
+  Max: 7
 
 #################
 # Disabled cops #
