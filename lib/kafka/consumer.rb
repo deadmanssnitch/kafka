@@ -63,7 +63,6 @@ module Kafka
     def commit(msg, async: false)
       list = Kafka::FFI::TopicPartitionList.new(1)
 
-      puts "topic=#{msg.topic} partition=#{msg.partition} offset=#{msg.offset + 1}"
       list.add(msg.topic, msg.partition)
       list.set_offset(msg.topic, msg.partition, msg.offset + 1)
 
