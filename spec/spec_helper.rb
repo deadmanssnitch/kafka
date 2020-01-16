@@ -86,12 +86,12 @@ RSpec.configure do |config|
   # We use kafkacat to make sure we use a well behaving client to verify that
   # the gem itself is well behaving.
   #
+  # @param topic [String] Name of the topic to publish to
   # @param payload [String] Content of the message to publish
   # @param key [String, nil] Partitioning key
   # @param partition [Integer, nil] Partition to publish to. Use -1 to publish
   #   to a random partition.
-  # @param topic [String] Name of the topic to publish to
-  def publish(payload, key: nil, partition: -1, topic: "consume_test_topic")
+  def publish(topic, payload, key: nil, partition: -1)
     cmd = Shellwords.join(
       [
         "kafkacat", "-P",
