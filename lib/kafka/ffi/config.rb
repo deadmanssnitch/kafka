@@ -13,6 +13,14 @@ module Kafka::FFI
       Kafka::FFI.rd_kafka_conf_new
     end
 
+    def initialize(ptr)
+      super(ptr)
+
+      # Maintain references to all of the set callbacks to avoid them being
+      # garbage collected.
+      @callbacks = {}
+    end
+
     # Set the config option at `key` to `value`. The configuration options
     # match those used by librdkafka (and the Java client).
     #
@@ -147,6 +155,7 @@ module Kafka::FFI
     # @yieldparam opaque [::FFI::Pointer] Pointer to the configuration's opaque
     #   pointer that was set via set_opaque.
     def set_background_event_cb(&block)
+      @callbacks[:background_event_cb] = block
       ::Kafka::FFI.rd_kafka_conf_set_background_event_cb(self, &block)
     end
     alias background_event_cb= set_background_event_cb
@@ -166,6 +175,7 @@ module Kafka::FFI
     # @yieldparam opaque [::FFI::Pointer] Pointer to the configuration's opaque
     #   pointer that was set via set_opaque.
     def set_dr_msg_cb(&block)
+      @callbacks[:dr_msg_cb] = block
       ::Kafka::FFI.rd_kafka_conf_set_dr_msg_cb(self, &block)
     end
     alias dr_msg_cb= set_dr_msg_cb
@@ -178,6 +188,7 @@ module Kafka::FFI
     # @yieldparam message [Message]
     # @yieldparam opaque [::FFI::Pointer]
     def set_consume_cb(&block)
+      @callbacks[:consume_cb] = block
       ::Kafka::FFI.rd_kafka_conf_set_consume_cb(self, &block)
     end
     alias consume_cb= set_consume_cb
@@ -200,6 +211,7 @@ module Kafka::FFI
     # @yieldparam partitions [TopicPartitionList] Set of partitions to assign
     #   or revoke.
     def set_rebalance_cb(&block)
+      @callbacks[:rebalance_cb] = block
       ::Kafka::FFI.rd_kafka_conf_set_rebalance_cb(self, &block)
     end
     alias rebalance_cb= set_rebalance_cb
@@ -216,6 +228,7 @@ module Kafka::FFI
     # @yieldparam error [Integer] Error committing the offsets
     # @yieldparam offsets [TopicPartitionList] Committed offsets
     def set_offset_commit_cb(&block)
+      @callbacks[:offset_commit_cb] = block
       ::Kafka::FFI.rd_kafka_conf_set_offset_commit_cb(self, &block)
     end
     alias offset_commit_cb= set_offset_commit_cb
@@ -232,6 +245,7 @@ module Kafka::FFI
     # @yieldparam reason [String]
     # @yieldparam opaque [::FFI::Pointer]
     def set_error_cb(&block)
+      @callbacks[:error_cb] = block
       ::Kafka::FFI.rd_kafka_conf_set_error_cb(self, &block)
     end
     alias error_cb= set_error_cb
@@ -246,6 +260,7 @@ module Kafka::FFI
     # @yieldparam throttle_ms [Integer] Throttle time in milliseconds
     # @yieldparam opaque [::FFI::Pointer]
     def set_throttle_cb(&block)
+      @callbacks[:throttle_cb] = block
       ::Kafka::FFI.rd_kafka_conf_set_throttle_cb(self, &block)
     end
     alias throttle_cb= set_throttle_cb
@@ -263,6 +278,7 @@ module Kafka::FFI
     # @yieldparam facility [String] Log facility
     # @yieldparam message [String] Log message
     def set_log_cb(&block)
+      @callbacks[:log_cb] = block
       ::Kafka::FFI.rd_kafka_conf_set_log_cb(self, &block)
     end
     alias log_cb= set_log_cb
@@ -278,26 +294,31 @@ module Kafka::FFI
     # @yieldparam json_len [Integer] Length of the JSON payload
     # @yieldparam opaque [::FFI::Pointer]
     def set_stats_cb(&block)
+      @callbacks[:stats_cb] = block
       ::Kafka::FFI.rd_kafka_conf_set_stats_cb(self, &block)
     end
     alias stats_cb= set_stats_cb
 
     def set_oauthbearer_token_refresh_cb(&block)
+      @callbacks[:oauthbearer_token_refresh_cb] = block
       ::Kafka::FFI.rd_kafka_conf_set_oauthbearer_token_refresh_cb(self, &block)
     end
     alias oauthbearer_token_refresh_cb= set_oauthbearer_token_refresh_cb
 
     def set_socket_cb(&block)
+      @callbacks[:socket_cb] = block
       ::Kafka::FFI.rd_kafka_conf_set_socket_cb(self, &block)
     end
     alias socket_cb= set_socket_cb
 
     def set_connect_cb(&block)
+      @callbacks[:connect_cb] = block
       ::Kafka::FFI.rd_kafka_conf_set_connect_cb(self, &block)
     end
     alias connect_cb= set_connect_cb
 
     def set_closesocket_cb(&block)
+      @callbacks[:closesocket_cb] = block
       ::Kafka::FFI.rd_kafka_conf_set_closesocket_cb(self, &block)
     end
     alias closesocket_cb= set_closesocket_cb
@@ -307,11 +328,13 @@ module Kafka::FFI
         raise Error, "set_open_cb is not available on Windows"
       end
 
+      @callbacks[:open_cb] = block
       ::Kafka::FFI.rd_kafka_conf_set_open_cb(self, &block)
     end
     alias open_cb= set_open_cb
 
     def set_ssl_cert_verify_cb(&block)
+      @callbacks[:ssl_cert_verify_cb] = block
       ::Kafka::FFI.rd_kafka_conf_set_ssl_cert_verify_cb(self, &block)
     end
     alias ssl_cert_verify_cb= set_ssl_cert_verify_cb
