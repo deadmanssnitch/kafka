@@ -4,6 +4,19 @@ Kafka provides both a generalized producer and consumer for [Apache Kafka](https
 as well as a set of bindings to [librdkafka](https://github.com/edenhill/librdkafka) to build
 specialized integrations.
 
+## :rotating_light: Project Status: Alpha :rotating_light:
+
+This project is currently of ALPHA quality. The APIs are still in flux and
+changes will happen that may break your application. There are also probably a
+number of subtle (and not so subtle) bugs. Since this relies heavily on binding
+to librdkafka through FFI there are probably code paths which will cause
+segfaults or memory corruption.
+
+You (yes you!) can make a difference and help make this project better. Test
+against your application and traffic, implement missing functions (see 
+`rake ffi:missing`), work with the API and make suggestions for improvements.
+All help is wanted and appreciated.
+
 ## Installation
 
 Add this line to your application's Gemfile:
