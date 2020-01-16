@@ -88,7 +88,7 @@ class Kafka::Producer
 
         # No report was received for the message before we timed out waiting.
         if !@done
-          raise ::Kafka::FFI::ResponseError, KAFKA::FFI::RD_KAFKA_RESP_ERR__TIMED_OUT
+          raise ::Kafka::FFI::ResponseError, ::Kafka::FFI::RD_KAFKA_RESP_ERR__TIMED_OUT
         end
       end
 
