@@ -10,16 +10,41 @@ module Kafka::FFI::Admin
       @client = ::Kafka::FFI::Producer.new(config)
     end
 
+    # Create a topic with the given name, number of partitions, and number of
+    # replicas per partition (replication factor). Total number of partitions
+    # will be partitions x replication_factor.
+    #
+    # @param name [String] Name of the topic to create
+    # @param partitions [Integer] Number of partitions the topic will have
+    # @param replication_factor [Integer] Number of replicas per partition to
+    #   have in the cluster.
+    #
+    # @return [nil] Create timed out
+    # @return [TopicResult] Response from the cluster with details about if the
+    #   topic was created or any errors.
+    def create_topic(name, partitions, replication_factor, timeout: 1000)
+      req = NewTopic.new(name, partitions, replication_factor)
+
+      res = create_topics(req, timeout: timeout)
+      if res
+        res[0]
+      end
+    ensure
+      req.destroy
+    end
+
     # Create topics in the cluster with the given configuration.
     #
     # @param topics [NewTopic, Array<NewTopic>] List of topics to create on the
     #   cluster.
-    # @param options [AdminOption] Optional set of parameters for the Admin API
-    #   request.
     # @param timeout [Integer] Time in milliseconds to way for a reply.
     #
     # @raise [ResponseError] An error occurred creating the topic(s)
-    def create_topics(topics, options: nil, timeout: 1000)
+    #
+    # @return [nil] Create timed out
+    # @return [Array<TopicResult>] Response from the cluster with details about
+    #   the creation of the list of topics or any errors.
+    def create_topics(topics, timeout: 1000)
       topics = Array(topics)
 
       # CreateTopic wants an array of topics
@@ -28,7 +53,8 @@ module Kafka::FFI::Admin
 
       queue = ::Kafka::FFI::Queue.new(@client)
 
-      ::Kafka::FFI.rd_kafka_CreateTopics(@client, list, topics.length, options, queue)
+      # TODO: AdminOption (nil placeholder)
+      ::Kafka::FFI.rd_kafka_CreateTopics(@client, list, topics.length, nil, queue)
 
       # @todo Need to retrieve the rd_kafka_topic_result_t to handle or
       #   propogate any errors.
@@ -59,7 +85,36 @@ module Kafka::FFI::Admin
       count.free
     end
 
-    def delete_topics(topics, options: nil, timeout: 1000)
+    # Delete the topic with the given name
+    #
+    # @param name [String] Name of the topic to delete
+    # @param timeout [Integer] Time to wait in milliseconds for the deletion to
+    #   complete.
+    #
+    # @return [nil] Delete timed out
+    # @return [TopicResult] Response from the cluster with details about the
+    #   deletion or any errors.
+    def delete_topic(name, timeout: 1000)
+      req = DeleteTopic.new(name, timeout: timeout)
+      res = delete_topics(req)
+
+      if res
+        res[0]
+      end
+    ensure
+      req.destroy
+    end
+
+    # Delete a list of Topics
+    #
+    # @param topics [DeleteTopic] List of topics to delete
+    # @param timeout [Integer] Time to wait in milliseconds for the deletion to
+    #   complete.
+    #
+    # @return [nil] Delete timed out
+    # @return [Array<TopicResult>] Response from the cluster with details about
+    #   the deletion of the list of topics or any errors.
+    def delete_topics(topics, timeout: 1000)
       topics = Array(topics)
 
       # CreateTopic wants an array of topics
@@ -67,7 +122,9 @@ module Kafka::FFI::Admin
       list.write_array_of_pointer(topics.map(&:pointer))
 
       queue = ::Kafka::FFI::Queue.new(@client)
-      ::Kafka::FFI.rd_kafka_DeleteTopics(@client, list, topics.length, options, queue)
+
+      # TODO: AdminOption (nil placeholder)
+      ::Kafka::FFI.rd_kafka_DeleteTopics(@client, list, topics.length, nil, queue)
 
       queue.poll(timeout: timeout) do |event|
         get_topic_results(event)
