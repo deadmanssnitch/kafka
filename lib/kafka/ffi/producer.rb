@@ -25,13 +25,14 @@ module Kafka::FFI
     #
     # @param headers [Kafka::FFI::Message::Header]
     #
-    # @param timestamp [Time, Integer]
+    # @param timestamp [Time] Timestamp as Time
+    # @param timestamp [Integer] Timestamp as milliseconds since unix epoch
     # @param timestamp [nil] Timestamp is assigned by librdkafka
     #
-    # @param opaque [Object] Ruby object that will be available (as an
-    #   FFI::Pointer) in some callbacks. The caller MUST maintain a reference
-    #   to the object until all callbacks are finished otherwise it will cause
-    #   a segfault when the object is garbage collected.
+    # @param opaque [::FFI::Pointer] Pointer to a memory address owned by the
+    #   application. The caller MUST maintain a reference to the pointer until
+    #   all callbacks are finished otherwise it will cause a segfault when the
+    #   object is garbage collected.
     def produce(topic, payload, key: nil, partition: nil, headers: nil, timestamp: nil, opaque: nil)
       args = [
         # Ensure librdkafka copies the payload into its own memory since the
@@ -71,8 +72,7 @@ module Kafka::FFI
       end
 
       if opaque
-        ptr = ::FFI::Pointer.new(:pointer, opaque.object_id << 1)
-        args.append(:vtype, :opaque, :pointer, ptr)
+        args.append(:vtype, :opaque, :pointer, opaque)
       end
 
       if timestamp
