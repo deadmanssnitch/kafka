@@ -21,32 +21,41 @@ module Kafka::FFI
     require "kafka/ffi/producer"
 
     # @param type [:consumer, :producer] Type of Kafka instance to create.
-    # @param config [Config, nil] Configuration for the instance.
+    # @param config [nil] Use librdkafka default config
+    # @param config [Config] Configuration for the instance.
     #
     # @return [Consumer, Producer]
     def self.new(type, config = nil)
-      # new(:type, config)
-      #
-      # There is no pointer to an existing client so we need to initialize a
-      # new one. Due to how FFI does type conversion, calling rd_kafka_new will
-      # make another call to new with type set to the pointer).
-      if !type.is_a?(::FFI::Pointer)
-        error = ::FFI::MemoryPointer.new(:char, 512)
-        client = Kafka::FFI.rd_kafka_new(type, config, error, error.size)
+      error = ::FFI::MemoryPointer.new(:char, 512)
 
-        if client.nil?
-          raise Error, error.read_string
-        end
-
-        return client
+      client = Kafka::FFI.rd_kafka_new(type, config, error, error.size)
+      if client.nil?
+        raise Error, error.read_string
       end
 
-      ptr = type
+      if config
+        # Store a reference to the config on the Client instance. We do this to
+        # tie the Config's lifecycle to the Client instance in Ruby since they
+        # are already tied in librdkafka. This ensures that any Ruby objects
+        # referenced in the config (like callbacks) are not garbage collected.
+        #
+        # Using instance_variable_set to avoid exposing an API method that
+        # could cause confusion from end users since the config cannot be
+        # changed after initialization.
+        client.instance_variable_set(:@config, config)
+      end
 
-      # Passed a null pointer. This most likely due to an error returned from
-      # rd_kafka_new and this call is actually nested in another call to new
-      # through the type conversion logic in FFI. Return nil so we can cleanly
-      # raise an error above.
+      client
+    end
+
+    def self.from_native(ptr, _ctx)
+      if !ptr.is_a?(::FFI::Pointer)
+        raise TypeError, "from_native can only convert from a ::FFI::Pointer to #{self}"
+      end
+
+      # Converting from a null pointer should return nil. Likely this was
+      # caused by rd_kafka_new returning an error and a NULL pointer for the
+      # Client.
       if ptr.null?
         return nil
       end
@@ -56,7 +65,6 @@ module Kafka::FFI
       # after we know the type. But for type safety we want to pass a Client.
       cfg = allocate
       cfg.send(:initialize, ptr)
-
       type = ::Kafka::FFI.rd_kafka_type(cfg)
 
       klass =
