@@ -30,6 +30,9 @@ module Kafka::FFI
     # the error was received from a broker or timeout.
     #
     # @see https://github.com/edenhill/librdkafka/blob/4818ecadee/src/rdkafka.h#L245
+    #
+    # @return [true] Error was internal to librdkafka
+    # @return [false] Error was returned by the cluster
     def internal?
       code < 0
     end
