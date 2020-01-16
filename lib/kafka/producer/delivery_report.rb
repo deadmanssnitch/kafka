@@ -63,6 +63,9 @@ class Kafka::Producer
 
         @done = true
         @waiter.broadcast
+
+        remove_instance_variable(:@mutex)
+        remove_instance_variable(:@waiter)
       end
     end
 
@@ -73,11 +76,13 @@ class Kafka::Producer
     # @raise [Kafka::FFI::ResponseError<RD_KAFKA_RESP_ERR__TIMED_OUT>] No
     #   report received before timeout.
     def wait(timeout: 5000)
-      @mutex.synchronize do
-        if @done
-          return
-        end
+      # Fast out since the delivery report has already been reported back from
+      # the cluster.
+      if @done
+        return
+      end
 
+      @mutex.synchronize do
         # Convert from milliseconds to seconds to match Ruby's API. Takes
         # milliseconds to be consistent with librdkafka APIs.
         if timeout
