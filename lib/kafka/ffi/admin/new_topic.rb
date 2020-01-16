@@ -25,23 +25,13 @@ module Kafka::FFI::Admin
       error = ::FFI::MemoryPointer.new(:char, 512)
 
       obj = ::Kafka::FFI.rd_kafka_NewTopic_new(name, partitions, replication_factor, error, error.size)
-      if obj.pointer.null?
+      if obj.nil?
         raise Error, error.read_string
       end
 
       obj
     ensure
       error.free
-    end
-
-    def self.from_native(value, _ctx)
-      if !value.is_a?(::FFI::Pointer)
-        raise TypeError, "from_native can only convert from a ::FFI::Pointer to #{self}"
-      end
-
-      req = allocate
-      req.send(:initialize, value)
-      req
     end
 
     # Set the broker assignment for partition to the replica set in broker_ids.

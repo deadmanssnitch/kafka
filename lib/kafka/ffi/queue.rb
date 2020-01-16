@@ -6,10 +6,6 @@ require "kafka/ffi/opaque_pointer"
 module Kafka::FFI
   class Queue < OpaquePointer
     def self.new(client)
-      if client.is_a?(::FFI::Pointer)
-        return super
-      end
-
       ::Kafka::FFI.rd_kafka_queue_new(client)
     end
 

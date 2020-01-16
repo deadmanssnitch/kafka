@@ -5,11 +5,7 @@ require "kafka/ffi/opaque_pointer"
 
 module Kafka::FFI
   class Config < OpaquePointer
-    def self.new(ptr = nil)
-      if ptr.is_a?(::FFI::Pointer)
-        return super(ptr)
-      end
-
+    def self.new
       Kafka::FFI.rd_kafka_conf_new
     end
 

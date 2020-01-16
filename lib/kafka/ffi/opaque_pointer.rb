@@ -33,7 +33,9 @@ module Kafka::FFI
           return nil
         end
 
-        new(value)
+        obj = allocate
+        obj.send(:initialize, value)
+        obj
       end
 
       # Convert from a Kafka::FFI type to a native FFI type.

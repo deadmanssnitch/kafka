@@ -7,11 +7,7 @@ module Kafka::FFI
   # TopicConfig can be passed to Topic.new to configure how the client
   # interacts with the Topic.
   class TopicConfig < OpaquePointer
-    def self.new(ptr = nil)
-      if ptr.is_a?(::FFI::Pointer)
-        return super(ptr)
-      end
-
+    def self.new
       Kafka::FFI.rd_kafka_topic_conf_new
     end
 
