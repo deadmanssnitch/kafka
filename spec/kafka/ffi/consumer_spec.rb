@@ -4,14 +4,14 @@ require "spec_helper"
 
 RSpec.describe Kafka::FFI::Consumer do
   specify "new" do
-    consumer = Kafka::FFI::Consumer.new(config.native)
+    consumer = Kafka::FFI::Consumer.new(config)
     expect(consumer).to be_a(Kafka::FFI::Consumer)
   ensure
     consumer.destroy if consumer
   end
 
   specify "#subscribe" do
-    consumer = Kafka::FFI::Consumer.new(config.native)
+    consumer = Kafka::FFI::Consumer.new(config)
 
     # With no subscriptions
     tpl = consumer.subscription
@@ -32,7 +32,7 @@ RSpec.describe Kafka::FFI::Consumer do
   end
 
   specify "#subscribe with bad topic list" do
-    consumer = Kafka::FFI::Consumer.new(config.native)
+    consumer = Kafka::FFI::Consumer.new(config)
 
     list = Kafka::FFI::TopicPartitionList.new
     list.add("")
@@ -44,7 +44,7 @@ RSpec.describe Kafka::FFI::Consumer do
   end
 
   specify "#subscription with no subscriptions" do
-    consumer = Kafka::FFI::Consumer.new(config.native)
+    consumer = Kafka::FFI::Consumer.new(config)
 
     # With no subscriptions
     tpl = consumer.subscription
@@ -55,7 +55,7 @@ RSpec.describe Kafka::FFI::Consumer do
   end
 
   specify "#subscription" do
-    consumer = Kafka::FFI::Consumer.new(config.native)
+    consumer = Kafka::FFI::Consumer.new(config)
 
     list = Kafka::FFI::TopicPartitionList.new
     list.add("topic")
@@ -73,7 +73,7 @@ RSpec.describe Kafka::FFI::Consumer do
   end
 
   specify "#unsubscribe" do
-    consumer = Kafka::FFI::Consumer.new(config.native)
+    consumer = Kafka::FFI::Consumer.new(config)
 
     # Successful even when there are no existing subscriptions.
     consumer.unsubscribe
@@ -97,7 +97,7 @@ RSpec.describe Kafka::FFI::Consumer do
   end
 
   specify "#assign" do
-    consumer = Kafka::FFI::Consumer.new(config.native)
+    consumer = Kafka::FFI::Consumer.new(config)
 
     list = Kafka::FFI::TopicPartitionList.new
     list.add_range("topic", 1..10)
@@ -113,7 +113,7 @@ RSpec.describe Kafka::FFI::Consumer do
   end
 
   specify "#assignment" do
-    consumer = Kafka::FFI::Consumer.new(config.native)
+    consumer = Kafka::FFI::Consumer.new(config)
 
     list = Kafka::FFI::TopicPartitionList.new
     list.add_range("topic", 1..10)
@@ -134,7 +134,7 @@ RSpec.describe Kafka::FFI::Consumer do
   end
 
   specify "#committed" do
-    consumer = Kafka::FFI::Consumer.new(config.native)
+    consumer = Kafka::FFI::Consumer.new(config)
 
     with_topic(partitions: 2) do |topic|
       list = Kafka::FFI::TopicPartitionList.new
@@ -160,7 +160,7 @@ RSpec.describe Kafka::FFI::Consumer do
   end
 
   specify "#get_consumer_queue" do
-    client = Kafka::FFI::Consumer.new(config.native)
+    client = Kafka::FFI::Consumer.new(config)
 
     queue = client.get_consumer_queue
     expect(queue).to be_a(Kafka::FFI::Queue)
@@ -170,7 +170,7 @@ RSpec.describe Kafka::FFI::Consumer do
   end
 
   specify "#get_partition_queue" do
-    client = Kafka::FFI::Consumer.new(config.native)
+    client = Kafka::FFI::Consumer.new(config)
 
     queue = client.get_partition_queue("test", 1)
     expect(queue).to be_a(Kafka::FFI::Queue)

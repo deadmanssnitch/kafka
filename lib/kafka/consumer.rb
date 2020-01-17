@@ -6,8 +6,6 @@ module Kafka
   class Consumer
     # @param config [Kafka::Config]
     def initialize(config)
-      config = config.native
-
       # Initialize the client
       @client = Kafka::FFI::Consumer.new(config)
 

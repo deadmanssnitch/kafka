@@ -10,11 +10,11 @@ module Kafka
     #
     # @param config [Config]
     def initialize(config)
-      config = config.native
+      config = config.dup
 
       # Configure callbacks
-      config.set_dr_msg_cb(&method(:on_delivery_report))
-      config.set_error_cb(&method(:on_error))
+      config.on_delivery_report(&method(:on_delivery_report))
+      config.on_error(&method(:on_error))
 
       @client = ::Kafka::FFI::Producer.new(config)
 

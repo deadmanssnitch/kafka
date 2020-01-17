@@ -4,7 +4,7 @@ require "spec_helper"
 
 RSpec.describe Kafka::FFI::Topic do
   specify "#name" do
-    client = Kafka::FFI::Consumer.new(config.native)
+    client = Kafka::FFI::Consumer.new(config)
     topic = client.topic("signals")
     expect(topic.name).to eq("signals")
   ensure

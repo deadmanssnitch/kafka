@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "ffi"
+require "kafka/config"
 require "kafka/ffi/opaque_pointer"
 
 module Kafka::FFI
@@ -20,13 +21,29 @@ module Kafka::FFI
     require "kafka/ffi/consumer"
     require "kafka/ffi/producer"
 
+    # Create a new Client of type with the given configuration.
+    #
     # @param type [:consumer, :producer] Type of Kafka instance to create.
     # @param config [nil] Use librdkafka default config
-    # @param config [Config] Configuration for the instance.
+    # @param config [Config, Kafka::Config] Configuration for the instance.
+    # @param config [Hash{[String, Symbol] => [String, Integer, nil, Boolean]}]
+    #   Configuration options for the instance.
     #
     # @return [Consumer, Producer]
     def self.new(type, config = nil)
       error = ::FFI::MemoryPointer.new(:char, 512)
+
+      # Convenience for passing in a Kafka::Config instead of building a
+      # Kafka::FFI::Config since Kafka::Config provides a way to create a
+      # config from a Hash.
+      config =
+        case config
+        when Config, nil     then config
+        when ::Kafka::Config then config.to_ffi
+        when Hash            then ::Kafka::Config.new(config).to_ffi
+        else
+          raise ArgumentError, "config must be on of nil, Config, ::Kafka::Config, or Hash"
+        end
 
       client = Kafka::FFI.rd_kafka_new(type, config, error, error.size)
       if client.nil?

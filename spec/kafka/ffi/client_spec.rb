@@ -6,14 +6,14 @@ RSpec.describe Kafka::FFI::Client do
   specify "#config" do
     config = config("client.id": "test")
 
-    client = Kafka::FFI::Client.new(:producer, config.native)
+    client = Kafka::FFI::Client.new(:producer, config)
     expect(client.config.get("client.id")).to eq("test")
   ensure
     client.destroy
   end
 
   specify "#metadata" do
-    client = Kafka::FFI::Client.new(:consumer, config.native)
+    client = Kafka::FFI::Client.new(:consumer, config)
 
     md = client.metadata(topic: "__consumer_offsets")
     expect(md).to be_a(Kafka::FFI::Metadata)
@@ -55,7 +55,7 @@ RSpec.describe Kafka::FFI::Client do
 
   specify "#set_log_queue" do
     # log.queue must be set to true otherwise segfault
-    config = config("log.queue": true).native
+    config = config("log.queue": true)
 
     client = Kafka::FFI::Client.new(:producer, config)
     queue = Kafka::FFI::Queue.new(client)

@@ -5,7 +5,7 @@ require "spec_helper"
 RSpec.describe Kafka::FFI::Producer do
   it "can produce a message" do
     payload = "Test message"
-    producer = Kafka::FFI::Producer.new(config.native)
+    producer = Kafka::FFI::Producer.new(config)
 
     with_topic do |topic|
       producer.produce(topic, payload)
@@ -25,7 +25,7 @@ RSpec.describe Kafka::FFI::Producer do
   # Verify that the partition argument is applied to publication.
   it "can produce a message to a specific partition" do
     cfg = config("partitioner": "murmur2")
-    producer = Kafka::FFI::Producer.new(cfg.native)
+    producer = Kafka::FFI::Producer.new(cfg)
 
     with_topic(partitions: 5) do |topic|
       # murmur2 maps to partitions: 1, 1, 2, 3
@@ -46,7 +46,7 @@ RSpec.describe Kafka::FFI::Producer do
   end
 
   it "sends message headers" do
-    producer = Kafka::FFI::Producer.new(config.native)
+    producer = Kafka::FFI::Producer.new(config)
 
     # Producev causes the headers to be owned by librdkafka instead of the
     # application.

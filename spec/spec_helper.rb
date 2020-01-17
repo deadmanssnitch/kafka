@@ -64,7 +64,7 @@ RSpec.configure do |config|
     replicas = 1
 
     # TODO: Can we reuse the same admin client across multiple tests?
-    admin = Kafka::FFI::Admin::Client.new(config.native)
+    admin = Kafka::FFI::Admin::Client.new(config)
 
     # TODO: Test that the topic was created
     create = Kafka::FFI::Admin::NewTopic.new(topic, partitions, replicas)

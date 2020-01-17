@@ -5,7 +5,7 @@ require "securerandom"
 
 RSpec.describe Kafka::FFI::Admin::Client do
   specify "#create_topics" do
-    client = Kafka::FFI::Admin::Client.new(config.native)
+    client = Kafka::FFI::Admin::Client.new(config)
 
     topics = [
       Kafka::FFI::Admin::NewTopic.new(SecureRandom.uuid, 3, 1),
@@ -21,7 +21,7 @@ RSpec.describe Kafka::FFI::Admin::Client do
   end
 
   specify "#delete_topics" do
-    client = Kafka::FFI::Admin::Client.new(config.native)
+    client = Kafka::FFI::Admin::Client.new(config)
     topic = SecureRandom.uuid
 
     delete = Kafka::FFI::Admin::DeleteTopic.new(topic)
