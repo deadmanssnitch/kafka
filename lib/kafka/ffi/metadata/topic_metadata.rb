@@ -20,10 +20,10 @@ class Kafka::FFI::Metadata
     # Returns any Broker reported errors.
     #
     # @return [nil] Broker reported no errors for the topic
-    # @return [ResponseError] Error reported by Broker
+    # @return [Kafka::ResponseError] Error reported by Broker
     def error
       if self[:err] != :ok
-        return Kafka::FFI::ResponseError.new(self[:err])
+        return ::Kafka::ResponseError.new(self[:err])
       end
     end
 

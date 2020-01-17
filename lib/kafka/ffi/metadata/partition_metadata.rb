@@ -22,10 +22,10 @@ class Kafka::FFI::Metadata
     # Returns the error for the Partition as reported by the Broker.
     #
     # @return [nil] No error reported by Broker
-    # @return [ResponseError] Error reported by Broker
+    # @return [Kafka::ResponseError] Error reported by Broker
     def error
       if self[:err] != :ok
-        return Kafka::FFI::ResponseError.new(self[:err])
+        return ::Kafka::ResponseError.new(self[:err])
       end
     end
 

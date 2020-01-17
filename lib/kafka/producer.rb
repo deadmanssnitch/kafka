@@ -83,8 +83,8 @@ module Kafka
 
     # Wait until all outstanding produce requests are completed.
     #
-    # @raise [ResponseError] Timeout was reached before all outstanding
-    #   requests were completed.
+    # @raise [Kafka::ResponseError] Timeout was reached before all
+    #   outstanding requests were completed.
     def flush(timeout: 1000)
       @client.flush(timeout: timeout)
     end

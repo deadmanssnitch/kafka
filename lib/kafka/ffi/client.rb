@@ -142,7 +142,7 @@ module Kafka::FFI
     #   only be passed for the first call of `topic` per topic name since a
     #   Topic can only be configured at creation.
     #
-    # @raise [ResponseError] Error occurred creating the topic
+    # @raise [Kafka::ResponseError] Error occurred creating the topic
     # @raise [TopicAlreadyConfiguredError] Passed a config for a topic that has
     #   already been configured.
     #
@@ -164,7 +164,7 @@ module Kafka::FFI
       # @todo - Keep list of topics and manage their lifecycle?
       topic = ::Kafka::FFI.rd_kafka_topic_new(self, name, config)
       if topic.nil?
-        raise ResponseError, ::Kafka::FFI.rd_kafka_last_error
+        raise ::Kafka::ResponseError, ::Kafka::FFI.rd_kafka_last_error
       end
 
       @topics[name] = topic
@@ -191,14 +191,14 @@ module Kafka::FFI
     #
     # @param list [TopicPartitionList] Set of partitions to pause
     #
-    # @raise [ResponseError] Invalid request
+    # @raise [Kafka::ResponseError] Invalid request
     #
     # @return [TopicPartitionList] List of partitions with errors set for any
     #   of the TopicPartitions that failed.
     def pause_partitions(list)
       err = ::Kafka::FFI.rd_kafka_pause_partitions(self, list)
       if err != :ok
-        raise ResponseError, err
+        raise ::Kafka::ResponseError, err
       end
 
       list
@@ -208,14 +208,14 @@ module Kafka::FFI
     #
     # @param list [TopicPartitionList] Set of partitions to unpause
     #
-    # @raise [ResponseError] Invalid request
+    # @raise [Kafka::ResponseError] Invalid request
     #
     # @return [TopicPartitionList] List of partitions with errors set for any
     #   of the TopicPartitions that failed.
     def resume_partitions(list)
       err = ::Kafka::FFI.rd_kafka_resume_partitions(self, list)
       if err != :ok
-        raise ResponseError, err
+        raise ::Kafka::ResponseError, err
       end
 
       list
@@ -254,11 +254,11 @@ module Kafka::FFI
     # @param dest [Queue] Destination Queue for logs
     # @param dest [nil] Forward logs to the Client's main queue
     #
-    # @raise [ResponseError] Error setting the log Queue
+    # @raise [Kafka::ResponseError] Error setting the log Queue
     def set_log_queue(dest)
       err = ::Kafka::FFI.rd_kafka_set_log_queue(self, dest)
       if err != :ok
-        raise ResponseError, err
+        raise ::Kafka::ResponseError, err
       end
 
       nil
@@ -271,7 +271,7 @@ module Kafka::FFI
     # @param topic [String] Name of the topic to get offsets for
     # @param partition [int] Partition of the topic to get offsets for
     #
-    # @raise [ResponseError] Error that occurred retrieving offsets
+    # @raise [Kafka::ResponseError] Error that occurred retrieving offsets
     #
     # @return [Range] Range of known offsets
     def query_watermark_offsets(topic, partition, timeout: 1000)
@@ -280,7 +280,7 @@ module Kafka::FFI
 
       err = ::Kafka::FFI.rd_kafka_query_watermark_offsets(self, topic, partition, low, high, timeout)
       if err != :ok
-        raise ResponseError, err
+        raise ::Kafka::ResponseError, err
       end
 
       Range.new(low.read_int64, high.read_int64, false)
@@ -294,7 +294,7 @@ module Kafka::FFI
     #   for. The TopicPartitions in the list will be modified based on the
     #   results of the query.
     #
-    # @raise [ResponseError] Invalid request
+    # @raise [Kafka::ResponseError] Invalid request
     #
     # @return [TopicPartitionList] List of topics with offset set.
     def offsets_for_times(list, timeout: 1000)
@@ -304,7 +304,7 @@ module Kafka::FFI
 
       err = ::Kafka::FFI.rd_kafka_offsets_for_times(self, list, timeout)
       if err != :ok
-        raise ResponseError, err
+        raise ::Kafka::ResponseError, err
       end
 
       list
@@ -317,7 +317,7 @@ module Kafka::FFI
     # @param topic [String, Topic] Only request info about this topic.
     # @param timeout [Integer] Request timeout in milliseconds
     #
-    # @raise [ResponseError] Error retrieving metadata
+    # @raise [Kafka::ResponseError] Error retrieving metadata
     #
     # @return [Metadata] Details about the state of the cluster.
     def metadata(local_only: false, topic: nil, timeout: 1000)
@@ -331,7 +331,7 @@ module Kafka::FFI
 
       err = ::Kafka::FFI.rd_kafka_metadata(self, local_only, topic, ptr, timeout)
       if err != :ok
-        raise ResponseError, err
+        raise ::Kafka::ResponseError, err
       end
 
       Kafka::FFI::Metadata.new(ptr.read_pointer)

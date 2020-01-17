@@ -13,7 +13,7 @@ RSpec.describe Kafka::FFI::Message do
     expect(msg.error).to eq(nil)
 
     msg[:err] = -199
-    expect(msg.error).to be_a(Kafka::FFI::ResponseError)
+    expect(msg.error).to be_a(Kafka::ResponseError)
     expect(msg.error.code).to eq(-199)
     expect(msg.error.name).to eq("RD_KAFKA_RESP_ERR__BAD_MSG")
   end

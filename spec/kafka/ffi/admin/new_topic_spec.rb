@@ -23,7 +23,7 @@ RSpec.describe Kafka::FFI::Admin::NewTopic do
 
     # Partition was not consecutive from the previous call
     expect { req.set_replica_assignment(2, [2]) }
-      .to raise_error(Kafka::FFI::ResponseError)
+      .to raise_error(Kafka::ResponseError)
   end
 
   specify "#set_config" do

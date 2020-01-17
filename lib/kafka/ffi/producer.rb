@@ -95,7 +95,7 @@ module Kafka::FFI
         # The only documented error is RD_KAFKA_RESP_ERR__CONFLICT should both
         # HEADER and HEADERS keys be passed in. There is no way for HEADER to
         # be passed to producev based on the above implementation.
-        raise ResponseError, err
+        raise ::Kafka::ResponseError, err
       end
 
       nil
@@ -105,12 +105,12 @@ module Kafka::FFI
     # typically be done prior to destroying a producer to ensure all queued and
     # in-flight requests are completed before terminating.
     #
-    # @raise [ResponseError] Timeout was reached before all outstanding
-    #   requests were completed.
+    # @raise [Kafka::ResponseError] Timeout was reached before all
+    #   outstanding requests were completed.
     def flush(timeout: 1000)
       err = ::Kafka::FFI.rd_kafka_flush(self, timeout)
       if err != :ok
-        raise ResponseError, err
+        raise ::Kafka::ResponseError, err
       end
 
       nil
@@ -124,8 +124,9 @@ module Kafka::FFI
     # @param blocking [Boolean] When true don't wait for background thread
     #   queue purging to finish.
     #
-    # @raise [ResponseError] Error occurred purging state. This is unlikely as
-    #   the documented error are not possible with this implementation.
+    # @raise [Kafka::ResponseError] Error occurred purging state. This is
+    #   unlikely as the documented error are not possible with this
+    #   implementation.
     def purge(queued: true, inflight: true, blocking: false)
       mask = 0
       mask |= RD_KAFKA_PURGE_F_QUEUE if queued
@@ -134,7 +135,7 @@ module Kafka::FFI
 
       err = ::Kafka::FFI.rd_kafka_purge(self, mask)
       if err != :ok
-        raise ResponseError, err
+        raise ::Kafka::ResponseError, err
       end
 
       nil

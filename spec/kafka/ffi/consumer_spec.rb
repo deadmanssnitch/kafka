@@ -37,7 +37,7 @@ RSpec.describe Kafka::FFI::Consumer do
     list = Kafka::FFI::TopicPartitionList.new
     list.add("")
     expect { consumer.subscribe(list) }
-      .to raise_error(Kafka::FFI::ResponseError)
+      .to raise_error(Kafka::ResponseError)
   ensure
     consumer.destroy
     list.destroy
@@ -142,7 +142,7 @@ RSpec.describe Kafka::FFI::Consumer do
 
       # Short timeout to force a timeout error
       expect { consumer.committed(list, timeout: 1) }
-        .to raise_error(Kafka::FFI::ResponseError, "Local: Timed out")
+        .to raise_error(Kafka::ResponseError, "Local: Timed out")
 
       # Actually takes about 1s locally
       consumer.committed(list, timeout: 2000)

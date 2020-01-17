@@ -8,7 +8,7 @@ module Kafka::FFI::Admin
     attr_reader :topic
 
     # @attr error [nil] Topic action was successful
-    # @attr error [Kafka::FFI::ResponseError] Action on the cluster for this
+    # @attr error [Kafka::ResponseError] Action on the cluster for this
     #   action failed.
     attr_reader :error
 
@@ -26,7 +26,7 @@ module Kafka::FFI::Admin
 
       # RD_KAFKA_RESP_ERR__NO_ERROR
       if struct[:err] != 0
-        @error = ::Kafka::FFI::ResponseError.new(struct[:err])
+        @error = ::Kafka::ResponseError.new(struct[:err])
       end
     end
 

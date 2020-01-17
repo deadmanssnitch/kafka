@@ -39,7 +39,7 @@ module Kafka::FFI::Admin
     #   cluster.
     # @param timeout [Integer] Time in milliseconds to way for a reply.
     #
-    # @raise [ResponseError] An error occurred creating the topic(s)
+    # @raise [Kafka::ResponseError] An error occurred creating the topic(s)
     #
     # @return [nil] Create timed out
     # @return [Array<TopicResult>] Response from the cluster with details about

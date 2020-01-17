@@ -16,11 +16,11 @@ module Kafka::FFI
     )
 
     # @return [nil] The TopicPartition does not have an error set
-    # @return [ResponseError] Error for this topic occurred related to the
-    #   action the TopicPartition (or TopicPartitionList) was passed to.
+    # @return [Kafka::ResponseError] Error for this topic occurred related to
+    #   the action the TopicPartition (or TopicPartitionList) was passed to.
     def error
       if self[:err] != :ok
-        ResponseError.new(self[:err])
+        ::Kafka::ResponseError.new(self[:err])
       end
     end
 

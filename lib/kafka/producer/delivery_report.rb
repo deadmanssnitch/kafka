@@ -4,7 +4,7 @@ class Kafka::Producer
   class DeliveryReport
     # @return [nil] Delivery was successful or report has not been received
     #   yet.
-    # @return [Kafka::FFI::ResponseError] Error delivering the Message.
+    # @return [Kafka::ResponseError] Error delivering the Message.
     attr_reader :error
 
     # @return [nil] Report has not been received yet
@@ -73,8 +73,8 @@ class Kafka::Producer
     #
     # @param timeout [Integer] Maximum time to wait in milliseconds.
     #
-    # @raise [Kafka::FFI::ResponseError<RD_KAFKA_RESP_ERR__TIMED_OUT>] No
-    #   report received before timeout.
+    # @raise [Kafka::ResponseError<RD_KAFKA_RESP_ERR__TIMED_OUT>] No report
+    #   received before timeout.
     def wait(timeout: 5000)
       # Fast out since the delivery report has already been reported back from
       # the cluster.
@@ -93,7 +93,7 @@ class Kafka::Producer
 
         # No report was received for the message before we timed out waiting.
         if !@done
-          raise ::Kafka::FFI::ResponseError, ::Kafka::FFI::RD_KAFKA_RESP_ERR__TIMED_OUT
+          raise ::Kafka::ResponseError, ::Kafka::FFI::RD_KAFKA_RESP_ERR__TIMED_OUT
         end
       end
 

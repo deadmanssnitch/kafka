@@ -44,7 +44,7 @@ module Kafka::FFI::Admin
     # @param broker_ids [Integer, Array<Integer>] Brokers that will be assigned
     #   the partition for the topic.
     #
-    # @raise [Kafka::FFI::ResponseError] Error occurred setting config
+    # @raise [Kafka::ResponseError] Error occurred setting config
     def set_replica_assignment(partition, broker_ids)
       broker_ids = Array(broker_ids)
 
@@ -55,7 +55,7 @@ module Kafka::FFI::Admin
 
       err = ::Kafka::FFI.rd_kafka_NewTopic_set_replica_assignment(self, partition, brokers, broker_ids.size, error, error.size)
       if err != :ok
-        raise ::Kafka::FFI::ResponseError, err
+        raise ::Kafka::ResponseError, err
       end
 
       nil
@@ -66,11 +66,11 @@ module Kafka::FFI::Admin
 
     # Set the broker side topic configuration name/value pair.
     #
-    # @raise [Kafka::FFI::ResponseError] Arguments were invalid
+    # @raise [Kafka::ResponseError] Arguments were invalid
     def set_config(name, value)
       err = ::Kafka::FFI.rd_kafka_NewTopic_set_config(self, name, value)
       if err != :ok
-        raise ::Kafka::FFI::ResponseError, err
+        raise ::Kafka::ResponseError, err
       end
 
       nil

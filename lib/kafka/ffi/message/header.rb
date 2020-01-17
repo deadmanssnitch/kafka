@@ -27,7 +27,7 @@ module Kafka::FFI
     # @param name [String] Header key name
     # @param value [#to_s, nil] Header key value
     #
-    # @raise [ResponseError] Error that occurred adding the header
+    # @raise [Kafka::ResponseError] Error that occurred adding the header
     def add(name, value)
       name = name.to_s
 
@@ -39,7 +39,7 @@ module Kafka::FFI
 
       err = ::Kafka::FFI.rd_kafka_header_add(self, name, name.length, value, value_size)
       if err != :ok
-        raise ResponseError, err
+        raise ::Kafka::ResponseError, err
       end
 
       nil
@@ -56,8 +56,9 @@ module Kafka::FFI
     #
     # @param name [String] Header key name to remove
     #
-    # @raise [ResponseError] Error that occurred removing the header
-    # @raise [ResponseError<RD_KAFKA_RESP_ERR__READ_ONLY>] Header is read only.
+    # @raise [Kafka::ResponseError] Error that occurred removing the header
+    # @raise [Kafka::ResponseError<RD_KAFKA_RESP_ERR__READ_ONLY>] Header is
+    #   read only.
     def remove(name)
       name = name.to_s
 
@@ -70,7 +71,7 @@ module Kafka::FFI
         # doesn't exist) is the same.
         nil
       else
-        raise ResponseError, err
+        raise ::Kafka::ResponseError, err
       end
     end
 
@@ -78,7 +79,8 @@ module Kafka::FFI
     #
     # @param name [String] Header key name
     #
-    # @raise [ResponseError] Error that occurred retrieving the header values
+    # @raise [Kafka::ResponseError] Error that occurred retrieving the header
+    #   values
     #
     # @return [Array<String, nil>] List of values for the header
     def get(name)
@@ -105,7 +107,7 @@ module Kafka::FFI
           # of found values.
           break
         else
-          raise ResponseError, err
+          raise ::Kafka::ResponseError, err
         end
       end
 
@@ -119,7 +121,7 @@ module Kafka::FFI
 
     # Retrieve all of the headers and their values
     #
-    # @raise [ResponseError] Error if occurred retrieving the headers.
+    # @raise [Kafka::ResponseError] Error if occurred retrieving the headers.
     #
     # @return [Hash<String, Array<String>>] Set of header keys and their values
     # @return [Hash{}] Header is empty
@@ -149,7 +151,7 @@ module Kafka::FFI
           # of found values.
           break
         else
-          raise ResponseError, err
+          raise ::Kafka::ResponseError, err
         end
       end
 
@@ -167,7 +169,8 @@ module Kafka::FFI
     #
     # @param name [String] Header key name
     #
-    # @raise [ResponseError] Error that occurred retrieving the header value
+    # @raise [Kafka::ResponseError] Error that occurred retrieving the header
+    #   value
     #
     # @return [String] Value of the last matching header with name
     # @return [nil] No header with that name exists
@@ -183,7 +186,7 @@ module Kafka::FFI
           return nil
         end
 
-        raise ResponseError, err
+        raise ::Kafka::ResponseError, err
       end
 
       ptr = value.read_pointer

@@ -22,10 +22,10 @@ module Kafka::FFI
     # publishing the message.
     #
     # @return [nil] Message does not have an error
-    # @return [ResponseError] RD_KAFKA_RESP_ERR__* error code
+    # @return [Kafka::ResponseError] RD_KAFKA_RESP_ERR__* error code
     def error
       if self[:err] != :ok
-        ResponseError.new(self[:err])
+        ::Kafka::ResponseError.new(self[:err])
       end
     end
 
@@ -105,7 +105,7 @@ module Kafka::FFI
 
     # Get the message header list
     #
-    # @raise [ResponseError] Error occurred parsing headers
+    # @raise [Kafka::ResponseError] Error occurred parsing headers
     #
     # @return [nil] Message does not have any headers
     # @return [Message::Headers] Set of headers
@@ -124,7 +124,7 @@ module Kafka::FFI
         # Messages does not have headers
         nil
       else
-        raise ResponseError, err
+        raise ::Kafka::ResponseError, err
       end
     ensure
       ptr.free
@@ -135,7 +135,7 @@ module Kafka::FFI
     # owner of the returned Message::Header and must eventually call #destroy
     # when the application is done with them.
     #
-    # @raise [ResponseError] Error occurred parsing headers
+    # @raise [Kafka::ResponseError] Error occurred parsing headers
     #
     # @return [nil] Message does not have any headers
     # @return [Message::Headers] Set of headers
@@ -154,7 +154,7 @@ module Kafka::FFI
         # Messages does not have headers
         nil
       else
-        raise ResponseError, err
+        raise ::Kafka::ResponseError, err
       end
     ensure
       ptr.free

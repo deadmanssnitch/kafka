@@ -34,7 +34,7 @@ module Kafka::FFI
     # @param topic [String] Name of the topic
     # @param partition [Integer] Topic partition
     #
-    # @raise [ResponseError] Error that occurred retrieving offsets
+    # @raise [Kafka::ResponseError] Error that occurred retrieving offsets
     #
     # @return [Array<(Integer, Integer)>] low and high offsets. If either is
     #   unknown the RD_KAFKA_OFFSET_INVALID is returned for that value
@@ -44,7 +44,7 @@ module Kafka::FFI
 
       err = ::Kafka::FFI.rd_kafka_get_watermark_offsets(self, topic, partition, low, high)
       if err != :ok
-        raise ResponseError, err
+        raise ::Kafka::ResponseError, err
       end
 
       [low.read_int64, high.read_int64]
@@ -78,11 +78,12 @@ module Kafka::FFI
     # @note It is not permitted to call #poll after redirecting the main queue
     #   with poll_set_consumer.
     #
-    # @raise [ResponseError] Error occurred redirecting the main queue.
+    # @raise [Kafka::ResponseError] Error occurred redirecting the main
+    #   queue.
     def poll_set_consumer
       err = ::Kafka::FFI.rd_kafka_poll_set_consumer(self)
       if err != :ok
-        raise ResponseError, err
+        raise ::Kafka::ResponseError, err
       end
 
       nil
@@ -95,11 +96,11 @@ module Kafka::FFI
     # @param list [TopicPartitionList] List of Topic + Partitions to subscribe
     #   to.
     #
-    # @raise [ResponseError] Error occurred subscribing to the topic.
+    # @raise [Kafka::ResponseError] Error occurred subscribing to the topic.
     def subscribe(list)
       err = ::Kafka::FFI.rd_kafka_subscribe(self, list)
       if err != :ok
-        raise ResponseError, err
+        raise ::Kafka::ResponseError, err
       end
 
       nil
@@ -108,11 +109,11 @@ module Kafka::FFI
     # Unsubscribe from the current subscription set (e.g. all current
     # subscriptions).
     #
-    # @raise [ResponseError] Error unsubscribing from topics
+    # @raise [Kafka::ResponseError] Error unsubscribing from topics
     def unsubscribe
       err = ::Kafka::FFI.rd_kafka_unsubscribe(self)
       if err != :ok
-        raise ResponseError, err
+        raise ::Kafka::ResponseError, err
       end
 
       nil
@@ -120,15 +121,16 @@ module Kafka::FFI
 
     # List the current topic subscriptions for the consumer.
     #
-    # @raise [ResponseError] Error that occurred retrieving the subscriptions
+    # @raise [Kafka::ResponseError] Error that occurred retrieving the
+    #   subscriptions
     #
     # @return [TopicPartitionList] List of current subscriptions
     def subscription
       ptr = ::FFI::MemoryPointer.new(:pointer)
 
-      resp = ::Kafka::FFI.rd_kafka_subscription(self, ptr)
-      if resp != :ok
-        raise ResponseError, resp
+      err = ::Kafka::FFI.rd_kafka_subscription(self, ptr)
+      if err != :ok
+        raise ::Kafka::ResponseError, err
       end
 
       ::Kafka::FFI::TopicPartitionList.new(ptr.read_pointer)
@@ -144,11 +146,11 @@ module Kafka::FFI
     #
     # @param list [TopicPartitionList] List of topic+partition assignments
     #
-    # @raise [ResponseError] Error processing assignments
+    # @raise [Kafka::ResponseError] Error processing assignments
     def assign(list)
       err = ::Kafka::FFI.rd_kafka_assign(self, list)
       if err != :ok
-        raise ResponseError, err
+        raise ::Kafka::ResponseError, err
       end
 
       nil
@@ -156,15 +158,16 @@ module Kafka::FFI
 
     # List the current partition assignment(s) for the consumer.
     #
-    # @raise [ResponseError] Error that occurred retrieving the assignments.
+    # @raise [Kafka::ResponseError] Error that occurred retrieving the
+    #   assignments.
     #
     # @return [TopicPartitionList] List of current assignments
     def assignment
       ptr = ::FFI::MemoryPointer.new(:pointer)
 
-      resp = ::Kafka::FFI.rd_kafka_assignment(self, ptr)
-      if resp != :ok
-        raise ResponseError, resp
+      err = ::Kafka::FFI.rd_kafka_assignment(self, ptr)
+      if err != :ok
+        raise ::Kafka::ResponseError, err
       end
 
       ::Kafka::FFI::TopicPartitionList.new(ptr.read_pointer)
@@ -182,9 +185,9 @@ module Kafka::FFI
     #   for.
     # @param timeout [Integer] Maximum time to wait in milliseconds
     #
-    # @raise [ResponseError] Error with the request (likely a timeout). Errors
-    #   with individual topic+partition combinations are set in the returned
-    #   TopicPartitionList
+    # @raise [Kafka::ResponseError] Error with the request (likely a
+    #   timeout). Errors with individual topic+partition combinations are set
+    #   in the returned TopicPartitionList
     def committed(list, timeout: 1000)
       if list.nil?
         raise ArgumentError, "list cannot be nil"
@@ -192,7 +195,7 @@ module Kafka::FFI
 
       err = ::Kafka::FFI.rd_kafka_committed(self, list, timeout)
       if err != :ok
-        raise ResponseError, err
+        raise ::Kafka::ResponseError, err
       end
 
       # Return the list that was passed in as it should now be augmented with
@@ -209,7 +212,7 @@ module Kafka::FFI
     # @param timeout [Integer] How long to wait for a message in milliseconds.
     #
     # @raise [ArgumentError] consumer_poll was called without a block.
-    # @raise [ResponseError] Error occurred while polling.
+    # @raise [Kafka::ResponseError] Error occurred while polling.
     #
     # @yield [message]
     # @yieldparam message [Message] Message received from Kafka. Application
@@ -247,12 +250,12 @@ module Kafka::FFI
     # @param async [Boolean] If async is false this operation will block until
     #   the broker offset commit is done.
     #
-    # @raise [ResponseError] Error committing offsets. Only raise if async is
-    #   false.
+    # @raise [Kafka::ResponseError] Error committing offsets. Only raise if
+    #   async is false.
     def commit(offsets, async)
       err = ::Kafka::FFI.rd_kafka_commit(self, offsets, async)
       if err != :ok
-        raise ResponseError, err
+        raise ::Kafka::ResponseError, err
       end
 
       nil
@@ -263,15 +266,15 @@ module Kafka::FFI
     # @param message [Message] The message to commit as processed
     # @param async [Boolean] True to allow commit to happen in the background.
     #
-    # @raise [ResponseError] Error that occurred commiting the message
+    # @raise [Kafka::ResponseError] Error that occurred commiting the message
     def commit_message(message, async)
       if message.nil? || message.null?
         raise ArgumentError, "message cannot but nil/null"
       end
 
       err = ::Kafka::FFI.rd_kafka_commit_message(message, async)
-      if err != :ok
-        raise ResponseError, err
+      if err
+        raise ::Kafka::ResponseError, err
       end
 
       nil
@@ -285,9 +288,16 @@ module Kafka::FFI
     # Ensure that `destroy` is called after the consumer is closed to free up
     # resources.
     #
-    # @return [Symbol, Integer] :ok on success otherwise an error code.
+    # @note Maximum blocking time is roughly limited to `session.timeout.ms`
+    #
+    # @raise [Kafka::ResponseError] Error occurred closing the consumer
     def close
-      ::Kafka::FFI.rd_kafka_consumer_close(self)
+      err = ::Kafka::FFI.rd_kafka_consumer_close(self)
+      if err != :ok
+        raise ::Kafka::ResponseError, err
+      end
+
+      nil
     end
   end
 end

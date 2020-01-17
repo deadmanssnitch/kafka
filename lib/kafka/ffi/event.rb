@@ -107,12 +107,12 @@ module Kafka::FFI
     # @see error_is_fatal to detect if it is a fatal error.
     #
     # @return [nil] No error for the Event
-    # @return [RD_KAFKA_RESP_ERR_*] Error code for the event.
+    # @return [Kafka::ResponseError] Error code for the event.
     def error
-      # @todo Would prefer this to return a Error type with fatal? and to_s.
-      #   Could it just be a ResponseError?
       err = ::Kafka::FFI.rd_kafka_event_error(self)
-      err == :ok ? nil : err
+      if err != :ok
+        ::Kafka::ResponseError.new(err)
+      end
     end
 
     # Returns a description of the error or nil when there is no error.
