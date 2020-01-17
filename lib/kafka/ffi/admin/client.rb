@@ -95,8 +95,8 @@ module Kafka::FFI::Admin
     # @return [TopicResult] Response from the cluster with details about the
     #   deletion or any errors.
     def delete_topic(name, timeout: 1000)
-      req = DeleteTopic.new(name, timeout: timeout)
-      res = delete_topics(req)
+      req = DeleteTopic.new(name)
+      res = delete_topics(req, timeout: timeout)
 
       if res
         res[0]
