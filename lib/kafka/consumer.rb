@@ -6,12 +6,10 @@ module Kafka
   class Consumer
     # @param config [Kafka::Config]
     def initialize(config)
-      # Keep a reference to the config even though @client now owns the
-      # instance and is in control of it's destruction.
-      @config = config.native
+      config = config.native
 
       # Initialize the client
-      @client = Kafka::FFI::Consumer.new(@config)
+      @client = Kafka::FFI::Consumer.new(config)
 
       # Event loop polling for events so callbacks are fired.
       @poller = Poller.new(@client)

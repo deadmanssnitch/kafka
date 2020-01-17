@@ -10,15 +10,13 @@ module Kafka
     #
     # @param config [Config]
     def initialize(config)
-      # Keep a reference to the config to ensure callbacks are not garbage
-      # collected. The client below takes ownership of the config.
-      @config = config.native
+      config = config.native
 
       # Configure callbacks
-      @config.set_dr_msg_cb(&method(:on_delivery_report))
-      @config.set_error_cb(&method(:on_error))
+      config.set_dr_msg_cb(&method(:on_delivery_report))
+      config.set_error_cb(&method(:on_error))
 
-      @client = ::Kafka::FFI::Producer.new(@config)
+      @client = ::Kafka::FFI::Producer.new(config)
 
       # Maintains a list of in-flight deliveries that we're waiting for reports
       # for. If we don't, it is possible that Ruby will garbage collect them
