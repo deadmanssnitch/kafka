@@ -1,5 +1,7 @@
 # Kafka
 
+[![Build Status](https://travis-ci.com/deadmanssnitch/kafka.svg?branch=master)](https://travis-ci.com/deadmanssnitch/kafka)
+
 Kafka provides both a generalized producer and consumer for [Apache Kafka](https://kafka.apache.org)
 as well as a set of bindings to [librdkafka](https://github.com/edenhill/librdkafka) to build
 specialized integrations.
