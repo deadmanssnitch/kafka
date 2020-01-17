@@ -81,6 +81,14 @@ module Kafka
       raise
     end
 
+    # Wait until all outstanding produce requests are completed.
+    #
+    # @raise [ResponseError] Timeout was reached before all outstanding
+    #   requests were completed.
+    def flush(timeout: 1000)
+      @client.flush(timeout: timeout)
+    end
+
     # Gracefully shutdown the Producer, flushing any pending deliveries, and
     # finally releasing an memory back to the system.
     #
