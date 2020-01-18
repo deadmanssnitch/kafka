@@ -14,62 +14,75 @@ RSpec.describe Kafka::FFI::Consumer do
     consumer = Kafka::FFI::Consumer.new(config)
 
     # With no subscriptions
-    tpl = consumer.subscription
-    expect(tpl.size).to eq(0)
+    subs = consumer.subscription
+    expect(subs.size).to eq(0)
 
-    list = Kafka::FFI::TopicPartitionList.new
-    list.add("topic")
-    list.add("snitches", 5)
-    expect(consumer.subscribe(list)).to eq(nil)
+    # Subscribe to multiple topics
+    consumer.subscribe("topic", "snitches")
 
-    tpl = consumer.subscription
-    expect(tpl.size).to eq(2)
-    expect(tpl.find("topic", -1)).not_to be(nil)
-    expect(tpl.find("snitches", 5)).not_to be(nil)
+    subs = consumer.subscription
+    expect(subs.size).to eq(2)
+    expect(subs).to include("topic")
+    expect(subs).to include("snitches")
   ensure
     consumer.destroy
-    list.destroy if list
+  end
+
+  # Subscribe replacing existing subscriptions was a surprise, so documenting
+  # it here.
+  specify "#subscribe replaces existing" do
+    consumer = Kafka::FFI::Consumer.new(config)
+
+    consumer.subscribe("topic")
+    expect(consumer.subscription).to eq(["topic"])
+
+    consumer.subscribe("events")
+    expect(consumer.subscription).to eq(["events"])
+  ensure
+    consumer.destroy
   end
 
   specify "#subscribe with bad topic list" do
     consumer = Kafka::FFI::Consumer.new(config)
 
-    list = Kafka::FFI::TopicPartitionList.new
-    list.add("")
-    expect { consumer.subscribe(list) }
+    expect { consumer.subscribe("") }
       .to raise_error(Kafka::ResponseError)
   ensure
     consumer.destroy
-    list.destroy
   end
 
   specify "#subscription with no subscriptions" do
     consumer = Kafka::FFI::Consumer.new(config)
 
     # With no subscriptions
-    tpl = consumer.subscription
-    expect(tpl.size).to eq(0)
+    subs = consumer.subscription
+    expect(subs.size).to eq(0)
   ensure
-    tpl.destroy if tpl
-    consumer.destroy if consumer
+    consumer.destroy
+  end
+
+  specify "#subscription will flatten arrays" do
+    consumer = Kafka::FFI::Consumer.new(config)
+
+    # Could occur taking list of topics directly from other method returns.
+    consumer.subscribe(["topic"], "foo", "bar", ["baz"])
+
+    subs = consumer.subscription
+    expect(subs).to match(%w[topic foo bar baz])
+  ensure
+    consumer.destroy
   end
 
   specify "#subscription" do
     consumer = Kafka::FFI::Consumer.new(config)
-
-    list = Kafka::FFI::TopicPartitionList.new
-    list.add("topic")
-    list.add("snitches", 5)
-    consumer.subscribe(list)
+    consumer.subscribe("topic", "snitches")
 
     # Retrieves the list of subscriptions
-    tpl = consumer.subscription
-    expect(tpl.size).to eq(2)
-    expect(tpl.find("topic", -1)).not_to be(nil)
-    expect(tpl.find("snitches", 5)).not_to be(nil)
+    subs = consumer.subscriptions
+    expect(subs.size).to eq(2)
+    expect(subs).to match(["topic", "snitches"])
   ensure
-    tpl.destroy if tpl
-    consumer.destroy if consumer
+    consumer.destroy
   end
 
   specify "#unsubscribe" do
@@ -78,59 +91,58 @@ RSpec.describe Kafka::FFI::Consumer do
     # Successful even when there are no existing subscriptions.
     consumer.unsubscribe
 
-    begin
-      list = Kafka::FFI::TopicPartitionList.new
-      list.add_range("topic", 1..10)
-      consumer.subscribe(list)
-    ensure
-      list.destroy
-    end
+    consumer.subscribe("foo", "bar", "baz")
 
     # Removes all subscriptions
-    consumer.unsubscribe
-
-    tpl = consumer.subscription
-    expect(tpl).to be_empty
+    expect { consumer.unsubscribe }
+      .to change { consumer.subscription.count }.from(3).to(0)
   ensure
-    tpl.destroy if tpl
-    consumer.destroy if consumer
+    consumer.destroy
   end
 
   specify "#assign" do
     consumer = Kafka::FFI::Consumer.new(config)
 
-    list = Kafka::FFI::TopicPartitionList.new
-    list.add_range("topic", 1..10)
-    consumer.subscribe(list)
+    with_topic(partitions: 9) do |topic|
+      consumer.subscribe(topic)
 
-    # Just verifies that calling `assign` doesn't explode. At this level it's
-    # impossible to verify that assignments are happening. It will be checked
-    # at the integration level.
-    consumer.assign(list)
+      list = Kafka::FFI::TopicPartitionList.new
+      list.add_range(topic, 0..3)
+
+      consumer.assign(list)
+
+      assigned = consumer.assignment
+      expect(assigned.elements.size).to eq(4)
+      expect(assigned.elements.map(&:topic)).to eq([topic] * 4)
+      expect(assigned.elements.map(&:partition)).to eq([0, 1, 2, 3])
+    ensure
+      list.destroy
+      assigned.destroy
+    end
   ensure
     consumer.destroy
-    list.destroy
   end
 
   specify "#assignment" do
     consumer = Kafka::FFI::Consumer.new(config)
 
-    list = Kafka::FFI::TopicPartitionList.new
-    list.add_range("topic", 1..10)
-    consumer.subscribe(list)
+    with_topic(partitions: 6) do |topic|
+      list = Kafka::FFI::TopicPartitionList.new
+      list.add(topic, 0)
+      list.add(topic, 4)
+      list.add(topic, 99)
+      consumer.assign(list)
 
-    # Just verifies that calling `assignment` doesn't explode. At this level
-    # it's impossible to verify that assignments are happening. It will be
-    # checked at the integration level.
-    begin
       tpl = consumer.assignment
-      expect(tpl).to be_empty
+      expect(tpl.elements.size).to eq(3)
+      expect(tpl.elements.map(&:topic)).to eq([topic] * 3)
+      expect(tpl.elements.map(&:partition)).to eq([0, 4, 99])
     ensure
+      list.destroy
       tpl.destroy
     end
   ensure
-    consumer.destroy if consumer
-    list.destroy if list
+    consumer.destroy
   end
 
   specify "#committed" do
@@ -153,7 +165,7 @@ RSpec.describe Kafka::FFI::Consumer do
         expect(tp.error).to eq(nil)
       end
     ensure
-      list.destroy if list
+      list.destroy
     end
   ensure
     consumer.destroy
@@ -166,7 +178,7 @@ RSpec.describe Kafka::FFI::Consumer do
     expect(queue).to be_a(Kafka::FFI::Queue)
   ensure
     client.destroy
-    queue.destroy if queue
+    queue.destroy
   end
 
   specify "#get_partition_queue" do
@@ -176,6 +188,6 @@ RSpec.describe Kafka::FFI::Consumer do
     expect(queue).to be_a(Kafka::FFI::Queue)
   ensure
     client.destroy
-    queue.destroy if queue
+    queue.destroy
   end
 end

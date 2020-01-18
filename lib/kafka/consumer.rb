@@ -17,17 +17,9 @@ module Kafka
     # subscriptions have become active, calls to #poll with yield messages for
     # the subscribe topics.
     #
-    # @param topics [String, Array<String>] Topics to subscribe to
-    def subscribe(*topics)
-      list = ::Kafka::FFI::TopicPartitionList.new(topics.length)
-
-      topics.each do |topic|
-        list.add(topic)
-      end
-
-      @client.subscribe(list)
-    ensure
-      list.destroy
+    # @param topic [String, Array<String>] Topics to subscribe to
+    def subscribe(topic, *rest)
+      @client.subscribe(topic, *rest)
     end
 
     # Retrieves the set of topic + partition assignments for the consumer.

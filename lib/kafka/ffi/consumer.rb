@@ -89,21 +89,32 @@ module Kafka::FFI
       nil
     end
 
-    # Subscribe the consumer to receive Messages for a set of topics. The given
-    # list is still owned by the caller and it is the caller's responsibility
-    # to destroy it when appropriate.
+    # Subscribe the consumer to receive Messages for a set of topics. The
+    # current set of subscriptions will be replaced.
     #
-    # @param list [TopicPartitionList] List of Topic + Partitions to subscribe
+    # @example Subscribe to multiple topics
+    #   client.subscribe("signals", "events", "changes")
+    #
+    # @param [String, Array<String>] Topic name or list of topics to subscribe
     #   to.
     #
-    # @raise [Kafka::ResponseError] Error occurred subscribing to the topic.
-    def subscribe(list)
-      err = ::Kafka::FFI.rd_kafka_subscribe(self, list)
+    # @raise [Kafka::ResponseError] Error occurred subscribing to the topics.
+    def subscribe(topic, *rest)
+      topics = [topic, rest].flatten
+
+      tpl = TopicPartitionList.new(topics.length)
+      topics.each do |t|
+        tpl.add(t)
+      end
+
+      err = ::Kafka::FFI.rd_kafka_subscribe(self, tpl)
       if err != :ok
         raise ::Kafka::ResponseError, err
       end
 
       nil
+    ensure
+      tpl.destroy
     end
 
     # Unsubscribe from the current subscription set (e.g. all current
@@ -124,7 +135,7 @@ module Kafka::FFI
     # @raise [Kafka::ResponseError] Error that occurred retrieving the
     #   subscriptions
     #
-    # @return [TopicPartitionList] List of current subscriptions
+    # @return [Array<String>] List of current subscribed topics
     def subscription
       ptr = ::FFI::MemoryPointer.new(:pointer)
 
@@ -133,10 +144,20 @@ module Kafka::FFI
         raise ::Kafka::ResponseError, err
       end
 
-      ::Kafka::FFI::TopicPartitionList.new(ptr.read_pointer)
+      begin
+        tpl = ::Kafka::FFI::TopicPartitionList.new(ptr.read_pointer)
+
+        # Map the topic partition list to topic names.
+        tpl.elements.map(&:topic)
+      ensure
+        tpl.destroy
+      end
     ensure
       ptr.free
     end
+
+    # Alias to subscriptions since it does return a list of topics
+    alias subscriptions subscription
 
     # Atomically assign the set of partitions to consume. This will replace the
     # existing assignment.
@@ -175,19 +196,25 @@ module Kafka::FFI
       ptr.free
     end
 
+    # Alias assignment since it returns a set
+    alias assignments assignment
+
     # Retrieve committed offsets for topics + partitions. The offset field for
     # each TopicPartition in list will be set to the stored offset or
     # RD_KAFKA_OFFSET_INVALID in case there was no stored offset for that
     # partition. The error field is set if there was an error with the
     # TopicPartition.
     #
-    # @param list [TopicPartitionList] List of TopicPartitions to fetch offsets
-    #   for.
+    # @param list [TopicPartitionList] List of topic+partitions to fetch
+    #   current offsets. The list will be updated to set the committed offset
+    #   or error as appropriate.
     # @param timeout [Integer] Maximum time to wait in milliseconds
     #
     # @raise [Kafka::ResponseError] Error with the request (likely a
     #   timeout). Errors with individual topic+partition combinations are set
     #   in the returned TopicPartitionList
+    #
+    # @return [TopicPartitionList] the updated list
     def committed(list, timeout: 1000)
       if list.nil?
         raise ArgumentError, "list cannot be nil"
