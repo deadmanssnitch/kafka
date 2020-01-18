@@ -12,8 +12,9 @@ module Kafka
     # @attr code [Integer] Error code as defined by librdkafka.
     attr_reader :code
 
-    def initialize(code)
+    def initialize(code, message = nil)
       @code = code
+      @message = message
     end
 
     # Returns the librdkafka error constant for this error.
@@ -37,7 +38,7 @@ module Kafka
     #
     # @return [String] Human readable description of the error.
     def to_s
-      ::Kafka::FFI.rd_kafka_err2str(@code)
+      @message || ::Kafka::FFI.rd_kafka_err2str(@code)
     end
   end
 end
