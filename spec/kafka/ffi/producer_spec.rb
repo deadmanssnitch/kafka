@@ -36,7 +36,7 @@ RSpec.describe Kafka::FFI::Producer do
       end
       producer.poll
 
-      msg = fetch(topic, count: 4)
+      msg = fetch(topic, count: 4, offset: "beginning")
       expect(msg.map(&:partition)).to eq([4, 4, 4, 4])
       expect(msg.map(&:key)).to eq(keys)
     end
