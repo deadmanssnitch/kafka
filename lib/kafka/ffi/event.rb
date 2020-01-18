@@ -111,7 +111,7 @@ module Kafka::FFI
     def error
       err = ::Kafka::FFI.rd_kafka_event_error(self)
       if err != :ok
-        ::Kafka::ResponseError.new(err)
+        ::Kafka::ResponseError.new(err, error_string)
       end
     end
 
@@ -120,9 +120,7 @@ module Kafka::FFI
     # @return [nil] No error for the Event
     # @return [String] Description of the error
     def error_string
-      if error
-        ::Kafka::FFI.rd_kafka_event_error_string(self)
-      end
+      ::Kafka::FFI.rd_kafka_event_error_string(self)
     end
 
     # Returns true or false if the Event represents a fatal error.
