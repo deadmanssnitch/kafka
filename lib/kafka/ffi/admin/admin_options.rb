@@ -24,12 +24,16 @@ module Kafka::FFI::Admin
     # @raise [ResponseError<RD_KAFKA_RESP_ERR__INVALID_ARG>] Timeout was out of
     #   range.
     def set_request_timeout(timeout)
-      err = ::Kafka::FFI.rd_kafka_AdminOptions_set_request_timeout(self, timeout, nil, 0)
-      if err != :ok
-        raise ::Kafka::ResponseError, err
+      error = ::FFI::MemoryPointer.new(:char, 512)
+
+      resp = ::Kafka::FFI.rd_kafka_AdminOptions_set_request_timeout(self, timeout, error, error.size)
+      if resp != :ok
+        raise ::Kafka::ResponseError.new(resp, error.read_string)
       end
 
       nil
+    ensure
+      error.free
     end
 
     # Set the broker's operation wait timeout for the request to be processed
@@ -45,12 +49,16 @@ module Kafka::FFI::Admin
     # @raise [ResponseError<RD_KAFKA_RESP_ERR__INVALID_ARG>] Timeout was out of
     #   range.
     def set_operation_timeout(timeout)
-      err = ::Kafka::FFI.rd_kafka_AdminOptions_set_operation_timeout(self, timeout, nil, 0)
-      if err != :ok
-        raise ::Kafka::ResponseError, err
+      error = ::FFI::MemoryPointer.new(:char, 512)
+
+      resp = ::Kafka::FFI.rd_kafka_AdminOptions_set_operation_timeout(self, timeout, error, error.size)
+      if resp != :ok
+        raise ::Kafka::ResponseError.new(resp, error.read_string)
       end
 
       nil
+    ensure
+      error.free
     end
 
     # Tell the broker to only validate the request without actually performing
@@ -63,12 +71,16 @@ module Kafka::FFI::Admin
     #
     # @raise [Kafka::ResponseError]
     def set_validate_only(on)
-      err = ::Kafka::FFI.rd_kafka_AdminOptions_set_validate_only(self, on, nil, 0)
-      if err != :ok
-        raise ::Kafka::ResponseError, err
+      error = ::FFI::MemoryPointer.new(:char, 512)
+
+      resp = ::Kafka::FFI.rd_kafka_AdminOptions_set_validate_only(self, on, error, error.size)
+      if resp != :ok
+        raise ::Kafka::ResponseError.new(resp, error.read_string)
       end
 
       nil
+    ensure
+      error.free
     end
 
     # Override which broker the Admin request will be sent to. By default,
@@ -82,12 +94,16 @@ module Kafka::FFI::Admin
     #
     # @param broker_id [Integer] ID of the Broker to receive the request.
     def set_broker(broker_id)
-      err = ::Kafka::FFI.rd_kafka_AdminOptions_set_broker(self, broker_id, nil, 0)
-      if err != :ok
-        raise ::Kafka::ResponseError, err
+      error = ::FFI::MemoryPointer.new(:char, 512)
+
+      resp = ::Kafka::FFI.rd_kafka_AdminOptions_set_broker(self, broker_id, error, error.size)
+      if resp != :ok
+        raise ::Kafka::ResponseError.new(resp, error.read_string)
       end
 
       nil
+    ensure
+      error.free
     end
 
     # rubocop:enable Naming/AccessorMethodName
