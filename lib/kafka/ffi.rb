@@ -186,6 +186,36 @@ module Kafka
       :describe_configs,  RD_KAFKA_ADMIN_OP_DESCRIBECONFIGS,
     ]
 
+    RD_KAFKA_RESOURCE_UNKNOWN = 0
+    RD_KAFKA_RESOURCE_ANY     = 1
+    RD_KAFKA_RESOURCE_TOPIC   = 2
+    RD_KAFKA_RESOURCE_GROUP   = 3
+    RD_KAFKA_RESOURCE_BROKER  = 4
+
+    enum :resource_type, [
+      :unknown, RD_KAFKA_RESOURCE_UNKNOWN,
+      :any,     RD_KAFKA_RESOURCE_ANY,
+      :topic,   RD_KAFKA_RESOURCE_TOPIC,
+      :group,   RD_KAFKA_RESOURCE_GROUP,
+      :broker,  RD_KAFKA_RESOURCE_BROKER,
+    ]
+
+    RD_KAFKA_CONFIG_SOURCE_UNKNOWN_CONFIG                = 0
+    RD_KAFKA_CONFIG_SOURCE_DYNAMIC_TOPIC_CONFIG          = 1
+    RD_KAFKA_CONFIG_SOURCE_DYNAMIC_BROKER_CONFIG         = 2
+    RD_KAFKA_CONFIG_SOURCE_DYNAMIC_DEFAULT_BROKER_CONFIG = 3
+    RD_KAFKA_CONFIG_SOURCE_STATIC_BROKER_CONFIG          = 4
+    RD_KAFKA_CONFIG_SOURCE_DEFAULT_CONFIG                = 5
+
+    enum :config_source, [
+      :unknown_config,                RD_KAFKA_CONFIG_SOURCE_UNKNOWN_CONFIG,
+      :dynamic_topic_config,          RD_KAFKA_CONFIG_SOURCE_DYNAMIC_TOPIC_CONFIG,
+      :dynamic_broker_config,         RD_KAFKA_CONFIG_SOURCE_DYNAMIC_BROKER_CONFIG,
+      :dynamic_default_broker_config, RD_KAFKA_CONFIG_SOURCE_DYNAMIC_DEFAULT_BROKER_CONFIG,
+      :static_broker_config,          RD_KAFKA_CONFIG_SOURCE_STATIC_BROKER_CONFIG,
+      :default_config,                RD_KAFKA_CONFIG_SOURCE_DEFAULT_CONFIG,
+    ]
+
     typedef :int,     :timeout_ms
     typedef :int32,   :partition
     typedef :int64,   :offset
@@ -466,6 +496,40 @@ module Kafka
     attach_function :rd_kafka_AdminOptions_set_broker, [Admin::AdminOptions, :int32, :pointer, :size_t], :error_code
     # :rd_kafka_AdminOptions_set_opaque
     attach_function :rd_kafka_AdminOptions_destroy, [Admin::AdminOptions], :void
+
+    ## DescribeConfigs
+    attach_function :rd_kafka_DescribeConfigs, [Client, :pointer, :size_t, Admin::AdminOptions, Queue], :void
+    attach_function :rd_kafka_DescribeConfigs_result_resources, [Event, :pointer], :pointer
+    attach_function :rd_kafka_event_DescribeConfigs_result, [Event], Event
+
+    ## AlterConfigs
+    attach_function :rd_kafka_AlterConfigs, [Client, :pointer, :size_t, Admin::AdminOptions, Queue], :void
+    attach_function :rd_kafka_AlterConfigs_result_resources, [Event, :pointer], :pointer
+    attach_function :rd_kafka_event_AlterConfigs_result, [Event], Event
+
+    ## Resource Type (enum)
+    attach_function :rd_kafka_ResourceType_name, [:resource_type], :string
+
+    ## ConfigResource
+    attach_function :rd_kafka_ConfigResource_new, [:resource_type, :string], Admin::ConfigResource
+    attach_function :rd_kafka_ConfigResource_set_config, [Admin::ConfigResource, :string, :string], :error_code
+    attach_function :rd_kafka_ConfigResource_configs, [Admin::ConfigResource, :pointer], :pointer
+    attach_function :rd_kafka_ConfigResource_type, [Admin::ConfigResource], :resource_type
+    attach_function :rd_kafka_ConfigResource_name, [Admin::ConfigResource], :string
+    attach_function :rd_kafka_ConfigResource_error, [Admin::ConfigResource], :error_code
+    attach_function :rd_kafka_ConfigResource_error_string, [Admin::ConfigResource], :string
+    attach_function :rd_kafka_ConfigResource_destroy, [Admin::ConfigResource], :void
+    # :rd_kafka_ConfigResource_destroy_array
+
+    ## ConfigEntry
+    attach_function :rd_kafka_ConfigEntry_name, [Admin::ConfigEntry], :string
+    attach_function :rd_kafka_ConfigEntry_value, [Admin::ConfigEntry], :string
+    attach_function :rd_kafka_ConfigEntry_source, [Admin::ConfigEntry], :config_source
+    attach_function :rd_kafka_ConfigEntry_is_read_only, [Admin::ConfigEntry], :int
+    attach_function :rd_kafka_ConfigEntry_is_default, [Admin::ConfigEntry], :int
+    attach_function :rd_kafka_ConfigEntry_is_sensitive, [Admin::ConfigEntry], :int
+    attach_function :rd_kafka_ConfigEntry_is_synonym, [Admin::ConfigEntry], :int
+    attach_function :rd_kafka_ConfigEntry_synonyms, [Admin::ConfigEntry, :pointer], :pointer
 
     ## Create Topics / NewTopic
 
