@@ -170,6 +170,22 @@ module Kafka
       :headers,   RD_KAFKA_VTYPE_HEADERS,
     ]
 
+    RD_KAFKA_ADMIN_OP_ANY              = 0
+    RD_KAFKA_ADMIN_OP_CREATETOPICS     = 1
+    RD_KAFKA_ADMIN_OP_DELETETOPICS     = 2
+    RD_KAFKA_ADMIN_OP_CREATEPARTITIONS = 3
+    RD_KAFKA_ADMIN_OP_ALTERCONFIGS     = 4
+    RD_KAFKA_ADMIN_OP_DESCRIBECONFIGS  = 5
+
+    enum :admin_operation, [
+      :any,               RD_KAFKA_ADMIN_OP_ANY,
+      :create_topics,     RD_KAFKA_ADMIN_OP_CREATETOPICS,
+      :delete_topics,     RD_KAFKA_ADMIN_OP_DELETETOPICS,
+      :create_partitions, RD_KAFKA_ADMIN_OP_CREATEPARTITIONS,
+      :alter_configs,     RD_KAFKA_ADMIN_OP_ALTERCONFIGS,
+      :describe_configs,  RD_KAFKA_ADMIN_OP_DESCRIBECONFIGS,
+    ]
+
     typedef :int,     :timeout_ms
     typedef :int32,   :partition
     typedef :int64,   :offset
@@ -442,9 +458,18 @@ module Kafka
 
     # Admin Commands
 
+    ## AdminOptions
+    attach_function :rd_kafka_AdminOptions_new, [Client, :admin_operation], Admin::AdminOptions
+    attach_function :rd_kafka_AdminOptions_set_request_timeout, [Admin::AdminOptions, :timeout_ms, :pointer, :size_t], :error_code
+    attach_function :rd_kafka_AdminOptions_set_operation_timeout, [Admin::AdminOptions, :timeout_ms, :pointer, :size_t], :error_code
+    attach_function :rd_kafka_AdminOptions_set_validate_only, [Admin::AdminOptions, :bool, :pointer, :size_t], :error_code
+    attach_function :rd_kafka_AdminOptions_set_broker, [Admin::AdminOptions, :int32, :pointer, :size_t], :error_code
+    # :rd_kafka_AdminOptions_set_opaque
+    attach_function :rd_kafka_AdminOptions_destroy, [Admin::AdminOptions], :void
+
     ## Create Topics / NewTopic
 
-    attach_function :rd_kafka_CreateTopics, [Client, :pointer, :size_t, :pointer, Queue], :void
+    attach_function :rd_kafka_CreateTopics, [Client, :pointer, :size_t, Admin::AdminOptions, Queue], :void
     attach_function :rd_kafka_CreateTopics_result_topics, [Event, :pointer], :pointer
     attach_function :rd_kafka_NewTopic_new, [:topic, :int, :int, :pointer, :size_t], Admin::NewTopic
     attach_function :rd_kafka_NewTopic_set_replica_assignment, [Admin::NewTopic, :partition, :pointer, :size_t, :pointer, :size_t], :error_code
@@ -454,7 +479,7 @@ module Kafka
 
     # DeleteTopics / DeleteTopic
 
-    attach_function :rd_kafka_DeleteTopics, [Client, :pointer, :size_t, :pointer, Queue], :void
+    attach_function :rd_kafka_DeleteTopics, [Client, :pointer, :size_t, Admin::AdminOptions, Queue], :void
     attach_function :rd_kafka_DeleteTopics_result_topics, [Event, :pointer], :pointer
     attach_function :rd_kafka_DeleteTopic_new, [:string], Admin::DeleteTopic
     attach_function :rd_kafka_DeleteTopic_destroy, [Admin::DeleteTopic], :void

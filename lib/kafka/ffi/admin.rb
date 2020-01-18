@@ -9,5 +9,6 @@ module Kafka::FFI
     require "kafka/ffi/admin/new_topic"
     require "kafka/ffi/admin/delete_topic"
     require "kafka/ffi/admin/topic_result"
+    require "kafka/ffi/admin/admin_options"
   end
 end
