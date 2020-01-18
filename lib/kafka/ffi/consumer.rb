@@ -182,7 +182,9 @@ module Kafka::FFI
     # @raise [Kafka::ResponseError] Error that occurred retrieving the
     #   assignments.
     #
-    # @return [TopicPartitionList] List of current assignments
+    # @return [Hash{String => Array<Integer>}] Current assignments for the
+    #   consumer. Hash keys are topic names and values are the list of assigned
+    #   partitions.
     def assignment
       ptr = ::FFI::MemoryPointer.new(:pointer)
 
@@ -191,7 +193,17 @@ module Kafka::FFI
         raise ::Kafka::ResponseError, err
       end
 
-      ::Kafka::FFI::TopicPartitionList.new(ptr.read_pointer)
+      begin
+        tpl = ::Kafka::FFI::TopicPartitionList.new(ptr.read_pointer)
+
+        # { "topic" => [1, 2, 3] }
+        tpl.elements.inject({}) do |memo, tp|
+          (memo[tp.topic] ||= []) << tp.partition
+          memo
+        end
+      ensure
+        tpl.destroy
+      end
     ensure
       ptr.free
     end

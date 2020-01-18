@@ -112,12 +112,9 @@ RSpec.describe Kafka::FFI::Consumer do
       consumer.assign(list)
 
       assigned = consumer.assignment
-      expect(assigned.elements.size).to eq(4)
-      expect(assigned.elements.map(&:topic)).to eq([topic] * 4)
-      expect(assigned.elements.map(&:partition)).to eq([0, 1, 2, 3])
+      expect(assigned).to eq({ topic => [0, 1, 2, 3] })
     ensure
       list.destroy
-      assigned.destroy
     end
   ensure
     consumer.destroy
@@ -133,13 +130,10 @@ RSpec.describe Kafka::FFI::Consumer do
       list.add(topic, 99)
       consumer.assign(list)
 
-      tpl = consumer.assignment
-      expect(tpl.elements.size).to eq(3)
-      expect(tpl.elements.map(&:topic)).to eq([topic] * 3)
-      expect(tpl.elements.map(&:partition)).to eq([0, 4, 99])
+      assigned = consumer.assignment
+      expect(assigned).to eq({ topic => [0, 4, 99] })
     ensure
       list.destroy
-      tpl.destroy
     end
   ensure
     consumer.destroy

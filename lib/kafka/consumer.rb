@@ -24,19 +24,13 @@ module Kafka
 
     # Retrieves the set of topic + partition assignments for the consumer.
     #
+    # @example
+    #   consumer.assignment # => { "topic" => [1,2,3] }
+    #
     # @return [Hash{String => Array<Integer>}] List of partition assignments
     #   keyed by the topic name.
     def assignments
-      assigned = {}
-
-      list = @client.assignment
-      list.elements.each do |tp|
-        (assigned[tp.topic] ||= []) << tp.partition
-      end
-
-      assigned
-    ensure
-      list.destroy
+      @client.assignment
     end
 
     # Poll the consumer for waiting message.
