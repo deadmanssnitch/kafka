@@ -458,6 +458,15 @@ module Kafka
     attach_function :rd_kafka_event_topic_partition, [Event], TopicPartition.by_ref
     attach_function :rd_kafka_event_destroy, [Event], :void
 
+    # Event casting
+    #   Each of these functions will type check the Event to see if it is the
+    #   desired type, returning nil if it is not.
+    attach_function :rd_kafka_event_CreateTopics_result, [Event], Event
+    attach_function :rd_kafka_event_DeleteTopics_result, [Event], Event
+    attach_function :rd_kafka_event_CreatePartitions_result, [Event], Event
+    attach_function :rd_kafka_event_AlterConfigs_result, [Event], Event
+    attach_function :rd_kafka_event_DescribeConfigs_result, [Event], Event
+
     # Topics
 
     attach_function :rd_kafka_topic_new, [Client, :string, TopicConfig], Topic
@@ -507,12 +516,10 @@ module Kafka
     ## DescribeConfigs
     attach_function :rd_kafka_DescribeConfigs, [Client, :pointer, :size_t, Admin::AdminOptions, Queue], :void
     attach_function :rd_kafka_DescribeConfigs_result_resources, [Event, :pointer], :pointer
-    attach_function :rd_kafka_event_DescribeConfigs_result, [Event], Event
 
     ## AlterConfigs
     attach_function :rd_kafka_AlterConfigs, [Client, :pointer, :size_t, Admin::AdminOptions, Queue], :void
     attach_function :rd_kafka_AlterConfigs_result_resources, [Event, :pointer], :pointer
-    attach_function :rd_kafka_event_AlterConfigs_result, [Event], Event
 
     ## Resource Type (enum)
     attach_function :rd_kafka_ResourceType_name, [:resource_type], :string
