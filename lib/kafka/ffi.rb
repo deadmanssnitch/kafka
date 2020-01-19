@@ -232,6 +232,9 @@ module Kafka
     require "kafka/ffi/config"
     require "kafka/ffi/message"
     require "kafka/ffi/metadata"
+    require "kafka/ffi/group_list"
+    require "kafka/ffi/group_info"
+    require "kafka/ffi/group_member_info"
     require "kafka/ffi/topic_config"
     require "kafka/ffi/opaque_pointer"
     require "kafka/ffi/topic_partition"
@@ -417,6 +420,10 @@ module Kafka
     # Metadata
     attach_function :rd_kafka_metadata, [Client, :bool, Topic, :pointer, :timeout_ms], :error_code
     attach_function :rd_kafka_metadata_destroy, [Metadata.by_ref], :void
+
+    # Group List
+    attach_function :rd_kafka_list_groups, [Client, :string, :pointer, :timeout_ms], :error_code
+    attach_function :rd_kafka_group_list_destroy, [GroupList.by_ref], :void
 
     # Queue
     attach_function :rd_kafka_queue_new, [Client], Queue

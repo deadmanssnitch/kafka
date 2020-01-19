@@ -23,6 +23,29 @@ RSpec.describe Kafka::FFI::Client do
     client.destroy
   end
 
+  specify "#group_list" do
+    cfg = config("group.id": "group_list_test", "client.id": "test_list_group")
+    client = Kafka::FFI::Client.new(:consumer, cfg)
+
+    with_topic do |topic|
+      client.subscribe(topic)
+      sleep 0.25 while client.assignment.empty?
+
+      list = client.group_list(timeout: 10000)
+      expect(list).not_to be(nil)
+
+      info = list.groups.find { |g| g.name == "group_list_test" }
+      expect(info).not_to be(nil)
+
+      member = info.members.find { |m| m.client_id == "test_list_group" }
+      expect(member).not_to be(nil)
+    ensure
+      list.destroy if list
+    end
+  ensure
+    client.destroy
+  end
+
   specify "#default_topic_conf_dup" do
     client = Kafka::FFI::Client.new(:consumer)
 
