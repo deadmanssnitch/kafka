@@ -56,6 +56,16 @@ RSpec.describe Kafka::FFI::Client do
     client.destroy
   end
 
+  specify "#outq_len" do
+    client = Kafka::FFI::Client.new(:consumer)
+
+    # Mainly ensure that we can call it and it returns a value. Not sure of a
+    # good way to modify the outbound queue.
+    expect(client.outq_len).to eq(0)
+  ensure
+    client.destroy
+  end
+
   specify "#get_main_queue" do
     client = Kafka::FFI::Client.new(:producer)
 

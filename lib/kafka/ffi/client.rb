@@ -384,6 +384,20 @@ module Kafka::FFI
       ::Kafka::FFI.rd_kafka_default_topic_conf_dup(self)
     end
 
+    # Returns the current length of the outbound queue. This is the sum of
+    # several factors including outbound messages, pending callbacks, waiting
+    # acknowledgements, etc...
+    #
+    # An application should wait for the return value to reach 0 before
+    # terminating to make sure outstanding messages, requests, callbacks, and
+    # events are fully processed.
+    #
+    # @return [Integer] Number of outbound items still pending
+    def outq_len
+      ::Kafka::FFI.rd_kafka_outq_len(self)
+    end
+    alias out_queue_len outq_len
+
     # Release all of the resources used by this Client. This may block until
     # the instance has finished it's shutdown procedure. Always make sure to
     # destory any associated resources and cleanly shutting down the instance
