@@ -533,7 +533,7 @@ module Kafka
     attach_function :rd_kafka_ConfigResource_error, [Admin::ConfigResource], :error_code
     attach_function :rd_kafka_ConfigResource_error_string, [Admin::ConfigResource], :string
     attach_function :rd_kafka_ConfigResource_destroy, [Admin::ConfigResource], :void
-    # :rd_kafka_ConfigResource_destroy_array
+    attach_function :rd_kafka_ConfigResource_destroy_array, [:pointer, :size_t], :void
 
     ## ConfigEntry
     attach_function :rd_kafka_ConfigEntry_name, [Admin::ConfigEntry], :string
@@ -556,7 +556,7 @@ module Kafka
     attach_function :rd_kafka_NewTopic_set_replica_assignment, [Admin::NewTopic, :partition, :pointer, :size_t, :pointer, :size_t], :error_code
     attach_function :rd_kafka_NewTopic_set_config, [Admin::NewTopic, :string, :string], :error_code
     attach_function :rd_kafka_NewTopic_destroy, [Admin::NewTopic], :void
-    # :rd_kafka_NewTopic_destroy_array
+    attach_function :rd_kafka_NewTopic_destroy_array, [:pointer, :size_t], :void
 
     # DeleteTopics / DeleteTopic
 
@@ -564,7 +564,7 @@ module Kafka
     attach_function :rd_kafka_DeleteTopics_result_topics, [Event, :pointer], :pointer
     attach_function :rd_kafka_DeleteTopic_new, [:string], Admin::DeleteTopic
     attach_function :rd_kafka_DeleteTopic_destroy, [Admin::DeleteTopic], :void
-    # :rd_kafka_DeleteTopic_destroy_array
+    attach_function :rd_kafka_DeleteTopic_destroy_array, [:pointer, :size_t], :void
 
     # CreatePartitions / NewPartitions
     attach_function :rd_kafka_CreatePartitions, [Client, :pointer, :size_t, Admin::AdminOptions, Queue], :void
@@ -575,5 +575,6 @@ module Kafka
     attach_function :rd_kafka_NewPartitions_set_replica_assignment, [Admin::NewPartitions, :int32, :pointer, :size_t, :pointer, :size_t], :error_code
 
     attach_function :rd_kafka_NewPartitions_destroy, [Admin::NewPartitions], :void
+    attach_function :rd_kafka_NewPartitions_destroy_array, [:pointer, :size_t], :void
   end
 end
