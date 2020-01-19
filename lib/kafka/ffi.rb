@@ -538,6 +538,9 @@ module Kafka
     attach_function :rd_kafka_ConfigEntry_is_synonym, [Admin::ConfigEntry], :int
     attach_function :rd_kafka_ConfigEntry_synonyms, [Admin::ConfigEntry, :pointer], :pointer
 
+    ## ConfigSource
+    attach_function :rd_kafka_ConfigSource_name, [:config_source], :string
+
     ## Create Topics / NewTopic
 
     attach_function :rd_kafka_CreateTopics, [Client, :pointer, :size_t, Admin::AdminOptions, Queue], :void
