@@ -565,5 +565,15 @@ module Kafka
     attach_function :rd_kafka_DeleteTopic_new, [:string], Admin::DeleteTopic
     attach_function :rd_kafka_DeleteTopic_destroy, [Admin::DeleteTopic], :void
     # :rd_kafka_DeleteTopic_destroy_array
+
+    # CreatePartitions / NewPartitions
+    attach_function :rd_kafka_CreatePartitions, [Client, :pointer, :size_t, Admin::AdminOptions, Queue], :void
+    attach_function :rd_kafka_CreatePartitions_result_topics, [Event, :pointer], :pointer
+
+    attach_function :rd_kafka_NewPartitions_new, [:topic, :size_t, :pointer, :size_t], Admin::NewPartitions
+
+    attach_function :rd_kafka_NewPartitions_set_replica_assignment, [Admin::NewPartitions, :int32, :pointer, :size_t, :pointer, :size_t], :error_code
+
+    attach_function :rd_kafka_NewPartitions_destroy, [Admin::NewPartitions], :void
   end
 end
