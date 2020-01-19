@@ -17,16 +17,20 @@ module Kafka::FFI::Admin
     # @param replication_factor [-1] Value from #set_replica_assignment will be
     #   used.
     #
-    # @raise [Kafka::FFI::Admin::Error] Parameters were invalid
+    # @raise [ArgumentError] Parameters were invalid
     #
     # @return [NewTopic]
     def self.new(name, partitions, replication_factor)
       # Allocate memory for the error message
       error = ::FFI::MemoryPointer.new(:char, 512)
 
+      if name.nil? || name.empty?
+        raise ArgumentError, " name is required and cannot be blank"
+      end
+
       obj = ::Kafka::FFI.rd_kafka_NewTopic_new(name, partitions, replication_factor, error, error.size)
       if obj.nil?
-        raise Error, error.read_string
+        raise ArgumentError, error.read_string
       end
 
       obj

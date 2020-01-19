@@ -11,9 +11,9 @@ RSpec.describe Kafka::FFI::Admin::NewTopic do
     req.destroy
   end
 
-  specify ".new with error" do
+  specify ".new with invalid options" do
     expect { Kafka::FFI::Admin::NewTopic.new("snitches", -1, 1) }
-      .to raise_error(Kafka::FFI::Admin::Error)
+      .to raise_error(ArgumentError, /num_partitions/)
   end
 
   specify "#set_replica_assignment" do
