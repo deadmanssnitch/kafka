@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-RSpec.describe Kafka::FFI::Message do
+RSpec.describe Kafka::FFI::Queue do
   specify "#new" do
     client = Kafka::FFI::Consumer.new
     queue = Kafka::FFI::Queue.new(client)
