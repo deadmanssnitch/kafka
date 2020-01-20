@@ -552,7 +552,7 @@ module Kafka
 
     ## Create Topics / NewTopic
 
-    attach_function :rd_kafka_CreateTopics, [Client, :pointer, :size_t, Admin::AdminOptions, Queue], :void
+    attach_function :rd_kafka_CreateTopics, [Client, :pointer, :size_t, Admin::AdminOptions, Queue], :void, blocking: true
     attach_function :rd_kafka_CreateTopics_result_topics, [Event, :pointer], :pointer
     attach_function :rd_kafka_NewTopic_new, [:topic, :int, :int, :pointer, :size_t], Admin::NewTopic
     attach_function :rd_kafka_NewTopic_set_replica_assignment, [Admin::NewTopic, :partition, :pointer, :size_t, :pointer, :size_t], :error_code

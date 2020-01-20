@@ -37,6 +37,7 @@ module Kafka::FFI::Admin
     #
     # @param topics [NewTopic, Array<NewTopic>] List of topics to create on the
     #   cluster.
+    # @parma options [AdminOption] Admin API request options
     # @param timeout [Integer] Time in milliseconds to way for a reply.
     #
     # @raise [Kafka::ResponseError] An error occurred creating the topic(s)
@@ -44,7 +45,7 @@ module Kafka::FFI::Admin
     # @return [nil] Create timed out
     # @return [Array<TopicResult>] Response from the cluster with details about
     #   the creation of the list of topics or any errors.
-    def create_topics(topics, timeout: 1000)
+    def create_topics(topics, options: nil, timeout: 1000)
       topics = Array(topics)
 
       # CreateTopic wants an array of topics
@@ -53,8 +54,7 @@ module Kafka::FFI::Admin
 
       queue = ::Kafka::FFI::Queue.new(@client)
 
-      # TODO: AdminOption (nil placeholder)
-      ::Kafka::FFI.rd_kafka_CreateTopics(@client, list, topics.length, nil, queue)
+      ::Kafka::FFI.rd_kafka_CreateTopics(@client, list, topics.length, options, queue)
 
       # @todo Need to retrieve the rd_kafka_topic_result_t to handle or
       #   propogate any errors.
@@ -64,6 +64,10 @@ module Kafka::FFI::Admin
     ensure
       list.free
       queue.destroy if queue
+    end
+
+    def options(api)
+      AdminOptions.new(@client, api)
     end
 
     def get_topic_results(event)
