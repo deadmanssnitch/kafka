@@ -29,10 +29,10 @@ module Kafka::FFI
     # @param timestamp [Integer] Timestamp as milliseconds since unix epoch
     # @param timestamp [nil] Timestamp is assigned by librdkafka
     #
-    # @param opaque [::FFI::Pointer] Pointer to a memory address owned by the
-    #   application. The caller MUST maintain a reference to the pointer until
-    #   all callbacks are finished otherwise it will cause a segfault when the
-    #   object is garbage collected.
+    # @param opaque [Opaque] Reference to an object owned by the application
+    #   which will be available as Message#opaque in callbacks. The application
+    #   MUST call #free on the Opaque once the final callback has been
+    #   triggered to avoid leaking memory.
     def produce(topic, payload, key: nil, partition: nil, headers: nil, timestamp: nil, opaque: nil)
       args = [
         # Ensure librdkafka copies the payload into its own memory since the
