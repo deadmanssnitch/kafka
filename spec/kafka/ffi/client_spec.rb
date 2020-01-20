@@ -66,6 +66,20 @@ RSpec.describe Kafka::FFI::Client do
     client.destroy
   end
 
+  specify "#brokers_add" do
+    # Default config does not have any brokers
+    client = Kafka::FFI::Client.new(:producer, nil)
+
+    expect(client.brokers_add("127.0.0.1:9092")).to eq(1)
+
+    metadata = client.metadata
+    expect(metadata.brokers.size).to eq(1)
+    expect(metadata.brokers[0].host).to eq("127.0.0.1")
+    expect(metadata.brokers[0].port).to eq(9092)
+  ensure
+    metadata.destroy if metadata
+  end
+
   specify "#get_main_queue" do
     client = Kafka::FFI::Client.new(:producer)
 

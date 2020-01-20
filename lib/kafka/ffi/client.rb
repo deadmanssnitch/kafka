@@ -398,6 +398,33 @@ module Kafka::FFI
     end
     alias out_queue_len outq_len
 
+    # Adds one or more brokers to the Client's list of initial bootstrap
+    # brokers. Additionaly brokers will be discovered automatically once the
+    # Client connects to a broker by querying the broker metadata.
+    #
+    # @note It is preferred to set brokers through the `metadata.broker.list`
+    #   or `bootstrap.servers` config options.
+    #
+    # @example Add multiple brokers
+    #   client.brokers_add(["kafka_1:9092", "kafka_2:9092"])
+    #
+    # @example Add a single broker with protocol
+    #   client.brokers.add("PLAINTEXT://localhost:9096")
+    #
+    # @see rdkafka.h rd_kafka_brokers_add
+    #
+    # @param brokers [String] Comma separated list of broker addresses to add.
+    # @param brokers [Array<String>] Array of broker addresses to add.
+    #
+    # @return [Integer] number of brokers successfully added
+    def brokers_add(brokers)
+      if brokers.is_a?(Array)
+        brokers = brokers.join(",")
+      end
+
+      ::Kafka::FFI.rd_kafka_brokers_add(self, brokers)
+    end
+
     # Release all of the resources used by this Client. This may block until
     # the instance has finished it's shutdown procedure. Always make sure to
     # destory any associated resources and cleanly shutting down the instance

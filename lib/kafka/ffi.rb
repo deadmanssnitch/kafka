@@ -257,6 +257,7 @@ module Kafka
     attach_function :rd_kafka_conf, [Client], Config
     attach_function :rd_kafka_poll, [Client, :timeout_ms], :int, blocking: true
     attach_function :rd_kafka_outq_len, [Client], :int
+    attach_function :rd_kafka_brokers_add, [Client, :string], :int
 
     # @note This function MUST ONLY be called from within a librdkafka
     #   callback.
