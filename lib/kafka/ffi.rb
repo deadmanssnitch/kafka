@@ -23,6 +23,13 @@ module Kafka
       File.expand_path("../../ext/librdkafka.dylib", __dir__),
     ]
 
+    # Returns the loaded version of librdkafka
+    #
+    # @return [String] Version string
+    def self.version
+      rd_kafka_version_str
+    end
+
     # kafka_type is passed to rd_kafka_new to specify the role of the
     # connection.
     #
