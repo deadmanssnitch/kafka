@@ -419,6 +419,23 @@ module Kafka
     # @todo
     # attach_function :rd_kafka_position, [Consumer, TopicPartitionList.by_ref], :error_code
 
+    ## Legacy Simple Consumer API
+    attach_function :rd_kafka_consume_start, [Topic, :partition, :offset], :int
+    attach_function :rd_kafka_consume_start_queue, [Topic, :partition, :offset, Queue], :int
+    attach_function :rd_kafka_consume_stop, [Topic, :partition], :int
+    attach_function :rd_kafka_consume, [Topic, :partition, :timeout_ms], Message.by_ref
+    attach_function :rd_kafka_consume_batch, [Topic, :partition, :timeout_ms, :pointer, :size_t], :ssize_t
+    attach_function :rd_kafka_consume_callback, [Topic, :partition, :timeout_ms, :consume_cb, :pointer], :int
+
+    ### Simple Consumer Queue API
+    attach_function :rd_kafka_consume_queue, [Queue, :timeout_ms], Message.by_ref
+    attach_function :rd_kafka_consume_batch_queue, [Queue, :timeout_ms, :pointer, :size_t], :ssize_t
+    attach_function :rd_kafka_consume_callback_queue, [Queue, :timeout_ms, :consume_cb, :pointer], :int
+
+    ### Simple Consumer Topic + Partition API
+    attach_function :rd_kafka_offset_store, [Topic, :partition, :offset], :error_code
+    attach_function :rd_kafka_offsets_store, [Client, TopicPartitionList.by_ref], :error_code
+
     # Producer
     attach_function :rd_kafka_produce, [Topic, :partition, :int, :pointer, :size_t, :string, :size_t, :pointer], :int
     attach_function :rd_kafka_producev, [Producer, :varargs], :error_code
