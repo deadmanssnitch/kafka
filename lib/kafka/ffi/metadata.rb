@@ -2,10 +2,6 @@
 
 module Kafka::FFI
   class Metadata < ::FFI::Struct
-    require "kafka/ffi/metadata/topic_metadata"
-    require "kafka/ffi/metadata/broker_metadata"
-    require "kafka/ffi/metadata/partition_metadata"
-
     layout(
       :broker_cnt,       :int,
       :brokers,          :pointer, # *rd_kafka_metadata_broker
@@ -17,7 +13,7 @@ module Kafka::FFI
 
     # Returns detailed metadata for the Brokers in the cluster.
     #
-    # @return [Array<Metadata::BrokerMetadata>] Metadata about known Brokers.
+    # @return [Array<BrokerMetadata>] Metadata about known Brokers.
     def brokers
       ptr = self[:brokers]
 
@@ -28,7 +24,7 @@ module Kafka::FFI
 
     # Returns detailed metadata about the topics and their partitions.
     #
-    # @return [Array<Metadata::TopicMetadata>] Metadata about known Topics.
+    # @return [Array<TopicMetadata>] Metadata about known Topics.
     def topics
       ptr = self[:topics]
 

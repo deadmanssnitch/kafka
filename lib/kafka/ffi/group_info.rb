@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
 require "ffi"
+require "kafka/ffi/broker_metadata"
 require "kafka/ffi/group_member_info"
-require "kafka/ffi/metadata/broker_metadata"
 
 module Kafka::FFI
   class GroupInfo < ::FFI::Struct
     layout(
-      :broker,        Metadata::BrokerMetadata.by_value,
+      :broker,        BrokerMetadata.by_value,
       :group,         :string,
       :err,           :error_code,
       :state,         :string,
@@ -19,7 +19,7 @@ module Kafka::FFI
 
     # Returns information about the broker that originated the group info.
     #
-    # @return [Kafka::FFI::Metadata::BrokerMetadata] Broker info
+    # @return [Kafka::FFI::BrokerMetadata] Broker info
     def broker
       self[:broker]
     end

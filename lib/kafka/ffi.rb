@@ -240,6 +240,9 @@ module Kafka
     require "kafka/ffi/opaque_pointer"
     require "kafka/ffi/topic_partition"
     require "kafka/ffi/topic_partition_list"
+    require "kafka/ffi/topic_metadata"
+    require "kafka/ffi/broker_metadata"
+    require "kafka/ffi/partition_metadata"
 
     # Errors
     attach_function :rd_kafka_err2str, [:error_code], :string

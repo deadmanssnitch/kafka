@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Kafka::FFI::Metadata
+module Kafka::FFI
   class TopicMetadata < ::FFI::Struct
     layout(
       :topic,         :string,

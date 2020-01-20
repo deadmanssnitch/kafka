@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Kafka::FFI::Metadata
+module Kafka::FFI
   class PartitionMetadata < ::FFI::Struct
     layout(
       :id,          :int32,
