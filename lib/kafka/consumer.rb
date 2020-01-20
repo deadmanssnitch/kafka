@@ -7,7 +7,7 @@ module Kafka
     # Returns the backing Kafka::FFI::Consumer.
     #
     # @DANGER Using the backing Consumer means being aware of memory management
-    #   and could leave the producer in a bad state. Make sure you know what
+    #   and could leave the consumer in a bad state. Make sure you know what
     #   you're doing.
     #
     # @return [Kafka::FFI::Consumer]
@@ -23,8 +23,11 @@ module Kafka
     end
 
     # Subscribe the consumer to the given list of topics. Once the
-    # subscriptions have become active, calls to #poll with yield messages for
-    # the subscribe topics.
+    # subscriptions have become active and partitions assigned, calls to #poll
+    # will yield messages for the subscribed topics.
+    #
+    # subscribe will _set_ the list of subscriptions, removing any that are not
+    # included in the most recent call.
     #
     # @param topic [String, Array<String>] Topics to subscribe to
     def subscribe(topic, *rest)
