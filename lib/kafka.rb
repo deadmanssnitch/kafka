@@ -2,6 +2,7 @@
 
 module Kafka
   require "kafka/ffi"
+  require "kafka/admin"
   require "kafka/error"
   require "kafka/config"
   require "kafka/version"

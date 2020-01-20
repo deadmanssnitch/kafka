@@ -3,6 +3,7 @@
 require "ffi"
 require "kafka/config"
 require "kafka/ffi/opaque_pointer"
+require "kafka/ffi/admin/result"
 
 module Kafka::FFI
   # Client is a handle to a configured librdkafka instance that begins
@@ -423,6 +424,201 @@ module Kafka::FFI
       end
 
       ::Kafka::FFI.rd_kafka_brokers_add(self, brokers)
+    end
+
+    ## Admin APIs
+
+    # Create topics in the cluster with the given configuration.
+    #
+    # Application is responsible for calling #destroy on the returned results
+    # when done with the results.
+    #
+    # @param topics [NewTopic, Array<NewTopic>] List of topics to create on the
+    #   cluster.
+    # @parma options [Admin::AdminOptions] Admin API request options
+    # @param timeout [Integer] Time in milliseconds to wait for a reply.
+    #
+    # @raise [Kafka::ResponseError] An error occurred creating the topic(s)
+    #
+    # @return [nil] Create timed out
+    # @return [Admin::Result<TopicResult>] Response from the cluster with
+    #   details about the creation of the list of topics or any errors.
+    def create_topics(topics, options: nil, timeout: 5000)
+      topics = Array(topics)
+
+      # CreateTopic wants an array of topics
+      list = ::FFI::MemoryPointer.new(:pointer, topics.length)
+      list.write_array_of_pointer(topics.map(&:pointer))
+
+      queue = ::Kafka::FFI::Queue.new(self)
+
+      ::Kafka::FFI.rd_kafka_CreateTopics(self, list, topics.length, options, queue)
+
+      event = queue.poll(timeout: timeout)
+      if event
+        ::Kafka::FFI::Admin::Result.new(event)
+      end
+    ensure
+      list.free
+      queue.destroy
+    end
+
+    # Delete a list of Topics from the cluster.
+    #
+    # Application is responsible for calling #destroy on the returned results
+    # when done with the results.
+    #
+    # @param topics [DeleteTopic] List of topics to delete
+    # @parma options [Admin::AdminOptions] Admin API request options
+    # @param timeout [Integer] Time to wait in milliseconds for the deletion to
+    #   complete.
+    #
+    # @return [nil] Delete timed out
+    # @return [Array<TopicResult>] Response from the cluster with details about
+    #   the deletion of the list of topics or any errors.
+    def delete_topics(topics, options: nil, timeout: 5000)
+      topics = Array(topics)
+
+      # DeleteTopics wants an array of topics
+      list = ::FFI::MemoryPointer.new(:pointer, topics.length)
+      list.write_array_of_pointer(topics.map(&:pointer))
+
+      queue = ::Kafka::FFI::Queue.new(self)
+
+      ::Kafka::FFI.rd_kafka_DeleteTopics(self, list, topics.length, options, queue)
+
+      event = queue.poll(timeout: timeout)
+      if event
+        ::Kafka::FFI::Admin::Result.new(event)
+      end
+    ensure
+      list.free
+      queue.destroy
+    end
+
+    # Create additional partition(s) for a topic on the cluster.
+    #
+    # Application is responsible for calling #destroy on the returned results
+    # when done with the results.
+    #
+    # @param requests [Admin::NewPartitions] Details about partions to create
+    # and possibly broker assignments for those partitions.
+    # @param requests [Array<Admin::NewPartitions>] List of partition detauls.
+    # @param options [Admin::AdminOptions] Admin API request options
+    # @param timeout [Integer] Time to wait in milliseconds for request to
+    #   complete.
+    #
+    # @return [nil] Request timed out
+    # @return [Admin::Result<Admin::TopicResult>] Results from the cluster
+    #   detailing success or failure of creating new partitions.
+    def create_partitions(requests, options: nil, timeout: 5000)
+      requests = Array(requests)
+
+      # NewPartitions wants an array of Admin::NewPartitions
+      list = ::FFI::MemoryPointer.new(:pointer, requests.length)
+      list.write_array_of_pointer(requests.map(&:pointer))
+
+      # Queue to receive the result
+      queue = ::Kafka::FFI::Queue.new(self)
+
+      ::Kafka::FFI.rd_kafka_CreatePartitions(self, list, requests.length, options, queue)
+
+      event = queue.poll(timeout: timeout)
+      if event
+        ::Kafka::FFI::Admin::Result.new(event)
+      end
+    ensure
+      list.free
+      queue.destroy
+    end
+
+    # Update the configuration for the specified resources. Updates may succeed
+    # for a subset of the provided resources while others fail. The
+    # configuration for a particular resource is update atomically, replacing
+    # values using the provided ConfigResource (set via set_config) and
+    # reverting any unspecified config options to their default values.
+    #
+    # Application is responsible for calling #destroy on the returned results
+    # when done with the results.
+    #
+    # @see rdkafka.h rd_kafka_AlterConfigs
+    #
+    # @note AlterConfigs will replace all existing configuration for the given
+    #   resources, reverting all unspecified config options to their default
+    #   values.
+    #
+    # @note At most one :broker type ConfigResource can be specified per call
+    #   to alter_configs since the changes must be sent to the broker specified
+    #   in the resource.
+    #
+    # @param resources [Admin::ConfigResource] Resource to alter configs for.
+    # @param resources [Array<Admin::ConfigResource>] List of resources with
+    #   their configs to update. At most one of type :broker is allowed per
+    #   call.
+    # @param options [Admin::AdminOptions] Admin API request options
+    # @param timeout [Integer] Time to wait in milliseconds for request to
+    #   complete.
+    #
+    # @return [nil] Request timed out
+    # @return [Array<Admin::ConfigResource>]
+    def alter_configs(resources, options: nil, timeout: 5000)
+      resources = Array(resources)
+
+      # NewPartitions wants an array of Admin::ConfigResource
+      list = ::FFI::MemoryPointer.new(:pointer, resources.length)
+      list.write_array_of_pointer(resources.map(&:pointer))
+
+      # Queue to receive the result
+      queue = ::Kafka::FFI::Queue.new(self)
+
+      ::Kafka::FFI.rd_kafka_AlterConfigs(self, list, resources.length, options, queue)
+
+      event = queue.poll(timeout: timeout)
+      if event
+        ::Kafka::FFI::Admin::Result.new(event)
+      end
+    ensure
+      list.free
+      queue.destroy
+    end
+
+    # Get configuration for the specified resources.
+    #
+    # Application is responsible for calling #destroy on the returned results
+    # when done with the results.
+    #
+    # @see rdkafka.h rd_kafka_DescribeConfigs
+    #
+    # @param resources [Admin::ConfigResource] Resource to request
+    #   configuration details for.
+    # @param resources [Array<Admin::ConfigResource>] List of resources to get
+    #   config details for.
+    # @param options [Admin::AdminOptions] Admin API request options
+    # @param timeout [Integer] Time to wait in milliseconds for request to
+    #   complete.
+    #
+    # @return [nil] Request timed out
+    # @return [Admin::Result<Admin::ConfigResource>] Configurations for the
+    #   requested resources.
+    def describe_configs(resources, options: nil, timeout: 5000)
+      resources = Array(resources)
+
+      # DescribeConfigs wants an array of Admin::ConfigResource pointers
+      list = ::FFI::MemoryPointer.new(:pointer, resources.length)
+      list.write_array_of_pointer(resources.map(&:pointer))
+
+      # Queue to receive the result
+      queue = ::Kafka::FFI::Queue.new(self)
+
+      ::Kafka::FFI.rd_kafka_DescribeConfigs(self, list, resources.length, options, queue)
+
+      event = queue.poll(timeout: timeout)
+      if event
+        ::Kafka::FFI::Admin::Result.new(event)
+      end
+    ensure
+      list.free
+      queue.destroy
     end
 
     # Release all of the resources used by this Client. This may block until

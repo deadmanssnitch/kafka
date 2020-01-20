@@ -9,26 +9,33 @@ module Kafka::FFI
       ::Kafka::FFI.rd_kafka_queue_new(client)
     end
 
-    # Poll a queue for an event, waiting up to timeout milliseconds.
+    # Poll a queue for an event, waiting up to timeout milliseconds. Takes an
+    # optional block which will handle destroying the event at the completion
+    # of the block.
     #
     # @param timeout [Integer] Max time to wait in millseconds for an Event.
     #
     # @yield [event]
     # @yieldparam event [Event] Polled event
+    #
+    # @return [nil] No event was available within the timeout
+    # @return [Event] Event polled from the queue, application is responsible
+    #   for calling #destroy on the Event when finished with it.
+    # @return When passed a block, the result returned by the block
     def poll(timeout: 1000)
-      if !block_given?
-        raise ArgumentError, "poll must be passed a block"
-      end
-
       event = ::Kafka::FFI.rd_kafka_queue_poll(self, timeout)
       if event.nil?
         return nil
       end
 
-      begin
-        yield(event)
-      ensure
-        event.destroy
+      if block_given?
+        begin
+          yield(event)
+        ensure
+          event.destroy
+        end
+      else
+        event
       end
     end
 

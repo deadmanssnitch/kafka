@@ -1,46 +1,32 @@
 # frozen_string_literal: true
 
 require "ffi"
+require "kafka/ffi/opaque_pointer"
 
 module Kafka::FFI::Admin
-  class TopicResult
-    # @attr topic [String] Name of the topic the TopicResult is for.
-    attr_reader :topic
-
-    # @attr error [nil] Topic action was successful
-    # @attr error [Kafka::ResponseError] Action on the cluster for this
-    #   action failed.
-    attr_reader :error
-
-    def initialize(struct)
-      # Convenience conversion to the underlying struct. The methods that
-      # return a TopicStruct grab the data when it is in scope but that data
-      # has been freed by the time it is returned to the caller.
-      #
-      # See Kafka::FFI::Admin::Client
-      if struct.is_a?(::FFI::Pointer)
-        struct = Struct.new(struct)
-      end
-
-      @topic = struct[:topic]
-
-      # RD_KAFKA_RESP_ERR__NO_ERROR
-      if struct[:err] != 0
-        @error = ::Kafka::ResponseError.new(struct[:err])
-      end
+  class TopicResult < ::Kafka::FFI::OpaquePointer
+    # Returns the name of the topic the result is for.
+    #
+    # @return [String] Topic name
+    def name
+      ::Kafka::FFI.rd_kafka_topic_result_name(self)
     end
+    alias topic name
 
-    def to_s
-      format("<%s topic=%s error=%s>", self.class, topic, error)
-    end
-
-    class Struct < ::FFI::Struct
-      layout(
-        :topic,  :string,
-        :err,    :int,
-        :errstr, :string,
-        :data,   :char
-      )
+    # Returns either nil for success or an error with details about why the
+    # topic operation failed.
+    #
+    # @return [nil] Topic operation was successful for this topic.
+    # @return [Kafka::ResponseError] Error performing the operation for this
+    #   topic.
+    def error
+      err = ::Kafka::FFI.rd_kafka_topic_result_error(self)
+      if err != :ok
+        ::Kafka::ResponseError.new(
+          err,
+          ::Kafka::FFI.rd_kafka_topic_result_error_string(self),
+        )
+      end
     end
   end
 end

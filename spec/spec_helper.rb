@@ -64,27 +64,16 @@ RSpec.configure do |config|
     replicas = 1
 
     # TODO: Can we reuse the same admin client across multiple tests?
-    admin = Kafka::FFI::Admin::Client.new(config)
-
-    # Wait for the operation to propogate before returning
-    options = admin.options(:create_topics)
-    options.set_operation_timeout(5000)
-
-    # TODO: Test that the topic was created
-    create = Kafka::FFI::Admin::NewTopic.new(topic, partitions, replicas)
-    admin.create_topics(create, options: options, timeout: 2500)
-    create.destroy
-    options.destroy
+    admin = Kafka::Admin.new(config)
 
     begin
+      admin.create_topic(topic, partitions, replicas, wait: true, timeout: nil)
+
       yield(topic)
     ensure
-      delete = Kafka::FFI::Admin::DeleteTopic.new(topic)
-      admin.delete_topics(delete)
-      delete.destroy
+      admin.delete_topic(topic)
+      admin.destroy
     end
-  ensure
-    admin.destroy if admin
   end
 
   # publish shells out to kafkacat to write a message to the specified topic.

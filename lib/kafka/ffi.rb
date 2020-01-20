@@ -365,7 +365,6 @@ module Kafka
     attach_function :rd_kafka_conf_destroy, [Config], :void
 
     # Topic Config
-
     attach_function :rd_kafka_topic_conf_new, [], TopicConfig
     attach_function :rd_kafka_topic_conf_set, [TopicConfig, :string, :string, :pointer, :size_t], :config_result
     attach_function :rd_kafka_topic_conf_get, [TopicConfig, :string, :pointer, :pointer], :config_result
@@ -377,7 +376,6 @@ module Kafka
     attach_function :rd_kafka_topic_conf_destroy, [TopicConfig], :void
 
     # Message
-
     attach_function :rd_kafka_message_timestamp, [Message.by_ref, :pointer], :int64
     attach_function :rd_kafka_message_latency, [Message.by_ref], :int64
     attach_function :rd_kafka_message_status, [Message.by_ref], :message_status
@@ -451,7 +449,6 @@ module Kafka
     attach_function :rd_kafka_queue_destroy, [Queue], :void
 
     # Event
-
     attach_function :rd_kafka_event_type, [Event], :event_type
     attach_function :rd_kafka_event_name, [Event], :string
 
@@ -559,7 +556,6 @@ module Kafka
     attach_function :rd_kafka_ConfigSource_name, [:config_source], :string
 
     ## Create Topics / NewTopic
-
     attach_function :rd_kafka_CreateTopics, [Client, :pointer, :size_t, Admin::AdminOptions, Queue], :void, blocking: true
     attach_function :rd_kafka_CreateTopics_result_topics, [Event, :pointer], :pointer
     attach_function :rd_kafka_NewTopic_new, [:topic, :int, :int, :pointer, :size_t], Admin::NewTopic
@@ -568,8 +564,12 @@ module Kafka
     attach_function :rd_kafka_NewTopic_destroy, [Admin::NewTopic], :void
     attach_function :rd_kafka_NewTopic_destroy_array, [:pointer, :size_t], :void
 
-    # DeleteTopics / DeleteTopic
+    # TopicResult
+    attach_function :rd_kafka_topic_result_error, [Admin::TopicResult], :error_code
+    attach_function :rd_kafka_topic_result_error_string, [Admin::TopicResult], :string
+    attach_function :rd_kafka_topic_result_name, [Admin::TopicResult], :topic
 
+    # DeleteTopics / DeleteTopic
     attach_function :rd_kafka_DeleteTopics, [Client, :pointer, :size_t, Admin::AdminOptions, Queue], :void
     attach_function :rd_kafka_DeleteTopics_result_topics, [Event, :pointer], :pointer
     attach_function :rd_kafka_DeleteTopic_new, [:topic], Admin::DeleteTopic

@@ -22,9 +22,6 @@ RSpec.describe Kafka::FFI::Queue do
     # Calling poll works
     expect(queue.poll(timeout: 5, &callback))
       .to be(nil)
-
-    # Requires a block
-    expect { queue.poll }.to raise_error(ArgumentError)
   ensure
     client.destroy
     queue.destroy if queue
