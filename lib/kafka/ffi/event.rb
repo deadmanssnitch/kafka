@@ -148,7 +148,11 @@ module Kafka::FFI
         return nil
       end
 
-      LogMessage.new(facility.read_string, message.read_string, level.read_int)
+      LogMessage.new(
+        facility.read_pointer.read_string,
+        message.read_pointer.read_string,
+        level.read_int,
+      )
     ensure
       facility.free
       message.free
