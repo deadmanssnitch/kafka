@@ -13,9 +13,7 @@ RSpec.describe Kafka::Consumer do
 
       publish(topic, "test")
 
-      while consumer.assignments[topic].nil?
-        sleep 0.25
-      end
+      wait_for_assignments(consumer, topic: topic)
 
       received =
         consumer.poll do |msg|

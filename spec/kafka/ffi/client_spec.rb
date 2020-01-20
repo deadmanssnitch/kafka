@@ -29,7 +29,7 @@ RSpec.describe Kafka::FFI::Client do
 
     with_topic do |topic|
       client.subscribe(topic)
-      sleep 0.25 while client.assignment.empty?
+      wait_for_assignments(client)
 
       list = client.group_list(timeout: 10000)
       expect(list).not_to be(nil)

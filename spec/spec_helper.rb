@@ -2,8 +2,10 @@
 
 require "bundler/setup"
 require "securerandom"
-require "kafka"
+require "timeout"
 require "open3"
+
+require "kafka"
 
 # Require supporting files in spec/support
 Dir[File.join(__dir__, "support/**/*.rb")].sort.each { |f| require f }
@@ -73,6 +75,30 @@ RSpec.configure do |config|
     ensure
       admin.delete_topic(topic)
       admin.destroy
+    end
+  end
+
+  # Wait for consumer to be assigned partitions to consume.
+  #
+  # @param consumer [#assignments] Consumer to wait for assignments for.
+  # @param topic [String] Wait for assignments for this topic. Default is any
+  #   assignment.
+  # @param timeout [Integer] Max time to wait in milliseconds
+  #
+  # @raise [Timeout::Error] Waiting timed out
+  def wait_for_assignments(consumer, topic: nil, timeout: 5000)
+    Timeout.timeout(timeout / 1000.0) do
+      loop do
+        assignments = consumer.assignments
+
+        if assignments.any?
+          if topic.nil? || !assignments[topic].nil?
+            return
+          end
+        end
+
+        sleep 0.25
+      end
     end
   end
 
