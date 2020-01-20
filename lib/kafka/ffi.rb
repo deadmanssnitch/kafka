@@ -246,6 +246,10 @@ module Kafka
     attach_function :rd_kafka_err2name, [:error_code], :string
     attach_function :rd_kafka_last_error, [], :error_code
 
+    # Version
+    attach_function :rd_kafka_version, [], :int
+    attach_function :rd_kafka_version_str, [], :string
+
     # Client
     attach_function :rd_kafka_new, [:kafka_type, Config, :pointer, :int], Client, blocking: true
     attach_function :rd_kafka_type, [Client], :kafka_type
