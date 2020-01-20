@@ -18,12 +18,6 @@ module Kafka
 
       @client = ::Kafka::FFI::Producer.new(config)
 
-      # Maintains a list of in-flight deliveries that we're waiting for reports
-      # for. If we don't, it is possible that Ruby will garbage collect them
-      # before on_delivery_report is called causing memory corruption or
-      # segfaults.
-      @in_flight = {}
-
       # Periodically call poll on the client to ensure callbacks are fired.
       @poller = Poller.new(@client)
     end
@@ -60,12 +54,7 @@ module Kafka
       # Pointer so it doesn't get garbage collected away and it can be freed it
       # in the callback since the raw FFI::Pointer disallows #free as FFI
       # doesn't believe we allocated it.
-      opaque = ::FFI::MemoryPointer.new(:int8)
-
-      # Add the report to in-flight messages. This needs to happen before
-      # calling `produce` to avoid threading issues where the callback is
-      # triggered before the insert to the hash is complete.
-      @in_flight[opaque] = report
+      opaque = Kafka::FFI::Opaque.new(report)
 
       @client.produce(topic, payload, key: key, partition: partition, headers: headers, timestamp: timestamp, opaque: opaque)
 
@@ -75,8 +64,7 @@ module Kafka
         report
       end
     rescue
-      # Failed publishing the message to Kafka so there won't be a callback.
-      @in_flight.delete(opaque)
+      opaque.free
 
       raise
     end
@@ -114,19 +102,16 @@ module Kafka
     # @param message [Kafka::FFI::Message]
     # @param opaque [FFI::Pointer]
     def on_delivery_report(_client, message, _opaque)
-      # The message.opaque pointer is a raw FFI::Pointer with the same address
-      # as the key used to track the DeliveryReport. Find the equivalent key
-      # and it's value.
-      key, report = @in_flight.assoc(message.opaque)
-      if key.nil?
+      op = message.opaque
+      if op.nil?
         return
       end
 
-      report.done(message)
-    ensure
-      if key
-        @in_flight.delete(key)
-        key.free
+      begin
+        report = op.value
+        report.done(message)
+      ensure
+        op.free
       end
     end
 

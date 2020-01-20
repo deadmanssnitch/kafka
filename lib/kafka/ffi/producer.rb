@@ -72,7 +72,7 @@ module Kafka::FFI
       end
 
       if opaque
-        args.append(:vtype, :opaque, :pointer, opaque)
+        args.append(:vtype, :opaque, :pointer, opaque.pointer)
       end
 
       if timestamp

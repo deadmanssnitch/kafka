@@ -13,7 +13,7 @@ module Kafka::FFI
       :key,       :pointer,
       :key_len,   :size_t,
       :offset,    :int64,
-      :private,   :pointer
+      :private,   Opaque
     )
 
     # Retrieve the error associated with this message. For consumers this is
@@ -86,9 +86,7 @@ module Kafka::FFI
     # @return [nil] Opaque was not set
     # @return [FFI::Pointer] Pointer to opaque address
     def opaque
-      if !self[:private].null?
-        self[:private]
-      end
+      self[:private]
     end
 
     # Returns the message's payload. When error != nil, will contain a string

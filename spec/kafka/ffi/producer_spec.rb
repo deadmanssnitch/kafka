@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "spec_helper"
+require "timeout"
 
 RSpec.describe Kafka::FFI::Producer do
   it "can produce a message" do
@@ -64,6 +65,40 @@ RSpec.describe Kafka::FFI::Producer do
         "token" => ["c2354d53d2"],
         "source" => [ "web", "user" ],
       })
+    end
+  ensure
+    producer.flush
+    producer.destroy
+  end
+
+  it "produce with opaque" do
+    cfg = config
+    opq = Object.new
+
+    reported = false
+
+    cfg.on_delivery_report do |_, message, _|
+      expect(message.opaque).not_to be(nil)
+      expect(message.opaque.value).to be(opq)
+
+      reported = true
+    end
+
+    producer = Kafka::FFI::Producer.new(cfg)
+
+    with_topic do |topic|
+      opaque = Kafka::FFI::Opaque.new(opq)
+
+      producer.produce(topic, "content", opaque: opaque)
+
+      Timeout.timeout 5 do
+        while producer.outq_len > 0
+          producer.poll
+          sleep 0.25
+        end
+      end
+
+      expect(reported).to eq(true)
     end
   ensure
     producer.flush

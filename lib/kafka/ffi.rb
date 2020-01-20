@@ -228,6 +228,7 @@ module Kafka
     require "kafka/ffi/event"
     require "kafka/ffi/queue"
     require "kafka/ffi/topic"
+    require "kafka/ffi/opaque"
     require "kafka/ffi/client"
     require "kafka/ffi/config"
     require "kafka/ffi/message"
