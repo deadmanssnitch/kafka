@@ -218,6 +218,7 @@ module Kafka
 
     typedef :int,     :timeout_ms
     typedef :int32,   :partition
+    typedef :int32,   :broker_id
     typedef :int64,   :offset
     typedef :string,  :topic
     typedef :pointer, :opaque
@@ -259,7 +260,7 @@ module Kafka
     attach_function :rd_kafka_name, [Client], :string
     attach_function :rd_kafka_memberid, [Client], :pointer
     attach_function :rd_kafka_clusterid, [Client], :pointer
-    attach_function :rd_kafka_controllerid, [Client, :timeout_ms], :int32, blocking: true
+    attach_function :rd_kafka_controllerid, [Client, :timeout_ms], :broker_id, blocking: true
     attach_function :rd_kafka_default_topic_conf_dup, [Client], TopicConfig
     attach_function :rd_kafka_conf, [Client], Config
     attach_function :rd_kafka_poll, [Client, :timeout_ms], :int, blocking: true
@@ -277,9 +278,9 @@ module Kafka
     # @test
     attach_function :rd_kafka_resume_partitions, [Client, TopicPartitionList.by_ref], :error_code
     # @test
-    attach_function :rd_kafka_query_watermark_offsets, [Client, :string, :partition, :pointer, :pointer, :timeout_ms], :error_code, blocking: true
+    attach_function :rd_kafka_query_watermark_offsets, [Client, :topic, :partition, :pointer, :pointer, :timeout_ms], :error_code, blocking: true
     # @test
-    attach_function :rd_kafka_get_watermark_offsets, [Client, :string, :partition, :pointer, :pointer], :error_code
+    attach_function :rd_kafka_get_watermark_offsets, [Client, :topic, :partition, :pointer, :pointer], :error_code
     # @test
     attach_function :rd_kafka_offsets_for_times, [Client, TopicPartitionList.by_ref, :timeout_ms], :error_code, blocking: true
 
@@ -324,7 +325,7 @@ module Kafka
     callback :error_cb, [Client, :error_code, :string, :pointer], :void
     attach_function :rd_kafka_conf_set_error_cb, [Config, :error_cb], :void
 
-    callback :throttle_cb, [Client, :string, :int32, :int, :pointer], :void
+    callback :throttle_cb, [Client, :string, :broker_id, :int, :pointer], :void
     attach_function :rd_kafka_conf_set_throttle_cb, [Config, :throttle_cb], :void
 
     callback :log_cb, [Client, :int, :string, :string], :void
@@ -353,7 +354,7 @@ module Kafka
     end
 
     # @test
-    callback :ssl_cert_verify_cb, [Client, :string, :int32, :pointer, :int, :string, :size_t, :string, :size_t, :pointer], :int
+    callback :ssl_cert_verify_cb, [Client, :string, :broker_id, :pointer, :int, :string, :size_t, :string, :size_t, :pointer], :int
     attach_function :rd_kafka_conf_set_ssl_cert_verify_cb, [Config, :ssl_cert_verify_cb], :config_result
 
     attach_function :rd_kafka_conf_set_ssl_cert, [Config, :cert_type, :cert_enc, :buffer_in, :size_t, :pointer, :size_t], :config_result
@@ -370,7 +371,7 @@ module Kafka
     attach_function :rd_kafka_topic_conf_get, [TopicConfig, :string, :pointer, :pointer], :config_result
     attach_function :rd_kafka_topic_conf_dup, [TopicConfig], TopicConfig
 
-    callback :topic_partitioner_cb, [Topic, :string, :size_t, :int32, :pointer, :pointer], :int32
+    callback :topic_partitioner_cb, [Topic, :string, :size_t, :int32, :pointer, :pointer], :partition
     attach_function :rd_kafka_topic_conf_set_partitioner_cb, [TopicConfig, :topic_partitioner_cb], :void
 
     attach_function :rd_kafka_topic_conf_destroy, [TopicConfig], :void
@@ -478,9 +479,8 @@ module Kafka
     attach_function :rd_kafka_event_DescribeConfigs_result, [Event], Event
 
     # Topics
-
-    attach_function :rd_kafka_topic_new, [Client, :string, TopicConfig], Topic
-    attach_function :rd_kafka_topic_name, [Topic], :string
+    attach_function :rd_kafka_topic_new, [Client, :topic, TopicConfig], Topic
+    attach_function :rd_kafka_topic_name, [Topic], :topic
     attach_function :rd_kafka_seek, [Topic, :partition, :offset, :timeout_ms], :error_code, blocking: true
 
     # @note May only be called inside a topic_partitioner_cb
@@ -499,13 +499,13 @@ module Kafka
 
     # Topic Partition List
     attach_function :rd_kafka_topic_partition_list_new, [:int32], TopicPartitionList.by_ref
-    attach_function :rd_kafka_topic_partition_list_add, [TopicPartitionList.by_ref, :string, :int32], TopicPartition.by_ref
-    attach_function :rd_kafka_topic_partition_list_add_range, [TopicPartitionList.by_ref, :string, :int32, :int32], :void
-    attach_function :rd_kafka_topic_partition_list_del, [TopicPartitionList.by_ref, :string, :int32], :int
+    attach_function :rd_kafka_topic_partition_list_add, [TopicPartitionList.by_ref, :topic, :partition], TopicPartition.by_ref
+    attach_function :rd_kafka_topic_partition_list_add_range, [TopicPartitionList.by_ref, :topic, :int32, :int32], :void
+    attach_function :rd_kafka_topic_partition_list_del, [TopicPartitionList.by_ref, :topic, :partition], :int
     attach_function :rd_kafka_topic_partition_list_del_by_idx, [TopicPartitionList.by_ref, :int], :int
     attach_function :rd_kafka_topic_partition_list_copy, [TopicPartitionList.by_ref], TopicPartitionList.by_ref
-    attach_function :rd_kafka_topic_partition_list_set_offset, [TopicPartitionList.by_ref, :string, :partition, :offset], :error_code
-    attach_function :rd_kafka_topic_partition_list_find, [TopicPartitionList.by_ref, :string, :int32], TopicPartition.by_ref
+    attach_function :rd_kafka_topic_partition_list_set_offset, [TopicPartitionList.by_ref, :topic, :partition, :offset], :error_code
+    attach_function :rd_kafka_topic_partition_list_find, [TopicPartitionList.by_ref, :topic, :partition], TopicPartition.by_ref
 
     callback :topic_list_cmp_func, [TopicPartition.by_ref, TopicPartition.by_ref, :pointer], :int
     attach_function :rd_kafka_topic_partition_list_sort, [TopicPartitionList.by_ref, :topic_list_cmp_func, :pointer ], :void
@@ -519,7 +519,7 @@ module Kafka
     attach_function :rd_kafka_AdminOptions_set_request_timeout, [Admin::AdminOptions, :timeout_ms, :pointer, :size_t], :error_code
     attach_function :rd_kafka_AdminOptions_set_operation_timeout, [Admin::AdminOptions, :timeout_ms, :pointer, :size_t], :error_code
     attach_function :rd_kafka_AdminOptions_set_validate_only, [Admin::AdminOptions, :bool, :pointer, :size_t], :error_code
-    attach_function :rd_kafka_AdminOptions_set_broker, [Admin::AdminOptions, :int32, :pointer, :size_t], :error_code
+    attach_function :rd_kafka_AdminOptions_set_broker, [Admin::AdminOptions, :broker_id, :pointer, :size_t], :error_code
     # :rd_kafka_AdminOptions_set_opaque
     attach_function :rd_kafka_AdminOptions_destroy, [Admin::AdminOptions], :void
 
@@ -572,7 +572,7 @@ module Kafka
 
     attach_function :rd_kafka_DeleteTopics, [Client, :pointer, :size_t, Admin::AdminOptions, Queue], :void
     attach_function :rd_kafka_DeleteTopics_result_topics, [Event, :pointer], :pointer
-    attach_function :rd_kafka_DeleteTopic_new, [:string], Admin::DeleteTopic
+    attach_function :rd_kafka_DeleteTopic_new, [:topic], Admin::DeleteTopic
     attach_function :rd_kafka_DeleteTopic_destroy, [Admin::DeleteTopic], :void
     attach_function :rd_kafka_DeleteTopic_destroy_array, [:pointer, :size_t], :void
 
@@ -582,7 +582,7 @@ module Kafka
 
     attach_function :rd_kafka_NewPartitions_new, [:topic, :size_t, :pointer, :size_t], Admin::NewPartitions
 
-    attach_function :rd_kafka_NewPartitions_set_replica_assignment, [Admin::NewPartitions, :int32, :pointer, :size_t, :pointer, :size_t], :error_code
+    attach_function :rd_kafka_NewPartitions_set_replica_assignment, [Admin::NewPartitions, :partition, :pointer, :size_t, :pointer, :size_t], :error_code
 
     attach_function :rd_kafka_NewPartitions_destroy, [Admin::NewPartitions], :void
     attach_function :rd_kafka_NewPartitions_destroy_array, [:pointer, :size_t], :void
