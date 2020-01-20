@@ -4,6 +4,15 @@ require "kafka/poller"
 
 module Kafka
   class Consumer
+    # Returns the backing Kafka::FFI::Consumer.
+    #
+    # @DANGER Using the backing Consumer means being aware of memory management
+    #   and could leave the producer in a bad state. Make sure you know what
+    #   you're doing.
+    #
+    # @return [Kafka::FFI::Consumer]
+    attr_reader :client
+
     # @param config [Kafka::Config]
     def initialize(config)
       # Initialize the client

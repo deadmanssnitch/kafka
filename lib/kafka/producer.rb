@@ -6,6 +6,15 @@ module Kafka
   class Producer
     require "kafka/producer/delivery_report"
 
+    # Returns the backing Kafka::FFI::Producer.
+    #
+    # @DANGER Using the backing Producer means being aware of memory management
+    #   and could leave the producer in a bad state. Make sure you know what
+    #   you're doing.
+    #
+    # @return [Kafka::FFI::Producer]
+    attr_reader :client
+
     # Initialize a new Producer for the configured cluster.
     #
     # @param config [Config]
