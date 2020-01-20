@@ -15,7 +15,7 @@ module Kafka::FFI::Admin
     #
     # Valid for all admin requests.
     #
-    # @note Default request timeout is `socker.timeout.ms` config option.
+    # @note Default request timeout is `socket.timeout.ms` config option.
     #
     # @param timeout [-1] Wait indefinitely for request to finish
     # @param timeout [Integer] Time to wait in milliseconds for request to be
