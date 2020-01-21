@@ -19,7 +19,11 @@ class Kafka::Producer
     # @return [Integer] Partition the message was delivered to.
     attr_reader :partition
 
-    def initialize
+    # Initializes a new DeliveryReport
+    #
+    # @param block [Proc] Callback to call with the DeliveryReport when it is
+    #   received from the cluster.
+    def initialize(&block)
       @mutex = Mutex.new
       @waiter = ConditionVariable.new
 
@@ -27,6 +31,7 @@ class Kafka::Producer
       @topic = nil
       @offset = nil
       @partition = nil
+      @callback = block
 
       # Will be set to true by a call to #done. Fast out for any callers to
       # #wait that may come in after done has already been called.
@@ -74,6 +79,10 @@ class Kafka::Producer
 
         remove_instance_variable(:@mutex)
         remove_instance_variable(:@waiter)
+      end
+
+      if @callback
+        @callback.call(self)
       end
     end
 

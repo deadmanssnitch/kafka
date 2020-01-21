@@ -45,14 +45,19 @@ module Kafka
     # @param timestamp [Time] Timestamp for the message
     # @param timestamp [Integer] Timestamp as milliseconds since unix epoch
     #
-    # @yield [report]
-    # @yieldparam report [DeliveryReport] Get the delivery status of the message.
+    # @param block [Proc] Optional asyncronous callback to be called when the
+    #   delivery status of the message is reported back from librdkafka. The
+    #   callback MUST avoid expensive or long running processing as that may
+    #   causes issues inside librdkafka.
     #
-    # @return [DeliveryReport] When no block is given, returns the
-    #   DeliveryReport to get status of delivery.
-    # @return When a block is given, returns the result of the block.
-    def produce(topic, payload, key: nil, partition: nil, headers: nil, timestamp: nil)
-      report = DeliveryReport.new
+    # @yield [report] Called asyncronously when the report is received from
+    #   Kafka on the success or failure of the delivery.
+    # @yieldparam report [DeliveryReport] Delivery status of the message.
+    #
+    # @return [DeliveryReport] Report of the success or failure of the
+    #   delivery. Call #wait to block until the report is received.
+    def produce(topic, payload, key: nil, partition: nil, headers: nil, timestamp: nil, &block)
+      report = DeliveryReport.new(&block)
 
       # Allocate a pointer to a small chunk of memory. We will use the pointer
       # (not the value it points to) as a key for looking up the DeliveryReport
@@ -66,11 +71,7 @@ module Kafka
 
       @client.produce(topic, payload, key: key, partition: partition, headers: headers, timestamp: timestamp, opaque: opaque)
 
-      if block_given?
-        yield(report)
-      else
-        report
-      end
+      report
     rescue
       opaque.free
 

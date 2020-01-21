@@ -24,4 +24,32 @@ RSpec.describe Kafka::Producer do
       producer.close
     end
   end
+
+  specify "#produce takes a block for async delivery reports" do
+    producer = Kafka::Producer.new(config)
+
+    with_topic do |topic|
+      # Publish a message and wait for it to be delivered
+      reports = Queue.new
+
+      result = producer.produce(topic, "[EXAMPLE CONTENT HERE]") do |report|
+        reports << report
+      end
+      expect(result).to be_a(Kafka::Producer::DeliveryReport)
+
+      result.wait
+
+      async = Timeout.timeout(1) { reports.pop }
+      expect(async).to be_successful
+
+      # Same object is returned
+      expect(async).to be(result)
+
+      published = fetch(topic, count: 1)
+      expect(published.length).to eq(1)
+      expect(published[0].payload).to eq("[EXAMPLE CONTENT HERE]")
+    ensure
+      producer.close
+    end
+  end
 end
