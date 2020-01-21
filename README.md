@@ -1,6 +1,7 @@
 # Kafka
 
 [![Build Status](https://travis-ci.com/deadmanssnitch/kafka.svg?branch=master)](https://travis-ci.com/deadmanssnitch/kafka)
+[![Gem Version](https://badge.fury.io/rb/kafka.svg)](https://badge.fury.io/rb/kafka)
 
 The kafka gem provides a general producer and consumer for
 [Apache Kafka](https://kafka.apache.org) using bindings to the official
