@@ -114,6 +114,7 @@ module Kafka
     def destroy
       @client.destroy
     end
+    alias close destroy
 
     private
 

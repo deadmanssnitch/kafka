@@ -51,3 +51,19 @@ namespace :ffi do
     puts `grep -o -h -P '^\\s+attach_function\\s+:\\Krd_kafka_\\w+' #{ffi_path} | sort`
   end
 end
+
+namespace :kafka do
+  desc "Start an instance of Kafka running in docker"
+  task :up do
+    # Find the docker-compose file for the most recent version of Kafka in
+    # spec/support.
+    compose = Dir["spec/support/kafka-*.yml"].max
+
+    sh "docker-compose -p ruby_kafka_dev -f #{compose} up -d"
+  end
+
+  desc "Shutdown the development Kafka instance"
+  task :down do
+    sh "docker-compose -p ruby_kafka_dev down"
+  end
+end
