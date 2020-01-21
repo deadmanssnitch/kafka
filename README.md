@@ -149,7 +149,7 @@ To get started with development make sure to have docker, docker-compose, and
 [kafkacat](https://github.com/edenhill/kafkacat) installed as they make getting
 up to speed easier.
 
-Before running the test, start an instance of
+Before running the test, start a Kafka broker instance
 
 ```console
 rake kafka:up
