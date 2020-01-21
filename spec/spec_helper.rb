@@ -86,7 +86,7 @@ RSpec.configure do |config|
   # @param timeout [Integer] Max time to wait in milliseconds
   #
   # @raise [Timeout::Error] Waiting timed out
-  def wait_for_assignments(consumer, topic: nil, timeout: 5000)
+  def wait_for_assignments(consumer, topic: nil, timeout: 10000)
     Timeout.timeout(timeout / 1000.0) do
       loop do
         assignments = consumer.assignments
