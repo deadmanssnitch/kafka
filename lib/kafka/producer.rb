@@ -23,7 +23,6 @@ module Kafka
 
       # Configure callbacks
       config.on_delivery_report(&method(:on_delivery_report))
-      config.on_error(&method(:on_error))
 
       @client = ::Kafka::FFI::Producer.new(config)
 
@@ -122,14 +121,6 @@ module Kafka
       ensure
         op.free
       end
-    end
-
-    # @param client [Kafka::FFI::Producer]
-    # @param error [Integer]
-    # @param reason [String]
-    # @param opaque [FFI::Pointer]
-    def on_error(_client, error, reason, _opaque)
-      # @todo Bubble up to app.
     end
   end
 end
