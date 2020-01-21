@@ -8,7 +8,7 @@ The kafka gem provides a general producer and consumer for
 module implements an object oriented mapping to most of the librdkafka API,
 making it easier and safer to use than calling functions directly.
 
-## :rotating_light: Project Status: Beta :rotating_light:
+## ⚠️ Project Status: Beta ⚠️
 
 This project is currently of BETA quality. Some APIs are still in flux and may
 change. There are also probably a number of subtle (and not so subtle) bugs and
