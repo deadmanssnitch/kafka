@@ -114,6 +114,35 @@ exported on `Kafka::FFI.rd_kafka_*`. Most will require understanding memory
 management but most should be easier to use and safe than calling into
 librdkafka directly.
 
+## Why another Kafka gem?
+
+There are already at least two good gems for Kafka:
+[ruby-kafka](https://github.com/zendesk/ruby-kafka) and
+[rdkafka](https://github.com/appsignal/rdkafka-ruby). In fact we've used both
+of these gems on Dead Man's Snitch for quite a while and they've been great. We
+really appreciate all of the work that has gone into them :heart:.
+
+Unfortunately, keeping up with Kafka feature and protocol changes can be a full
+time job. Development on ruby-kafka has stalled for that reason and many
+consumer/producer libraries are migrating away from it.
+
+As a heartbeat and cron job monitoring service, we depend on receiving and
+processing reports from jobs reliably and quickly. Failing to receive a report
+could mean waking someone up at 3AM or forcing them to take time away from
+family or friends to deal with a false alarm. What started as a deep dive into
+rdkafka to understand how best to use it reliably, we had ideas we wanted to
+implement that probably wouldn't have been a good fit for rdkafka so we decided
+to start from scratch.
+
+Our goal is to provide a stable and easy to maintain Kafka consumer / producer
+for Ruby. With time as our biggest constraint it makes sense to leverage
+librdkafka as it has full time maintenance and support by the team behind
+Kafka. FFI makes it fast and easy to expose new librdkafka APIs as they are
+added. A stable test suite means being able to meaningfully spend the limited
+amount of time we have available to invest. Embracing memory management and
+building clean separations between layers should reduce the burden to implement
+new bindings as the rules and responsibilities of each layer are clear.
+
 ## Development
 
 To get started with development make sure to have docker, docker-compose, and
