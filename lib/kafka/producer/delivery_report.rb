@@ -47,6 +47,14 @@ class Kafka::Producer
       error.nil?
     end
 
+    # Returns if the delivery was successful
+    #
+    # @return [Boolean] True when the report was delivered to the cluster
+    #   successfully.
+    def successful?
+      !error
+    end
+
     # @private
     #
     # Set the response based on the message and notify anyone waiting on the
