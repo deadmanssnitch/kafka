@@ -43,6 +43,10 @@ Or install it yourself as:
 
 For more examples see [the examples directory](examples/).
 
+For a detailed introduction on librdkafka which would be useful when working
+with `Kafka::FFI` directly, see 
+[the librdkafka documentation](https://github.com/edenhill/librdkafka/blob/master/INTRODUCTION.md).
+
 ### Sending Message to a Topic
 
 ```ruby
