@@ -30,6 +30,16 @@ module Kafka
       rd_kafka_version_str
     end
 
+    # Returns the set of features available from librdkafka
+    #
+    # @return [Array<String>] List of available features
+    def self.features
+      conf = Config.new
+      conf.get("builtin.features").split(",")
+    ensure
+      conf.destroy
+    end
+
     # kafka_type is passed to rd_kafka_new to specify the role of the
     # connection.
     #
