@@ -73,13 +73,14 @@ module Kafka
       # @see https://github.com/edenhill/librdkafka/blob/master/INTRODUCTION.md#high-level-kafkaconsumer
       @poller.stop
 
-      # Leave the consumer group, commit and hanging offsets, etc...
-      @client.close
-
-      # Dispatch any remaining callbacks or events.
-      @client.poll
-
-      # Release resources back to the system.
+      # Gracefully shutdown the consumer, leaving the consumer group,
+      # committing any remaining offsets, and releasing resources back to the
+      # system.
+      #
+      # This will effectively call #close on the Client automatically. Trying
+      # to follow the documentation and calling #close before #destroy caused
+      # warnings due to brokers disconnecting but just calling #destroy fixes
+      # that.
       @client.destroy
     end
   end
