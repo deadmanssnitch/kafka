@@ -18,8 +18,9 @@ module Kafka
       # Initialize the client
       @client = Kafka::FFI::Consumer.new(config)
 
-      # Event loop polling for events so callbacks are fired.
-      @poller = Poller.new(@client)
+      # Redirect the main event queue so calls to consumer_poll will fire
+      # callbacks instead of having to have a separate poller thread.
+      @client.poll_set_consumer
     end
 
     # Subscribe the consumer to the given list of topics. Once the
@@ -71,7 +72,6 @@ module Kafka
     #   Consumer.
     def close
       # @see https://github.com/edenhill/librdkafka/blob/master/INTRODUCTION.md#high-level-kafkaconsumer
-      @poller.stop
 
       # Gracefully shutdown the consumer, leaving the consumer group,
       # committing any remaining offsets, and releasing resources back to the
