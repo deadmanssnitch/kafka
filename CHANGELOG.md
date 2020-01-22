@@ -1,5 +1,7 @@
 ## Unreleased
 
+* Fixes DeliveryReport#error? and DeliveryReport#successful? being swapped
+
 ## 0.5.1 / 2020-01-22
 
 * Kafka::Consumer now uses poll_set_consumer instead of a Poller thread

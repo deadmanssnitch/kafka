@@ -59,9 +59,13 @@ class Kafka::Producer
       @done
     end
 
-    # @return [Boolean] Is the report for an error?
+    # Returns if the delivery errored
+    #
+    # @see #see
+    #
+    # @return [Boolean] True when the delivery failed with an error.
     def error?
-      error.nil?
+      received? && !successful?
     end
 
     # Returns if the delivery was successful
@@ -69,7 +73,7 @@ class Kafka::Producer
     # @return [Boolean] True when the report was delivered to the cluster
     #   successfully.
     def successful?
-      !error
+      received? && error.nil?
     end
 
     # @private
@@ -97,6 +101,8 @@ class Kafka::Producer
       if @callback
         @callback.call(self)
       end
+
+      nil
     end
 
     # Wait for a report to be received for the delivery from the cluster.
