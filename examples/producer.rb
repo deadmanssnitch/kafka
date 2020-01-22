@@ -29,7 +29,6 @@ workers = 8.times.map do |i|
     while @run
       producer.produce("ruby_test_topic", "#{i}: #{SecureRandom.uuid}") do |report|
         # Wait for delivery confirmation from the cluster
-        report.wait
         puts report.inspect
       end
 
