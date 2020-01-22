@@ -11,6 +11,7 @@ RSpec.configure do
     attr_reader :offset
     attr_reader :timestamp
     attr_reader :headers
+    attr_reader :latency
 
     def initialize(json)
       raw = JSON.parse(json)
@@ -21,6 +22,7 @@ RSpec.configure do
       @offset = raw["offset"]
       @payload = raw["payload"]
       @timestamp = raw["ts"]
+      @latency = ((Time.now - Time.at(0, @timestamp, :millisecond)).to_f * 100_000).to_i
 
       @headers = {}
 

@@ -19,6 +19,17 @@ class Kafka::Producer
     # @return [Integer] Partition the message was delivered to.
     attr_reader :partition
 
+    # Returns the number of microseconds since the message was enqueued for
+    # delivery until the message was confirmed by the cluster or permanently
+    # failed.
+    #
+    # @note Latency is in microseconds (μs) while most other timestamps are in
+    #   milliseconds.
+    #
+    # @return [nil] Latency was not available
+    # @return [Integer] Time since message was produced in microseconds
+    attr_reader :latency
+
     # Initializes a new DeliveryReport
     #
     # @param block [Proc] Callback to call with the DeliveryReport when it is
@@ -30,6 +41,7 @@ class Kafka::Producer
       @error = nil
       @topic = nil
       @offset = nil
+      @latency = nil
       @partition = nil
       @callback = block
 
@@ -73,6 +85,7 @@ class Kafka::Producer
         @offset = message.offset
         @topic = message.topic
         @partition = message.partition
+        @latency = message.latency
 
         @done = true
         @waiter.broadcast

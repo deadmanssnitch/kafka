@@ -19,6 +19,7 @@ RSpec.describe Kafka::Producer do
       expect(published[0].topic).to eq(result.topic)
       expect(published[0].offset).to eq(result.offset)
       expect(published[0].partition).to eq(result.partition)
+      expect(published[0].latency).to be > 0
       expect(result.error).to be(nil)
     ensure
       producer.close
@@ -41,6 +42,10 @@ RSpec.describe Kafka::Producer do
 
       async = Timeout.timeout(1) { reports.pop }
       expect(async).to be_successful
+      expect(async.topic).to eq(topic)
+      expect(async.offset).to eq(0)
+      expect(async.partition).not_to be(nil)
+      expect(async.latency).to be > 0
 
       # Same object is returned
       expect(async).to be(result)
