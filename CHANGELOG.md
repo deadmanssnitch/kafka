@@ -1,6 +1,8 @@
 ## Unreleased
 
 * Fixes DeliveryReport#error? and DeliveryReport#successful? being swapped
+* Adds all current RD_KAFKA_RESP_ERR_ constants
+* Adds Kafka::QueueFullError for when producer queue is full
 
 ## 0.5.1 / 2020-01-22
 

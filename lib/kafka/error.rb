@@ -9,6 +9,26 @@ module Kafka
   # @see rdkafka.h RD_KAFKA_RESP_ERR_*
   # @see rdkafka.h rd_kafka_resp_err_t
   class ::Kafka::ResponseError < Error
+    def self.new(code, message = nil)
+      klass =
+        case code
+        when Kafka::FFI::RD_KAFKA_RESP_ERR__QUEUE_FULL
+          QueueFullError
+        else
+          ResponseError
+        end
+
+      error = klass.allocate
+      error.send(:initialize, code, message)
+      error
+    end
+
+    # exception is called instead of `new` when using the form:
+    #   raise Kafka::ResponseError, code
+    def self.exception(code)
+      new(code)
+    end
+
     # @attr code [Integer] Error code as defined by librdkafka.
     attr_reader :code
 
@@ -41,4 +61,10 @@ module Kafka
       @message || ::Kafka::FFI.rd_kafka_err2str(@code)
     end
   end
+
+  # QueueFullError is raised when producing messages and the queue of messages
+  # pending delivery to topics has reached it's size limit.
+  #
+  # @see Config option `queue.buffering.max.messages`
+  class QueueFullError < ResponseError; end
 end

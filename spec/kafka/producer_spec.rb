@@ -57,4 +57,18 @@ RSpec.describe Kafka::Producer do
       producer.close
     end
   end
+
+  specify "#produce when queue is full" do
+    producer = Kafka::Producer.new(config({
+      # Small buffer so we can easily overflow it
+      "queue.buffering.max.messages": 1,
+    }))
+
+    with_topic do |topic|
+      expect { 10.times { producer.produce(topic, "") } }
+        .to raise_error(Kafka::QueueFullError)
+    ensure
+      producer.close
+    end
+  end
 end

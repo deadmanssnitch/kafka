@@ -33,6 +33,10 @@ module Kafka::FFI
     #   which will be available as Message#opaque in callbacks. The application
     #   MUST call #free on the Opaque once the final callback has been
     #   triggered to avoid leaking memory.
+    #
+    # @raise [Kafka::QueueFullError] Number of messages queued for delivery has
+    #   exceeded capacity. See `queue.buffering.max.messages` config setting to
+    #   adjust.
     def produce(topic, payload, key: nil, partition: nil, headers: nil, timestamp: nil, opaque: nil)
       args = [
         # Ensure librdkafka copies the payload into its own memory since the
