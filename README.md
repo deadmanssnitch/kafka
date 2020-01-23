@@ -2,12 +2,17 @@
 
 [![Build Status](https://travis-ci.com/deadmanssnitch/kafka.svg?branch=master)](https://travis-ci.com/deadmanssnitch/kafka)
 [![Gem Version](https://badge.fury.io/rb/kafka.svg)](https://badge.fury.io/rb/kafka)
+[![Documentation](https://img.shields.io/badge/-Documentation-success)](https://deadmanssnitch.com/opensource/kafka/docs/)
 
-The kafka gem provides a general producer and consumer for
-[Apache Kafka](https://kafka.apache.org) using bindings to the official
-[C client librdkafka](https://github.com/edenhill/librdkafka).  The `Kafka::FFI`
-module implements an object oriented mapping to most of the librdkafka API,
-making it easier and safer to use than calling functions directly.
+Kafka provides a Ruby client for [Apache Kafka](https://kafka.apache.org) that
+leverages [librdkafka](https://github.com/edenhill/librdkafka) for its
+performance and general correctness.
+
+## Features
+- Thread safe Producer with sync and async delivery reporting
+- High-level balanced Consumer
+- Admin client
+- Object oriented librdkafka mappings for easy custom implementations
 
 ## ⚠️ Project Status: Beta ⚠️
 
@@ -23,6 +28,8 @@ You (yes you!) can make a difference and help make this project better. Test
 against your application and traffic, implement missing functions (see
 `rake ffi:missing`), work with the API and make suggestions for improvements.
 All help is wanted and appreciated.
+
+Kafka is currently in production usage at [Dead Man's Snitch](https://deadmanssnitch.com).
 
 ## Installation
 
@@ -40,12 +47,12 @@ Or install it yourself as:
 
     $ gem install kafka
 
-## Usage
+## Getting Started
 
 For more examples see [the examples directory](examples/).
 
 For a detailed introduction on librdkafka which would be useful when working
-with `Kafka::FFI` directly, see 
+with `Kafka::FFI` directly, see
 [the librdkafka documentation](https://github.com/edenhill/librdkafka/blob/master/INTRODUCTION.md).
 
 ### Sending Message to a Topic
@@ -71,10 +78,10 @@ result = producer.produce("events", event.to_json)
 require "kafka"
 
 config = Kafka::Config.new({
-  "bootstrap.servers": "localhost:9092",
+"bootstrap.servers": "localhost:9092",
 
-  # Required for consumers to know what consumer group to join.
-  "group.id": "web.production.eventer",
+# Required for consumers to know what consumer group to join.
+"group.id": "web.production.eventer",
 })
 
 consumer = Kafka::Consumer.new(config)
@@ -85,9 +92,9 @@ trap("INT")  { @run = false }
 trap("TERM") { @run = false }
 
 while @run
-  consumer.poll do |message|
-    puts message.payload
-  end
+consumer.poll do |message|
+puts message.payload
+end
 end
 ```
 
@@ -144,11 +151,25 @@ amount of time we have available to invest. Embracing memory management and
 building clean separations between layers should reduce the burden to implement
 new bindings as the rules and responsibilities of each layer are clear.
 
+## Thread / Fork Safety
+
+The `Producer` is thread safe for publishing messages but should only be closed
+from a single thread. While the `Consumer` is thread safe for calls to `#poll`
+only one message can be in flight at a time, causing the threads to serialize.
+Instead, create a single consumer for each thread.
+
+Kafka _is not_ `fork` safe. Make sure to close any Producers or Consumer before
+forking and rebuilt them after the process forks.
+
+## Compatibility
+
+Kafka requires Ruby 2.5+ and is tested against Ruby 2.5+ and Kafka 2.1+.
+
 ## Development
 
-To get started with development make sure to have docker, docker-compose, and
-[kafkacat](https://github.com/edenhill/kafkacat) installed as they make getting
-up to speed easier.
+To get started with development make sure to have `docker`, `docker-compose`, and
+[`kafkacat`](https://github.com/edenhill/kafkacat) installed as they make getting
+up to speed easier. Some rake tasks depend on `ctags`.
 
 Before running the test, start a Kafka broker instance
 
@@ -175,9 +196,11 @@ the [code of conduct](https://github.com/deadmanssnitch/kafka/blob/master/CODE_O
 
 ## License
 
-The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
+The gem is available as open source under the terms of the
+[MIT License](https://opensource.org/licenses/MIT).
 
 ## Code of Conduct
 
-Everyone interacting in the Kafka project's codebases and issue trackers are expected to follow the
+Everyone interacting in the Kafka project's codebases and issue trackers are
+expected to follow the
 [code of conduct](https://github.com/deadmanssnitch/kafka/blob/master/CODE_OF_CONDUCT.md).
