@@ -15,14 +15,13 @@ end
 task default: [:ext, :spec]
 
 namespace :ffi do
-  desc "Lists the librdkafka functions that have not been implemented in Kafka::FFI"
-  task :missing do
-    require_relative "lib/kafka/version"
+  require_relative "lib/kafka/version"
 
-    require "uri"
-    require "net/http"
-    require "tempfile"
+  require "uri"
+  require "net/http"
+  require "tempfile"
 
+  def header
     header = Tempfile.new(["rdkafka", ".h"])
 
     # Fetch the header for the pinned version of librdkafka. rdkafka.h contains
@@ -32,7 +31,14 @@ namespace :ffi do
     header.write(resp)
     header.close
 
-    all = `ctags -x --sort=yes --kinds-C=pf #{header.path} | awk '{ print $1 }'`
+    at_exit { header.unlink }
+
+    header.path
+  end
+
+  desc "Lists the librdkafka functions that have not been implemented in Kafka::FFI"
+  task :missing do
+    all = `ctags -x --sort=yes --kinds-C=pf #{header} | awk '{ print $1 }'`
     all = all.split("\n")
 
     ffi_path = File.expand_path("lib/kafka/ffi.rb", __dir__)
@@ -41,14 +47,35 @@ namespace :ffi do
 
     missing = all - implemented
     puts missing
-  ensure
-    header.unlink
   end
 
   desc "Prints the list of implemented librdkafka functions"
   task :implemented do
     ffi_path = File.expand_path("lib/kafka/ffi.rb", __dir__)
     puts `grep -o -h -P '^\\s+attach_function\\s+:\\Krd_kafka_\\w+' #{ffi_path} | sort`
+  end
+
+  namespace :sync do
+    desc "Update ffi.rb with all errors defined in rdkafka.h"
+    task :errors do
+      ffi_path = File.expand_path("lib/kafka/ffi.rb", __dir__)
+
+      cmd = [
+        # Find all of the enumerator types in the header
+        "ctags -x --sort=no --kinds-C=e #{header}",
+
+        # Reduce it to just RD_KAFKA_RESP_ERR_* and their values
+        "grep -o -P 'RD_KAFKA_RESP_ERR_\\w+ = -?\\d+'",
+
+        # Add spacing to the constants so they line up correctly.
+        "sed -e 's/^/    /'",
+
+        # Delete any existing error constants then append the generated result.
+        "sed -e '/^\\s\\+RD_KAFKA_RESP_ERR_.\\+=.\\+/d' -e '/Response Errors/r /dev/stdin' #{ffi_path}",
+      ].join(" | ")
+
+      File.write(ffi_path, `#{cmd}`, mode: "w")
+    end
   end
 end
 
