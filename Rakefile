@@ -64,6 +64,7 @@ namespace :kafka do
 
   desc "Shutdown the development Kafka instance"
   task :down do
-    sh "docker-compose -p ruby_kafka_dev down"
+    compose = Dir["spec/support/kafka-*.yml"].max
+    sh "docker-compose -p ruby_kafka_dev -f #{compose} down"
   end
 end
