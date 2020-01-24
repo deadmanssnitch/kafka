@@ -55,7 +55,7 @@ For a detailed introduction on librdkafka which would be useful when working
 with `Kafka::FFI` directly, see
 [the librdkafka documentation](https://github.com/edenhill/librdkafka/blob/master/INTRODUCTION.md).
 
-### Sending Message to a Topic
+### Sending a Message to a Topic
 
 ```ruby
 require "kafka"
@@ -68,8 +68,17 @@ event = { time: Time.now, status: "success" }
 result = producer.produce("events", event.to_json)
 
 # Wait for the delivery to confirm that publishing was successful.
-# result.wait
-# result.successful?
+result.wait
+result.successful?
+
+# Provide a callback to be called when the delivery status is ready.
+producer.produce("events", event.to_json) do |result|
+  StatsD.increment("kafka.total")
+  
+  if result.error?
+    StatsD.increment("kafka.errors")
+  end
+end
 ```
 
 ### Consuming Messages from a Topic
@@ -78,10 +87,10 @@ result = producer.produce("events", event.to_json)
 require "kafka"
 
 config = Kafka::Config.new({
-"bootstrap.servers": "localhost:9092",
+  "bootstrap.servers": "localhost:9092",
 
-# Required for consumers to know what consumer group to join.
-"group.id": "web.production.eventer",
+  # Required for consumers to know what consumer group to join.
+  "group.id": "web.production.eventer",
 })
 
 consumer = Kafka::Consumer.new(config)
@@ -92,9 +101,9 @@ trap("INT")  { @run = false }
 trap("TERM") { @run = false }
 
 while @run
-consumer.poll do |message|
-puts message.payload
-end
+  consumer.poll do |message|
+    puts message.payload
+  end
 end
 ```
 
@@ -159,7 +168,7 @@ only one message can be in flight at a time, causing the threads to serialize.
 Instead, create a single consumer for each thread.
 
 Kafka _is not_ `fork` safe. Make sure to close any Producers or Consumer before
-forking and rebuilt them after the process forks.
+forking and rebuild them after forking the new process.
 
 ## Compatibility
 
