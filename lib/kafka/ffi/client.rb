@@ -122,17 +122,23 @@ module Kafka::FFI
     # Retrieves the Client's Cluster ID
     #
     # @note requires config `api.version.request` set to true
-    def cluster_id
-      id = ::Kafka::FFI.rd_kafka_clusterid(self)
-
-      if id.null?
+    #
+    # @param timeout [Integer] Maximum time to wait in milliseconds. Use 0 for
+    # non-bloack call that will return immediately if metadata is cached.
+    #
+    # @return [nil] Cluster ID not available
+    # @return [String] ID of the Cluster
+    def cluster_id(timeout: 1000)
+      ptr = ::Kafka::FFI.rd_kafka_clusterid(self, timeout)
+      if ptr.null?
         return nil
       end
 
-      id.read_string
-    ensure
-      if !id.null?
-        ::Kafka::FFI.rd_kafka_mem_free(self, id)
+      begin
+        ptr.read_string
+      ensure
+        # Documentation explicitly says that the string needs to be freed.
+        ::Kafka::FFI.rd_kafka_mem_free(self, ptr)
       end
     end
 

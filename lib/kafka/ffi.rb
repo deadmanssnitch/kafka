@@ -409,7 +409,7 @@ module Kafka
     attach_function :rd_kafka_type, [Client], :kafka_type
     attach_function :rd_kafka_name, [Client], :string
     attach_function :rd_kafka_memberid, [Client], :pointer
-    attach_function :rd_kafka_clusterid, [Client], :pointer
+    attach_function :rd_kafka_clusterid, [Client, :timeout_ms], :pointer
     attach_function :rd_kafka_controllerid, [Client, :timeout_ms], :broker_id, blocking: true
     attach_function :rd_kafka_default_topic_conf_dup, [Client], TopicConfig
     attach_function :rd_kafka_conf, [Client], Config

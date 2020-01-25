@@ -1,6 +1,7 @@
 ## Unreleased
 
 * Fixes DeliveryReport#error? and DeliveryReport#successful? being swapped
+* Fixes Kafka::FFI::Client#cluster_id being incorrectly bound
 * Adds all current RD_KAFKA_RESP_ERR_ constants
 * Adds Kafka::QueueFullError for when producer queue is full
 

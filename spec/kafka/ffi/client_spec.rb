@@ -12,6 +12,16 @@ RSpec.describe Kafka::FFI::Client do
     client.destroy
   end
 
+  specify "#cluster_id" do
+    client = Kafka::FFI::Client.new(:producer, config)
+
+    # Mainly validate that the call is correct since the value can't be
+    # determined before hand. rd_kafka_clusterid
+    expect(client.cluster_id).not_to be_empty
+  ensure
+    client.destroy
+  end
+
   specify "#metadata" do
     client = Kafka::FFI::Client.new(:consumer, config)
 
