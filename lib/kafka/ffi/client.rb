@@ -172,25 +172,23 @@ module Kafka::FFI
     #   Topic can only be configured at creation.
     #
     # @raise [Kafka::ResponseError] Error occurred creating the topic
-    # @raise [TopicAlreadyConfiguredError] Passed a config for a topic that has
-    #   already been configured.
+    # @raise [Kafka::FFI::TopicAlreadyConfiguredError] Passed a config for a
+    #   topic that has already been configured.
     #
     # @return [Topic] Topic instance
-    #   error.
     def topic(name, config = nil)
       topic = @topics[name]
       if topic
         if config
           # Make this an exception because it's probably a programmer error
-          # that _should_ only primarily happen during development due to
+          # that _should_ primarily happen during development due to
           # misunderstanding the semantics.
-          raise TopicAlreadyConfigured, "#{name} was already configured"
+          raise ::Kafka::FFI::TopicAlreadyConfiguredError, "#{name} was already configured"
         end
 
         return topic
       end
 
-      # @todo - Keep list of topics and manage their lifecycle?
       topic = ::Kafka::FFI.rd_kafka_topic_new(self, name, config)
       if topic.nil?
         raise ::Kafka::ResponseError, ::Kafka::FFI.rd_kafka_last_error

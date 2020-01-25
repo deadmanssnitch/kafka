@@ -22,6 +22,28 @@ RSpec.describe Kafka::FFI::Client do
     client.destroy
   end
 
+  specify "#topic" do
+    client = Kafka::FFI::Client.new(:producer, config)
+
+    with_topic do |topic|
+      cfg = Kafka::FFI::TopicConfig.new
+      cfg.set("auto.commit.enable", false)
+
+      # First call to configure a topic
+      t = client.topic(topic, cfg)
+      expect(t).not_to be(nil)
+
+      # It is an error to try and reconfigure a topic.
+      expect { client.topic(topic, cfg) }
+        .to raise_error(Kafka::FFI::TopicAlreadyConfiguredError)
+
+      # Cached topic is always returned
+      expect(client.topic(topic)).to be(t)
+    end
+  ensure
+    client.destroy
+  end
+
   specify "#metadata" do
     client = Kafka::FFI::Client.new(:consumer, config)
 
