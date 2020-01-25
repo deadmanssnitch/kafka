@@ -54,7 +54,7 @@ module Kafka
       @client.consumer_poll(timeout, &block)
     end
 
-    # @param msg [Consumer::Message]
+    # @param msg [Kafka::FFI::Message]
     def commit(msg, async: false)
       list = Kafka::FFI::TopicPartitionList.new(1)
 
@@ -66,7 +66,7 @@ module Kafka
       list.destroy
     end
 
-    # Gracefully shutdown the consumer and it's connections.
+    # Gracefully shutdown the consumer and its connections.
     #
     # @note After calling #close it is unsafe to call any other method on the
     #   Consumer.

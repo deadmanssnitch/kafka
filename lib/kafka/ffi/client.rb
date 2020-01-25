@@ -17,7 +17,7 @@ module Kafka::FFI
   #
   # @note Naming this is hard and librdkafka primarily just refers to it as "a
   #   handle" to an instance. It's more akin to an internal service and this
-  #   Client talks the API to that service.
+  #   Client talks the API of that service.
   class Client < OpaquePointer
     require "kafka/ffi/consumer"
     require "kafka/ffi/producer"
@@ -101,6 +101,9 @@ module Kafka::FFI
     def initialize(ptr)
       super(ptr)
 
+      # Caches Topics created on the first call to #topic below. Topics need to
+      # be destroyed before destroying the Client. We keep a set in the client
+      # so end users don't need to think about it.
       @topics = {}
     end
 
@@ -108,6 +111,8 @@ module Kafka::FFI
     #
     # @note The returned config is read-only and tied to the lifetime of the
     #   Client. Don't try to modify or destroy the config.
+    #
+    # @return [Config] Client's current config. Read-only.
     def config
       ::Kafka::FFI.rd_kafka_conf(self)
     end
