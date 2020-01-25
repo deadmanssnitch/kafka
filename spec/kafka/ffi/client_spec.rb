@@ -12,12 +12,26 @@ RSpec.describe Kafka::FFI::Client do
     client.destroy
   end
 
+  specify "#name" do
+    client = Kafka::FFI::Client.new(:producer, config)
+    expect(client.name).to include("producer-")
+  ensure
+    client.destroy
+  end
+
   specify "#cluster_id" do
     client = Kafka::FFI::Client.new(:producer, config)
 
     # Mainly validate that the call is correct since the value can't be
     # determined before hand. rd_kafka_clusterid
     expect(client.cluster_id).not_to be_empty
+  ensure
+    client.destroy
+  end
+
+  specify "#controller_id" do
+    client = Kafka::FFI::Client.new(:producer, config)
+    expect(client.controller_id).to eq(1001)
   ensure
     client.destroy
   end
