@@ -409,7 +409,7 @@ module Kafka
     attach_function :rd_kafka_type, [Client], :kafka_type
     attach_function :rd_kafka_name, [Client], :string
     attach_function :rd_kafka_memberid, [Client], :pointer
-    attach_function :rd_kafka_clusterid, [Client, :timeout_ms], :pointer
+    attach_function :rd_kafka_clusterid, [Client, :timeout_ms], :pointer, blocking: true
     attach_function :rd_kafka_controllerid, [Client, :timeout_ms], :broker_id, blocking: true
     attach_function :rd_kafka_default_topic_conf_dup, [Client], TopicConfig
     attach_function :rd_kafka_conf, [Client], Config
@@ -573,14 +573,14 @@ module Kafka
     attach_function :rd_kafka_consume_start, [Topic, :partition, :offset], :int
     attach_function :rd_kafka_consume_start_queue, [Topic, :partition, :offset, Queue], :int
     attach_function :rd_kafka_consume_stop, [Topic, :partition], :int
-    attach_function :rd_kafka_consume, [Topic, :partition, :timeout_ms], Message.by_ref
-    attach_function :rd_kafka_consume_batch, [Topic, :partition, :timeout_ms, :pointer, :size_t], :ssize_t
-    attach_function :rd_kafka_consume_callback, [Topic, :partition, :timeout_ms, :consume_cb, :pointer], :int
+    attach_function :rd_kafka_consume, [Topic, :partition, :timeout_ms], Message.by_ref, blocking: true
+    attach_function :rd_kafka_consume_batch, [Topic, :partition, :timeout_ms, :pointer, :size_t], :ssize_t, blocking: true
+    attach_function :rd_kafka_consume_callback, [Topic, :partition, :timeout_ms, :consume_cb, :pointer], :int, blocking: true
 
     ### Simple Consumer Queue API
-    attach_function :rd_kafka_consume_queue, [Queue, :timeout_ms], Message.by_ref
-    attach_function :rd_kafka_consume_batch_queue, [Queue, :timeout_ms, :pointer, :size_t], :ssize_t
-    attach_function :rd_kafka_consume_callback_queue, [Queue, :timeout_ms, :consume_cb, :pointer], :int
+    attach_function :rd_kafka_consume_queue, [Queue, :timeout_ms], Message.by_ref, blocking: true
+    attach_function :rd_kafka_consume_batch_queue, [Queue, :timeout_ms, :pointer, :size_t], :ssize_t, blocking: true
+    attach_function :rd_kafka_consume_callback_queue, [Queue, :timeout_ms, :consume_cb, :pointer], :int, blocking: true
 
     ### Simple Consumer Topic + Partition API
     attach_function :rd_kafka_offset_store, [Topic, :partition, :offset], :error_code
@@ -594,16 +594,16 @@ module Kafka
     attach_function :rd_kafka_purge, [Producer, :int], :error_code, blocking: true
 
     # Metadata
-    attach_function :rd_kafka_metadata, [Client, :bool, Topic, :pointer, :timeout_ms], :error_code
+    attach_function :rd_kafka_metadata, [Client, :bool, Topic, :pointer, :timeout_ms], :error_code, blocking: true
     attach_function :rd_kafka_metadata_destroy, [Metadata.by_ref], :void
 
     # Group List
-    attach_function :rd_kafka_list_groups, [Client, :string, :pointer, :timeout_ms], :error_code
+    attach_function :rd_kafka_list_groups, [Client, :string, :pointer, :timeout_ms], :error_code, blocking: true
     attach_function :rd_kafka_group_list_destroy, [GroupList.by_ref], :void
 
     # Queue
     attach_function :rd_kafka_queue_new, [Client], Queue
-    attach_function :rd_kafka_queue_poll, [Queue, :timeout_ms], Event
+    attach_function :rd_kafka_queue_poll, [Queue, :timeout_ms], Event, blocking: true
     attach_function :rd_kafka_queue_get_main, [Client], Queue
     attach_function :rd_kafka_queue_get_consumer, [Consumer], Queue
     attach_function :rd_kafka_queue_get_partition, [Consumer, :topic, :partition], Queue
