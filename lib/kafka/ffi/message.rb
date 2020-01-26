@@ -106,7 +106,7 @@ module Kafka::FFI
     # @raise [Kafka::ResponseError] Error occurred parsing headers
     #
     # @return [nil] Message does not have any headers
-    # @return [Message::Headers] Set of headers
+    # @return [Message::Header] Set of headers
     def headers
       ptr = ::FFI::MemoryPointer.new(:pointer)
 
@@ -116,7 +116,7 @@ module Kafka::FFI
         if ptr.null?
           nil
         else
-          Message::Headers.new(ptr)
+          Message::Header.new(ptr)
         end
       when RD_KAFKA_RESP_ERR__NOENT
         # Messages does not have headers
@@ -136,7 +136,7 @@ module Kafka::FFI
     # @raise [Kafka::ResponseError] Error occurred parsing headers
     #
     # @return [nil] Message does not have any headers
-    # @return [Message::Headers] Set of headers
+    # @return [Message::Header] Set of headers
     def detach_headers
       ptr = ::FFI::MemoryPointer.new(:pointer)
 
@@ -146,7 +146,7 @@ module Kafka::FFI
         if ptr.null?
           nil
         else
-          Message::Headers.new(ptr)
+          Message::Header.new(ptr)
         end
       when RD_KAFKA_RESP_ERR__NOENT
         # Messages does not have headers
