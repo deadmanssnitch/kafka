@@ -353,7 +353,7 @@ module Kafka::FFI
     # @raise [ConfigError] Certificate was not properly encoded or librdkafka
     #   was not compiled with SSL/TLS.
     def set_ssl_cert(cert_type, cert_enc, certificate)
-      error = ::MemoryPointer.new(:char, 512)
+      error = ::FFI::MemoryPointer.new(:char, 512)
 
       err = ::Kafka::FFI.rd_kafka_conf_set_ssl_cert(cert_type, cert_enc, certificate, certificate.bytesize, error, error.size)
       if err != :ok
