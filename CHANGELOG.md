@@ -2,6 +2,8 @@
 
 * Fixes DeliveryReport#error? and DeliveryReport#successful? being swapped
 * Fixes Kafka::FFI::Client#cluster_id being incorrectly bound
+* Fixes naming issues in Message#headers and Message#detach_headers
+* Fixes naming issue in Config#set_ssl_cert
 * Adds all current RD_KAFKA_RESP_ERR_ constants
 * Adds Kafka::QueueFullError for when producer queue is full
 
