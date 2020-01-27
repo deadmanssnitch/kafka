@@ -1,5 +1,7 @@
 ## Unreleased
 
+## 0.5.2 / 2020-01-27
+
 * Fixes DeliveryReport#error? and DeliveryReport#successful? being swapped
 * Fixes Kafka::FFI::Client#cluster_id being incorrectly bound
 * Fixes naming issues in Message#headers and Message#detach_headers
