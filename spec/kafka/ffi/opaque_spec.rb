@@ -26,4 +26,9 @@ RSpec.describe Kafka::FFI::Opaque do
     expect { opaque.free }
       .to change { Kafka::FFI::Opaque.from_native(ptr, nil) }.to(nil)
   end
+
+  specify ".to_native converts nil to NULL" do
+    expect(Kafka::FFI::Opaque.to_native(nil, nil))
+      .to eq(::FFI::Pointer::NULL)
+  end
 end

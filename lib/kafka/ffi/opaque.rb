@@ -41,8 +41,14 @@ module Kafka::FFI
         @registry.delete(opaque.pointer.address)
       end
 
-      # @param value [Opaque]
+      # @param value [Opaque, nil]
+      #
+      # @return [FFI::Pointer] Pointer referencing the Opauqe value.
       def to_native(value, _ctx)
+        if value.nil?
+          return ::FFI::Pointer::NULL
+        end
+
         value.pointer
       end
 
