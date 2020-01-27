@@ -593,6 +593,14 @@ module Kafka
     attach_function :rd_kafka_flush, [Producer, :timeout_ms], :error_code, blocking: true
     attach_function :rd_kafka_purge, [Producer, :int], :error_code, blocking: true
 
+    ## Partitioners
+
+    attach_function :rd_kafka_msg_partitioner_random, [Topic, :string, :size_t, :int32, Opaque, Opaque], :partition
+    attach_function :rd_kafka_msg_partitioner_consistent, [Topic, :string, :size_t, :int32, Opaque, Opaque], :partition
+    attach_function :rd_kafka_msg_partitioner_consistent_random, [Topic, :string, :size_t, :int32, Opaque, Opaque], :partition
+    attach_function :rd_kafka_msg_partitioner_murmur2, [Topic, :string, :size_t, :int32, Opaque, Opaque], :partition
+    attach_function :rd_kafka_msg_partitioner_murmur2_random, [Topic, :string, :size_t, :int32, Opaque, Opaque], :partition
+
     # Metadata
     attach_function :rd_kafka_metadata, [Client, :bool, Topic, :pointer, :timeout_ms], :error_code, blocking: true
     attach_function :rd_kafka_metadata_destroy, [Metadata.by_ref], :void

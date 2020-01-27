@@ -7,6 +7,7 @@
 * Fixes passing nil for a Kafka::FFI::Opaque
 * Adds all current RD_KAFKA_RESP_ERR_ constants
 * Adds Kafka::QueueFullError for when producer queue is full
+* Adds bindings for built in partitioners
 
 ## 0.5.1 / 2020-01-22
 
