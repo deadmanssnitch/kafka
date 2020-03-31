@@ -311,8 +311,8 @@ module Kafka::FFI
         raise ArgumentError, "message cannot but nil/null"
       end
 
-      err = ::Kafka::FFI.rd_kafka_commit_message(message, async)
-      if err
+      err = ::Kafka::FFI.rd_kafka_commit_message(self, message, async)
+      if err != :ok
         raise ::Kafka::ResponseError, err
       end
 

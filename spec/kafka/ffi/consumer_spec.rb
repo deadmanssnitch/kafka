@@ -165,6 +165,38 @@ RSpec.describe Kafka::FFI::Consumer do
     consumer.destroy
   end
 
+  specify "#commit_message" do
+    consumer = Kafka::FFI::Consumer.new(config({
+      # Disable auto commit otherwise Kafka will handle committing the consumed
+      # offset making this test invalid.
+      "enable.auto.commit": false,
+    }))
+
+    with_topic(partitions: 1) do |topic|
+      list = Kafka::FFI::TopicPartitionList.new
+      list.add(topic, 0)
+
+      publish(topic, "message")
+      consumer.subscribe(topic)
+
+      list = consumer.committed(list)
+      expect(list.find(topic, 0).offset).to eq(Kafka::FFI::RD_KAFKA_OFFSET_INVALID)
+
+      consumer.consumer_poll(5000) do |msg|
+        expect(msg.payload).to eq("message")
+
+        consumer.commit_message(msg, false)
+      end
+
+      list = consumer.committed(list)
+      expect(list.find(topic, 0).offset).to eq(1)
+    ensure
+      list.destroy
+    end
+  ensure
+    consumer.destroy
+  end
+
   specify "#get_consumer_queue" do
     client = Kafka::FFI::Consumer.new(config)
 
