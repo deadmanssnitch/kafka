@@ -23,7 +23,7 @@ RSpec.describe Kafka::FFI::Client do
     client = Kafka::FFI::Client.new(:producer, config)
 
     # Mainly validate that the call is correct since the value can't be
-    # determined before hand. rd_kafka_clusterid
+    # determined before hand.
     expect(client.cluster_id).not_to be_empty
   ensure
     client.destroy
@@ -31,7 +31,10 @@ RSpec.describe Kafka::FFI::Client do
 
   specify "#controller_id" do
     client = Kafka::FFI::Client.new(:producer, config)
-    expect(client.controller_id).to eq(1001)
+
+    # https://issues.apache.org/jira/browse/KAFKA-1070
+    expect(client.controller_id).to be_a(Integer)
+    expect(client.controller_id).to be >= 1001
   ensure
     client.destroy
   end
