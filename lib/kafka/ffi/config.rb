@@ -12,6 +12,11 @@ module Kafka::FFI
     def initialize(ptr)
       super(ptr)
 
+      # Set recommended keys to identify the client to operators to help
+      # diagnose issues.
+      set("client.software.name", "kafka-ruby")
+      set("client.software.version", software_version)
+
       # Maintain references to all of the set callbacks to avoid them being
       # garbage collected.
       @callbacks = {}
@@ -377,6 +382,19 @@ module Kafka::FFI
       if !pointer.null?
         ::Kafka::FFI.rd_kafka_conf_destroy(self)
       end
+    end
+
+    private
+
+    # Default value for client.software.version
+    #
+    # @return [String] Kafka client version number
+    def software_version
+      # Format must match /^([\.\-a-zA-Z0-9])+$/ per Validation section of
+      # KIP-511.
+      #
+      # v0.5.2-librdkafka-v1.4.0-ruby-2.6.5
+      "v#{Kafka::VERSION}-librdkafka-v#{Kafka::FFI.version}-#{RUBY_ENGINE}-#{RUBY_VERSION}"
     end
   end
 end

@@ -10,6 +10,18 @@ RSpec.describe Kafka::FFI::Config do
     config.destroy
   end
 
+  specify "client version" do
+    config = Kafka::FFI::Config.new
+
+    expect(config.get("client.software.name")).to eq("kafka-ruby")
+
+    version = config.get("client.software.version")
+    expect(version).to match(/^([\.\-a-zA-Z0-9])+$/)
+    expect(version).to eq("v#{::Kafka::VERSION}-librdkafka-v#{::Kafka::FFI.version}-#{RUBY_ENGINE}-#{RUBY_VERSION}")
+  ensure
+    config.destroy
+  end
+
   specify "#dup" do
     config = Kafka::FFI::Config.new
     config.set("client.id", "original")
