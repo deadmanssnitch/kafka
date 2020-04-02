@@ -600,6 +600,8 @@ module Kafka
     attach_function :rd_kafka_msg_partitioner_consistent_random, [Topic, :string, :size_t, :int32, Opaque, Opaque], :partition
     attach_function :rd_kafka_msg_partitioner_murmur2, [Topic, :string, :size_t, :int32, Opaque, Opaque], :partition
     attach_function :rd_kafka_msg_partitioner_murmur2_random, [Topic, :string, :size_t, :int32, Opaque, Opaque], :partition
+    attach_function :rd_kafka_msg_partitioner_fnv1a, [Topic, :string, :size_t, :int32, Opaque, Opaque], :partition
+    attach_function :rd_kafka_msg_partitioner_fnv1a_random, [Topic, :string, :size_t, :int32, Opaque, Opaque], :partition
 
     # Metadata
     attach_function :rd_kafka_metadata, [Client, :bool, Topic, :pointer, :timeout_ms], :error_code, blocking: true
