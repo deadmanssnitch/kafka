@@ -181,7 +181,7 @@ RSpec.describe Kafka::FFI::Consumer do
       publish(topic, "message")
       consumer.subscribe(topic)
 
-      list = consumer.committed(list)
+      list = consumer.committed(list, timeout: 2000)
       expect(list.find(topic, 0).offset).to eq(Kafka::FFI::RD_KAFKA_OFFSET_INVALID)
 
       consumer.consumer_poll(5000) do |msg|
@@ -195,7 +195,7 @@ RSpec.describe Kafka::FFI::Consumer do
         commit_list.destroy
       end
 
-      list = consumer.committed(list)
+      list = consumer.committed(list, timeout: 2000)
       expect(list.find(topic, 0).offset).to eq(1)
     ensure
       list.destroy
@@ -218,7 +218,7 @@ RSpec.describe Kafka::FFI::Consumer do
       publish(topic, "message")
       consumer.subscribe(topic)
 
-      list = consumer.committed(list)
+      list = consumer.committed(list, timeout: 2000)
       expect(list.find(topic, 0).offset).to eq(Kafka::FFI::RD_KAFKA_OFFSET_INVALID)
 
       consumer.consumer_poll(5000) do |msg|
@@ -227,7 +227,7 @@ RSpec.describe Kafka::FFI::Consumer do
         consumer.commit_message(msg, false)
       end
 
-      list = consumer.committed(list)
+      list = consumer.committed(list, timeout: 2000)
       expect(list.find(topic, 0).offset).to eq(1)
     ensure
       list.destroy
