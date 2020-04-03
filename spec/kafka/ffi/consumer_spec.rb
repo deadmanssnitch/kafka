@@ -179,7 +179,9 @@ RSpec.describe Kafka::FFI::Consumer do
 
       # Publishes a message to ensure we have one to consume
       publish(topic, "message")
+
       consumer.subscribe(topic)
+      wait_for_assignments(consumer)
 
       list = consumer.committed(list, timeout: 2000)
       expect(list.find(topic, 0).offset).to eq(Kafka::FFI::RD_KAFKA_OFFSET_INVALID)
@@ -216,7 +218,9 @@ RSpec.describe Kafka::FFI::Consumer do
       list.add(topic, 0)
 
       publish(topic, "message")
+
       consumer.subscribe(topic)
+      wait_for_assignments(consumer)
 
       list = consumer.committed(list, timeout: 2000)
       expect(list.find(topic, 0).offset).to eq(Kafka::FFI::RD_KAFKA_OFFSET_INVALID)
