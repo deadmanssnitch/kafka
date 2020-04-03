@@ -1,5 +1,9 @@
 ## Unreleased
 
+* Update librdkafka to 1.4.0
+* Support kip-511 for client name and version
+* Add bindings for fnv1a partitioners
+
 ## 0.5.2 / 2020-01-27
 
 * Fixes DeliveryReport#error? and DeliveryReport#successful? being swapped
