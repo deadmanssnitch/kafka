@@ -43,7 +43,7 @@ before_install:
 
   # Enable documentation format to better show what kafka error logs match with
   # which tests.
-  - echo "--color --format documentation --warnings" > .rspec
+  - echo "--color --require './spec/support/running_documentation_formatter.rb' --format RunningDocumentationFormatter --warnings" > .rspec
 
 script:
   - bundle exec rake
