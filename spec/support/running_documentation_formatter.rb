@@ -11,29 +11,20 @@ class RunningDocumentationFormatter < RSpec::Core::Formatters::DocumentationForm
 
   def example_started(notification)
     super
-    output.write "#{current_indentation}#{notification.example.description.strip}"
+    output.puts "#{current_indentation}#{notification.example.description.strip}"
   end
 
   private 
 
   def passed_output(example)
-    reset_line
-    super
+    RSpec::Core::Formatters::ConsoleCodes.wrap("#{current_indentation}  success", :success)
   end
 
   def pending_output(example, message)
-    reset_line
-    super
+    RSpec::Core::Formatters::ConsoleCodes.wrap("#{current_indentation}  (PENDING: #{message})", :pending)
   end
 
   def failure_output(example)
-    reset_line
-    super
-  end
-
-  # clears the current line so the correctly formatted success, failure, or
-  # pending is correctly colored.
-  def reset_line
-    output.write "\33[2K\r"
+    RSpec::Core::Formatters::ConsoleCodes.wrap("#{current_indentation}  (FAILED - #{next_failure_index})", :failure)
   end
 end
