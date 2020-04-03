@@ -41,5 +41,9 @@ before_install:
   - echo 'docker run -i --rm --network=host edenhill/kafkacat:1.5.0 "$@"' > $HOME/bin/kafkacat
   - chmod +x $HOME/bin/kafkacat
 
+  # Enable documentation format to better show what kafka error logs match with
+  # which tests.
+  - echo "--color --format documentation --warnings" > .rspec
+
 script:
   - bundle exec rake
