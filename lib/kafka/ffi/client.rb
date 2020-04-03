@@ -19,9 +19,6 @@ module Kafka::FFI
   #   handle" to an instance. It's more akin to an internal service and this
   #   Client talks the API of that service.
   class Client < OpaquePointer
-    require "kafka/ffi/consumer"
-    require "kafka/ffi/producer"
-
     # Create a new Client of type with the given configuration.
     #
     # @param type [:consumer, :producer] Type of Kafka instance to create.

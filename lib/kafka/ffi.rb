@@ -385,6 +385,8 @@ module Kafka
     require "kafka/ffi/topic"
     require "kafka/ffi/opaque"
     require "kafka/ffi/client"
+    require "kafka/ffi/consumer"
+    require "kafka/ffi/producer"
     require "kafka/ffi/config"
     require "kafka/ffi/message"
     require "kafka/ffi/metadata"

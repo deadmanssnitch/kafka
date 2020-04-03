@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "kafka/ffi"
-
 module Kafka::FFI
   module Admin
     require "kafka/ffi/admin/result"
