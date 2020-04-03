@@ -6,8 +6,6 @@ services:
 
   kafka:
     image: "wurstmeister/kafka:2.12-2.2.2"
-    tmpfs:
-      - /kafka
     depends_on:
       - zookeeper
     ports:
