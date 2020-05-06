@@ -1,6 +1,6 @@
 ## Unreleased
 
-* Update librdkafka to 1.4.0
+* Update librdkafka to 1.4.2
 * Fixes Kafka::FFI::Consumer#commit_message
 * Adds kip-511 for client name and version
 * Adds bindings for fnv1a partitioners
