@@ -65,10 +65,9 @@ RSpec.describe Kafka::FFI::Client do
     client = Kafka::FFI::Client.new(:consumer, config)
 
     md = client.metadata(topic: "__consumer_offsets")
-    expect(md).to be_a(Kafka::FFI::Metadata)
+    expect(md).to be_a(Kafka::Metadata)
     expect(md.topics.size).to eq(1)
   ensure
-    md.destroy
     client.destroy
   end
 
@@ -125,8 +124,6 @@ RSpec.describe Kafka::FFI::Client do
     expect(metadata.brokers.size).to eq(1)
     expect(metadata.brokers[0].host).to eq("127.0.0.1")
     expect(metadata.brokers[0].port).to eq(9092)
-  ensure
-    metadata.destroy if metadata
   end
 
   specify "#create_topics" do
@@ -206,15 +203,9 @@ RSpec.describe Kafka::FFI::Client do
       expect(result.size).to eq(1)
       expect(result[0].error).to be(nil)
 
-      begin
-        metadata = client.metadata
-
-        tp = metadata.topics.find { |t| t.name == topic }
-        expect(tp).not_to be(nil)
-        expect(tp.partitions.size).to eq(3)
-      ensure
-        metadata.destroy
-      end
+      tp = client.metadata.topic(topic)
+      expect(tp).not_to be(nil)
+      expect(tp.partitions.size).to eq(3)
     ensure
       request.destroy
       options.destroy

@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "kafka/poller"
-
 module Kafka
   class Consumer
     # Returns the backing Kafka::FFI::Consumer.

@@ -1,5 +1,6 @@
 ## Unreleased
 
+* BREAKING: Kafka::FFI::Client#metadata now returns Kafka::Metadata
 * Update librdkafka to 1.4.2
 * Fixes Kafka::FFI::Consumer#commit_message
 * Adds kip-511 for client name and version

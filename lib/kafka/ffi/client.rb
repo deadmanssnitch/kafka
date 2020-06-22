@@ -2,6 +2,7 @@
 
 require "ffi"
 require "kafka/config"
+require "kafka/metadata"
 require "kafka/ffi/opaque_pointer"
 require "kafka/ffi/admin/result"
 
@@ -343,7 +344,7 @@ module Kafka::FFI
     #
     # @raise [Kafka::ResponseError] Error retrieving metadata
     #
-    # @return [Metadata] Details about the state of the cluster.
+    # @return [Kafka::Metadata] Details about the state of the cluster.
     def metadata(local_only: false, topic: nil, timeout: 1000)
       ptr = ::FFI::MemoryPointer.new(:pointer)
 
@@ -358,7 +359,14 @@ module Kafka::FFI
         raise ::Kafka::ResponseError, err
       end
 
-      Kafka::FFI::Metadata.new(ptr.read_pointer)
+      # Makes the metadata accessbile as structs then reads everything into
+      # Ruby managed objects so they can be garbage collected.
+      struct = Kafka::FFI::Metadata.new(ptr.read_pointer)
+      begin
+        ::Kafka::Metadata.new(struct)
+      ensure
+        struct.destroy
+      end
     ensure
       ptr.free
     end
