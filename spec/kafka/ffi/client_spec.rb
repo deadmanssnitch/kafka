@@ -79,16 +79,37 @@ RSpec.describe Kafka::FFI::Client do
       client.subscribe(topic)
       wait_for_assignments(client)
 
-      list = client.group_list(timeout: 10000)
-      expect(list).not_to be(nil)
+      groups = client.group_list(timeout: 10000)
+      expect(groups).not_to be(nil)
+      expect(groups).not_to be_empty
 
-      info = list.groups.find { |g| g.name == "group_list_test" }
+      info = groups.find { |g| g.name == "group_list_test" }
       expect(info).not_to be(nil)
+      expect(info.error?).to be(false)
+      expect(info.name).to eq("group_list_test")
+      expect(info.state).to eq("Stable")
+      expect(info.protocol).to eq("range")
+      expect(info.protocol_type).to eq("consumer")
+      expect(info.members).not_to be_empty
 
-      member = info.members.find { |m| m.client_id == "test_list_group" }
+      info.broker.tap do |broker|
+        expect(broker.id).to be >= 1001
+        expect(broker.host).to eq("127.0.0.1")
+        expect(broker.port).to eq(9092)
+      end
+
+      member = info.members[0]
       expect(member).not_to be(nil)
-    ensure
-      list.destroy if list
+      expect(member.member_id).to start_with("test_list_group-")
+      expect(member.client_id).to eq("test_list_group")
+
+      # Will be the IP address of the current host
+      expect(member.client_host).not_to be_empty
+
+      # Binary encoded membership information. Just test that it's set
+      # correctly.
+      expect(member.member_metadata).not_to be_empty
+      expect(member.member_assignment).not_to be_empty
     end
   ensure
     client.destroy

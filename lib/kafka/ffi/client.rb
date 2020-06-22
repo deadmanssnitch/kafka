@@ -373,22 +373,27 @@ module Kafka::FFI
 
     # List and describe client groups in the cluster.
     #
-    # @note Application must call #destroy to release the list when done
-    #
     # @raise [Kafka::ResponseError] Error occurred receiving group details
     #
-    # @return [Kafka::FFI::GroupList] List of consumer groups in the cluster.
+    # @return [Array<Kafka::Metadata::Group>] List of consumer groups in the cluster.
     def group_list(group: nil, timeout: 1000)
-      list = ::FFI::MemoryPointer.new(:pointer)
+      ptr = ::FFI::MemoryPointer.new(:pointer)
 
-      err = ::Kafka::FFI.rd_kafka_list_groups(self, group, list, timeout)
+      err = ::Kafka::FFI.rd_kafka_list_groups(self, group, ptr, timeout)
       if err != :ok
         raise ::Kafka::ResponseError, err
       end
 
-      GroupList.new(list.read_pointer)
+      # Copy the group metadata into Ruby's memory space so it can easily be
+      # garbage collected.
+      list = GroupList.new(ptr.read_pointer)
+      begin
+        list.groups.map { |g| ::Kafka::Metadata::Group.new(g) }
+      ensure
+        list.destroy
+      end
     ensure
-      list.free
+      ptr.free
     end
 
     # Create a copy of the Client's default topic configuration object. The

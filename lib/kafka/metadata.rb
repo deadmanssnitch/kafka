@@ -6,7 +6,9 @@ module Kafka
   # cluster.
   class Metadata
     require "kafka/metadata/topic"
+    require "kafka/metadata/group"
     require "kafka/metadata/broker"
+    require "kafka/metadata/group_member"
 
     # Returns the ID of the Broker that served the metadata request.
     #
