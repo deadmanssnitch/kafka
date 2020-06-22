@@ -1,6 +1,6 @@
 ## Unreleased
 
-* BREAKING: Kafka::FFI::Client#metadata now returns Kafka::Metadata
+* BREAKING: Kafka::FFI::Client#metadata now returns Kafka::Metadata::Cluster
 * BREAKING: Kafka::FFI::Client#group_list now returns array of Kafka::Metadata::Group
 * Update librdkafka to 1.4.2
 * Fixes Kafka::FFI::Consumer#commit_message

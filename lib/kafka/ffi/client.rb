@@ -344,7 +344,7 @@ module Kafka::FFI
     #
     # @raise [Kafka::ResponseError] Error retrieving metadata
     #
-    # @return [Kafka::Metadata] Details about the state of the cluster.
+    # @return [Kafka::Metadata::Cluster] Details about the state of the cluster.
     def metadata(local_only: false, topic: nil, timeout: 1000)
       ptr = ::FFI::MemoryPointer.new(:pointer)
 
@@ -363,7 +363,7 @@ module Kafka::FFI
       # Ruby managed objects so they can be garbage collected.
       struct = Kafka::FFI::Metadata.new(ptr.read_pointer)
       begin
-        ::Kafka::Metadata.new(struct)
+        ::Kafka::Metadata::Cluster.new(struct)
       ensure
         struct.destroy
       end

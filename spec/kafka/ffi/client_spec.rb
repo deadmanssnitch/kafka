@@ -64,9 +64,41 @@ RSpec.describe Kafka::FFI::Client do
   specify "#metadata" do
     client = Kafka::FFI::Client.new(:consumer, config)
 
-    md = client.metadata(topic: "__consumer_offsets")
-    expect(md).to be_a(Kafka::Metadata)
-    expect(md.topics.size).to eq(1)
+    with_topic(partitions: 2) do |name|
+      md = client.metadata(topic: name)
+      expect(md).to be_a(Kafka::Metadata::Cluster)
+      expect(md.topics.size).to eq(1)
+
+      expect(md.broker_id).to be >= 1001
+      expect(md.broker_name).to match(/127\.0\.0\.1:9092\/\d+/)
+      expect(md.brokers.size).to eq(1)
+
+      md.brokers.first.tap do |broker|
+        expect(broker.id).to be >= 1001
+        expect(broker.host).to eq("127.0.0.1")
+        expect(broker.port).to eq(9092)
+      end
+
+      topic = md.topic(name)
+      expect(topic).not_to be(nil)
+      expect(topic.name).to eq(name)
+      expect(topic.partitions.size).to eq(2)
+      expect(topic.error).to be(nil)
+      expect(topic.error?).to be(false)
+
+      topic.partitions.each_with_index do |part, index|
+        expect(part.id).to eq(index)
+        expect(part.error).to be(nil)
+        expect(part.error?).to be(false)
+        expect(part.leader).to be >= 1001
+
+        expect(part.replicas.size).to eq(1)
+        expect(part.replicas[0]).to be >= 1001
+
+        expect(part.in_sync_replicas.size).to eq(1)
+        expect(part.in_sync_replicas[0]).to be >= 1001
+      end
+    end
   ensure
     client.destroy
   end

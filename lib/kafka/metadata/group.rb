@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Kafka::Metadata
+module Kafka::Metadata
   class Group
     # Returns the name of the Group
     #

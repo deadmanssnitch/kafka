@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Kafka::Metadata
+module Kafka::Metadata
   class Broker
     attr_reader :id
     attr_reader :host

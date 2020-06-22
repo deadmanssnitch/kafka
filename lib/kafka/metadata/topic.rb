@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
-require "kafka/metadata/partition"
-
-class Kafka::Metadata
+module Kafka::Metadata
   class Topic
     # Returns the name of the topic
     #

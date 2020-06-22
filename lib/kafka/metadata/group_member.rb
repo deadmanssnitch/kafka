@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Kafka::Metadata
+module Kafka::Metadata
   class GroupMember
     # Returns the broker generated member id for the consumer.
     #
