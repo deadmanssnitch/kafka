@@ -5,9 +5,12 @@ require_relative "../lib/kafka/version"
 require "mini_portile2"
 require "fileutils"
 
-desc "Compile librdkafka v#{Kafka::LIBRDKAFKA_VERSION}"
+LIBRDKAFKA_VERSION  = "1.5.0"
+LIBRDKAFKA_CHECKSUM = "f7fee59fdbf1286ec23ef0b35b2dfb41031c8727c90ced6435b8cf576f23a656"
+
+desc "Compile librdkafka v#{LIBRDKAFKA_VERSION}"
 task :default do
-  Rake::Task["build:release"].invoke(Kafka::LIBRDKAFKA_VERSION, Kafka::LIBRDKAFKA_CHECKSUM)
+  Rake::Task["build:release"].invoke(LIBRDKAFKA_VERSION, LIBRDKAFKA_CHECKSUM)
 end
 
 desc "Clean up and remove build artifacts"

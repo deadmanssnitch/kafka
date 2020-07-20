@@ -15,8 +15,6 @@ end
 task default: [:ext, :spec]
 
 namespace :ffi do
-  require_relative "lib/kafka/version"
-
   require "uri"
   require "net/http"
   require "tempfile"
@@ -24,9 +22,15 @@ namespace :ffi do
   def header
     header = Tempfile.new(["rdkafka", ".h"])
 
+    # Extract the LIBRDKAFKA_VERSION constant from the Rakefile to know which
+    # version to fetch. This used to be in version.rb was it was moved out of
+    # the public API. This is not the cleanest but it allows extracting it
+    # without having to load the full library.
+    version = /^LIBRDKAFKA_VERSION\s+=\s+"(\d+\.\d+\.\d+)"/.match(File.read("ext/Rakefile"))[1]
+
     # Fetch the header for the pinned version of librdkafka. rdkafka.h contains
     # all of the exported function prototypes.
-    url = URI("https://raw.githubusercontent.com/edenhill/librdkafka/v#{::Kafka::LIBRDKAFKA_VERSION}/src/rdkafka.h")
+    url = URI("https://raw.githubusercontent.com/edenhill/librdkafka/v#{version}/src/rdkafka.h")
     resp = Net::HTTP.get(url)
     header.write(resp)
     header.close
