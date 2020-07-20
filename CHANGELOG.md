@@ -3,6 +3,7 @@
 * BREAKING: Kafka::FFI::Client#metadata now returns Kafka::Metadata::Cluster
 * BREAKING: Kafka::FFI::Client#group_list now returns array of Kafka::Metadata::Group
 * BREAKING: Removed Kafka::LIBRDKAFKA_VERSION and Kafka::LIBRDKAFKA_CHECKSUM
+* BREAKING: FFI Consumer, Producer, and Client now require a config
 * Update librdkafka to 1.5.0
 * Fixes Kafka::FFI::Consumer#commit_message
 * Adds kip-511 for client name and version

@@ -148,7 +148,7 @@ RSpec.describe Kafka::FFI::Client do
   end
 
   specify "#default_topic_conf_dup" do
-    client = Kafka::FFI::Client.new(:consumer)
+    client = Kafka::FFI::Client.new(:consumer, config)
 
     topic_conf = client.default_topic_conf_dup
     expect(topic_conf).not_to be(nil)
@@ -158,7 +158,7 @@ RSpec.describe Kafka::FFI::Client do
   end
 
   specify "#outq_len" do
-    client = Kafka::FFI::Client.new(:consumer)
+    client = Kafka::FFI::Client.new(:consumer, config)
 
     # Mainly ensure that we can call it and it returns a value. Not sure of a
     # good way to modify the outbound queue.
@@ -303,7 +303,7 @@ RSpec.describe Kafka::FFI::Client do
   end
 
   specify "#get_main_queue" do
-    client = Kafka::FFI::Client.new(:producer)
+    client = Kafka::FFI::Client.new(:producer, config)
 
     queue = client.get_main_queue
     expect(queue).to be_a(Kafka::FFI::Queue)
@@ -313,7 +313,7 @@ RSpec.describe Kafka::FFI::Client do
   end
 
   specify "#get_background_queue is nil with no configured background_event_cb" do
-    client = Kafka::FFI::Client.new(:producer)
+    client = Kafka::FFI::Client.new(:producer, config)
 
     queue = client.get_background_queue
     expect(queue).to be(nil)

@@ -16,7 +16,7 @@ RSpec.describe Kafka::Consumer do
       wait_for_assignments(consumer, topic: topic)
 
       received =
-        consumer.poll do |msg|
+        consumer.poll(timeout: 5000) do |msg|
           expect(msg.payload).to eq("test")
 
           true

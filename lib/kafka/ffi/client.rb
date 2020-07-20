@@ -29,7 +29,7 @@ module Kafka::FFI
     #   Configuration options for the instance.
     #
     # @return [Consumer, Producer]
-    def self.new(type, config = nil)
+    def self.new(type, config)
       error = ::FFI::MemoryPointer.new(:char, 512)
 
       # Convenience for passing in a Kafka::Config instead of building a

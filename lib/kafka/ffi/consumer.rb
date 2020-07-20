@@ -7,7 +7,10 @@ module Kafka::FFI
   class Consumer < Kafka::FFI::Client
     native_type :pointer
 
-    def self.new(config = nil)
+    # Initializes a new high level Consumer.
+    #
+    # @see Kafka::FFI::Client.new
+    def self.new(config)
       super(:consumer, config)
     end
 

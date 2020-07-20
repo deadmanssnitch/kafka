@@ -4,7 +4,7 @@ require "spec_helper"
 
 RSpec.describe Kafka::FFI::Queue do
   specify "#new" do
-    client = Kafka::FFI::Consumer.new
+    client = Kafka::FFI::Consumer.new(config)
     queue = Kafka::FFI::Queue.new(client)
 
     expect(queue).not_to be(nil)
@@ -15,7 +15,7 @@ RSpec.describe Kafka::FFI::Queue do
   end
 
   specify "#poll" do
-    client = Kafka::FFI::Consumer.new
+    client = Kafka::FFI::Consumer.new(config)
     queue = client.get_main_queue
     callback = lambda { |e| }
 
@@ -28,7 +28,7 @@ RSpec.describe Kafka::FFI::Queue do
   end
 
   specify "#forward" do
-    client = Kafka::FFI::Consumer.new
+    client = Kafka::FFI::Consumer.new(config)
 
     main = client.get_main_queue
     queue = Kafka::FFI::Queue.new(client)
@@ -46,7 +46,7 @@ RSpec.describe Kafka::FFI::Queue do
   end
 
   specify "#length" do
-    client = Kafka::FFI::Consumer.new
+    client = Kafka::FFI::Consumer.new(config)
     queue = Kafka::FFI::Queue.new(client)
 
     expect(queue.length).to eq(0)

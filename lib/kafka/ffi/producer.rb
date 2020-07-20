@@ -5,7 +5,10 @@ require "kafka/ffi/client"
 
 module Kafka::FFI
   class Producer < Kafka::FFI::Client
-    def self.new(config = nil)
+    # Initializes a new Producer.
+    #
+    # @see Kafka::FFI::Client.new
+    def self.new(config)
       super(:producer, config)
     end
 

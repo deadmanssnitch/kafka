@@ -4,7 +4,7 @@ require "spec_helper"
 
 RSpec.describe Kafka::FFI::Admin::AdminOptions do
   specify ".new" do
-    client = Kafka::FFI::Producer.new
+    client = Kafka::FFI::Producer.new(config)
     opts = Kafka::FFI::Admin::AdminOptions.new(client, :create_topics)
 
     expect(opts).to be_a(Kafka::FFI::Admin::AdminOptions)
@@ -14,7 +14,7 @@ RSpec.describe Kafka::FFI::Admin::AdminOptions do
   end
 
   specify "#set_request_timeout" do
-    client = Kafka::FFI::Producer.new
+    client = Kafka::FFI::Producer.new(config)
     opts = Kafka::FFI::Admin::AdminOptions.new(client, :create_topics)
 
     expect { opts.set_request_timeout(900000000) }
@@ -32,7 +32,7 @@ RSpec.describe Kafka::FFI::Admin::AdminOptions do
   end
 
   specify "#set_operation_timeout" do
-    client = Kafka::FFI::Producer.new
+    client = Kafka::FFI::Producer.new(config)
     opts = Kafka::FFI::Admin::AdminOptions.new(client, :create_topics)
 
     expect { opts.set_operation_timeout(900000000) }
@@ -50,7 +50,7 @@ RSpec.describe Kafka::FFI::Admin::AdminOptions do
   end
 
   specify "#set_validate_only" do
-    client = Kafka::FFI::Producer.new
+    client = Kafka::FFI::Producer.new(config)
     opts = Kafka::FFI::Admin::AdminOptions.new(client, :create_topics)
 
     # Verify set_validate_only can be called, there is no way to tell if the
@@ -63,7 +63,7 @@ RSpec.describe Kafka::FFI::Admin::AdminOptions do
   end
 
   specify "#set_broker" do
-    client = Kafka::FFI::Producer.new
+    client = Kafka::FFI::Producer.new(config)
     opts = Kafka::FFI::Admin::AdminOptions.new(client, :create_topics)
 
     # Verify set_broker can be called without segfaulting. There is no way to
