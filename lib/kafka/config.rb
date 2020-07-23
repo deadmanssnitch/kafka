@@ -108,6 +108,15 @@ module Kafka
       @callbacks[:stats] = block
     end
 
+    # Callback when consumer group is rebalanced
+    #
+    # @note Consumer only
+    #
+    # @see Kafka::FFI::Config#set_rebalance_cb
+    def on_rebalance(&block)
+      @callbacks[:rebalance] = block
+    end
+
     # Allocate and configure a new Kafka::FFI::Config that mirrors this Config.
     # The returned Kafka::FFI::Config should be either passed to initialize a
     # new Client or eventually destroyed. Once passed to a Client, the Config
@@ -123,7 +132,6 @@ module Kafka
 
       # Omitted callbacks:
       #  - background_event - Requires lower level usage
-      #  - rebalance        - Requires knowing the rebalance semantics
       #  - all socket       - Unknown need at this level
       #  - ssl_cert_verify  - Currently not needed
       #  - oauthbearer_token_refresh - Unable to test
@@ -136,6 +144,7 @@ module Kafka
         when :throttle         then conf.set_throttle_cb(&callback)
         when :log              then conf.set_log_cb(&callback)
         when :stats            then conf.set_stats_cb(&callback)
+        when :rebalance        then conf.set_rebalance_cb(&callback)
         end
       end
 

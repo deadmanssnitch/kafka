@@ -10,6 +10,7 @@
 * Adds kip-511 for client name and version
 * Adds bindings for fnv1a partitioners
 * Adds Kakfa::FFI::Queue#consume
+* Adds on_rebalance support to Kafka::Config
 
 ### Removal of Kafka::LIBRDKAFKA_VERSION
 

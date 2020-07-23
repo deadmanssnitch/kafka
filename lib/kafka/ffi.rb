@@ -472,7 +472,7 @@ module Kafka
     callback :consume_cb, [Message.by_ref, :pointer], :void
     attach_function :rd_kafka_conf_set_consume_cb, [Config, :consume_cb], :void
 
-    callback :rebalance_cb, [Client, :error_code, TopicPartitionList.by_ref, :pointer], :void
+    callback :rebalance_cb, [Client, :error_code, TopicPartitionList.by_ref, Opaque], :void
     attach_function :rd_kafka_conf_set_rebalance_cb, [Config, :rebalance_cb], :void
 
     callback :offset_commit_cb, [Client, :error_code, TopicPartitionList.by_ref, :pointer], :void

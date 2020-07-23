@@ -223,11 +223,28 @@ module Kafka::FFI
     # assignment/revocation and delegates the responsibility to the
     # application's callback.
     #
+    # @example Example of application's responsibilities
+    #
+    #   config.set_rebalance_cb do |client, err, tpl, opaque|
+    #     case err
+    #     when Kafka::FFI::RD_KAFKA_RESP_ERR__ASSIGN_PARTITIONS
+    #       client.assign(tpl
+    #     when Kafka::FFI::RD_KAFKA_RESP_ERR__REVOKE_PARTITIONS
+    #       if manual_commits
+    #         client.commit(tpl, false)
+    #       end
+    #
+    #     client.assign(nil)
+    #   else
+    #     handle_unlikely_error(err)
+    #     client.assign(nil)
+    #   end
+    #
     # @see rdkafka.h rd_kafka_conf_set_rebalance_cb
     # @note Consumer only
     #
     # @yield [client, error, partitions, opaque]
-    # @yieldparam client [Client]
+    # @yieldparam client [Consumer]
     # @yieldparam error [RD_KAFKA_RESP_ERR__ASSIGN_PARTITIONS] Callback
     #   contains new assignments for the consumer.
     # @yieldparam error [RD_KAFKA_RESP_ERR__REVOKE_PARTITIONS] Callback
@@ -235,6 +252,8 @@ module Kafka::FFI
     # @yieldparam error [Integer] Other error code
     # @yieldparam partitions [TopicPartitionList] Set of partitions to assign
     #   or revoke.
+    # @yieldparam opaque [Opaque] The config's opaque pointer that was set via
+    #   set_opaque.
     def set_rebalance_cb(&block)
       @callbacks[:rebalance_cb] = block
       ::Kafka::FFI.rd_kafka_conf_set_rebalance_cb(self, &block)
