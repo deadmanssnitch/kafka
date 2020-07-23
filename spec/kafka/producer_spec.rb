@@ -46,6 +46,7 @@ RSpec.describe Kafka::Producer do
       expect(async.offset).to eq(0)
       expect(async.partition).not_to be(nil)
       expect(async.latency).to be > 0
+      expect(async.broker_id).to be >= 1001
 
       # Same object is returned
       expect(async).to be(result)

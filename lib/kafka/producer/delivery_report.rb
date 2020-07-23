@@ -30,6 +30,12 @@ class Kafka::Producer
     # @return [Integer] Time since message was produced in microseconds
     attr_reader :latency
 
+    # Returns the broker id of the broker the message was produced to.
+    #
+    # @return [Integer, -1] The broker id the message was produced to or -1 if
+    #   unknown.
+    attr_reader :broker_id
+
     # Initializes a new DeliveryReport
     #
     # @param block [Proc] Callback to call with the DeliveryReport when it is
@@ -90,6 +96,7 @@ class Kafka::Producer
         @topic = message.topic
         @partition = message.partition
         @latency = message.latency
+        @broker_id = message.broker_id
 
         @done = true
         @waiter.broadcast

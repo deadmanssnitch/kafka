@@ -72,6 +72,15 @@ module Kafka::FFI
       self[:offset]
     end
 
+    # Returns the ID of the Broker that the message was produced to or fetched
+    # from.
+    #
+    # @return [Integer, -1] ID of the broker the message was produced to or
+    #   fetched from. Will be -1 when broker id is unknown.
+    def broker_id
+      ::Kafka::FFI.rd_kafka_message_broker_id(self)
+    end
+
     # Returns the per message opaque pointer that was given to produce. This is
     # a pointer to a Ruby object owned by the application.
     #
