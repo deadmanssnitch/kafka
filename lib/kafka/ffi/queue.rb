@@ -9,7 +9,7 @@ module Kafka::FFI
       ::Kafka::FFI.rd_kafka_queue_new(client)
     end
 
-    # Poll a queue for an event, waiting up to timeout milliseconds. Takes an
+    # Poll a queue for an Event, waiting up to timeout milliseconds. Takes an
     # optional block which will handle destroying the event at the completion
     # of the block.
     #
@@ -83,13 +83,13 @@ module Kafka::FFI
 
     # Forward events meant for this Queue to the destination Queue instead.
     #
-    # @param dest [Queue] Destination queue to forward
-    # @param dest [nil] Remove forwarding for this queue.
+    # @param dest [Queue, nil] Destination queue to forward or nil to stop
+    #   forwarding.
     def forward(dest)
       ::Kafka::FFI.rd_kafka_queue_forward(self, dest)
     end
 
-    # Retrieve the current number of elemens in the queue.
+    # Retrieve the current number of elements in the queue.
     #
     # @return [Integer] Number of elements in the queue
     def length
