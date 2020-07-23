@@ -8,6 +8,7 @@
 * Fixes Kafka::FFI::Consumer#commit_message
 * Adds kip-511 for client name and version
 * Adds bindings for fnv1a partitioners
+* Adds Kakfa::FFI::Queue#consume
 
 ### Removal of Kafka::LIBRDKAFKA_VERSION
 

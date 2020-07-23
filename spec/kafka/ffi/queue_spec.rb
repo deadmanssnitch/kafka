@@ -27,6 +27,87 @@ RSpec.describe Kafka::FFI::Queue do
     queue.destroy if queue
   end
 
+  specify "#consume" do
+    with_topic(partitions: 1) do |topic|
+      client = Kafka::FFI::Consumer.new(config)
+      client.subscribe(topic)
+
+      wait_for_assignments(client)
+
+      begin
+        # Grab the partition queue and disable any forwarding to ensure messags
+        # arrive on the queue.
+        queue = client.get_partition_queue(topic, 0)
+        queue.forward(nil)
+
+        # Publish a test message after forwarding is disabled to ensure it's
+        # routed to the queue.
+        publish(topic, "test", partition: 0)
+
+        received =
+          queue.consume(2000) do |msg|
+            expect(msg.topic).to eq(topic)
+            expect(msg.partition).to eq(0)
+            expect(msg.payload).to eq("test")
+
+            true
+          end
+
+        expect(received).to be(true)
+      ensure
+        queue.destroy
+      end
+    ensure
+      client.destroy
+    end
+  end
+
+  specify "#consume block exceptions are raised to caller" do
+    with_topic(partitions: 1) do |topic|
+      client = Kafka::FFI::Consumer.new(config)
+      client.subscribe(topic)
+
+      wait_for_assignments(client)
+
+      begin
+        queue = client.get_partition_queue(topic, 0)
+        queue.forward(nil)
+
+        publish(topic, "error", partition: 0)
+
+        expect { queue.consume(2000) { raise "Error" } }
+          .to raise_error(StandardError, "Error")
+      ensure
+        queue.destroy
+      end
+    ensure
+      client.destroy
+    end
+  end
+
+  specify "#consume timeout returns nil" do
+    with_topic(partitions: 1) do |topic|
+      client = Kafka::FFI::Consumer.new(config)
+      client.subscribe(topic)
+
+      wait_for_assignments(client)
+
+      begin
+        queue = client.get_partition_queue(topic, 0)
+        queue.forward(nil)
+
+        # This test does not publish to the topic so there are no messages to
+        # consume.
+        received = queue.consume(5) { raise "Block should not be called" }
+        expect(received).to be(nil)
+      ensure
+        queue.destroy
+      end
+    ensure
+      client.destroy
+    end
+  end
+
   specify "#forward" do
     client = Kafka::FFI::Consumer.new(config)
 

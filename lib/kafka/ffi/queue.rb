@@ -39,6 +39,48 @@ module Kafka::FFI
       end
     end
 
+    # Poll the queue for a Message, blocking up to timeout millseconds. The
+    # yielded message must not be cached in the application as it will become
+    # unusable once the block completes.
+    #
+    # @note Only available for topic partition queues from a consumer.
+    #
+    # @see max.poll.interal.ms configuration option.
+    #
+    # @param timeout [Integer] How long to wait for a message in milliseconds.
+    #
+    # @raise [ArgumentError] consumer_poll was called without a block.
+    # @raise [Kafka::ResponseError] Error occurred while polling.
+    #
+    # @yield [message]
+    # @yieldparam message [Message] Message received from Kafka. Application
+    #   must not call #destroy as it is owned by the Client.
+    #
+    # @return Either nil when no message was available or the result of the
+    #   block.
+    def consume(timeout)
+      if !block_given?
+        raise ArgumentError, "consume must be passed a block"
+      end
+
+      msg = ::Kafka::FFI.rd_kafka_consume_queue(self, timeout.to_i)
+
+      # No message was available
+      if msg.null?
+        return nil
+      end
+
+      begin
+        if msg.error
+          raise msg.error
+        end
+
+        yield(msg)
+      ensure
+        msg.destroy
+      end
+    end
+
     # Forward events meant for this Queue to the destination Queue instead.
     #
     # @param dest [Queue] Destination queue to forward
