@@ -31,8 +31,7 @@ module Kafka::FFI
       ::Kafka::FFI.rd_kafka_event_name(self)
     end
 
-    # Retrieve the set of messages. Can take a block to iterate over the set of
-    # Messages rather than return them.
+    # Retrieve the set of messages attached to the event.
     #
     # Events:
     #   - RD_KAFKA_EVENT_FETCH
@@ -40,51 +39,22 @@ module Kafka::FFI
     #
     # @note Do not call #destroy on the Messages
     #
-    # @yield [message] Iterate over available messages
-    # @yieldparam [Message]
-    #
     # @return [Array<Message>] Messages attached to the Event
-    # @return [nil] Event does not have any Messages or a block was given.
     def messages
-      # This departs from the librdkafka API due to having a collection of
-      # methods that have funky semantics for Ruby.
-
-      # @todo Messages are only on RD_KAFKA_EVENT_FETCH and RD_KAFKA_EVENT_DR.
-      #   Need to test what happens with other event types.
-
-      # No block so fetch all of the messages and return them as an array.
-      if !block_given?
-        count = ::Kafka::FFI.rd_kafka_event_message_count(self)
-        if count == 0
-          return []
-        end
-
-        begin
-          # Allocates enough memory for the full set but only converts as many
-          # as were returned.
-          # @todo Retrieve all until sum(ret) == count?
-          ptr = ::FFI::MemoryPointer.new(:pointer, count)
-          ret = ::Kafka::FFI.rd_kafka_event_message_array(self, ptr, count)
-
-          # Map the return pointers to Messages
-          return ptr.read_array_of_pointer(ret).map! { |p| Message.from_native(p) }
-        ensure
-          ptr.free
-        end
+      count = ::Kafka::FFI.rd_kafka_event_message_count(self)
+      if count == 0
+        return []
       end
 
-      # Block was passed so use rd_kafka_event_message_next
       begin
-        ptr = ::FFI::MemoryPointer.new(:pointer)
+        # Allocates enough memory for the full set but only converts as many
+        # as were returned.
+        # @todo Retrieve all until sum(ret) == count?
+        ptr = ::FFI::MemoryPointer.new(:pointer, count)
+        ret = ::Kafka::FFI.rd_kafka_event_message_array(self, ptr, count)
 
-        loop do
-          msg = ::Kafka::FFI.rd_kafka_event_message_next(self)
-          if msg.null?
-            break
-          end
-
-          yield(msg)
-        end
+        # Map the return pointers to Messages
+        return ptr.read_array_of_pointer(ret).map! { |p| Message.new(p) }
       ensure
         ptr.free
       end
