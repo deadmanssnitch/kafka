@@ -39,5 +39,9 @@ module Kafka::FFI
     def offset
       self[:offset]
     end
+
+    def inspect
+      "#<Kafka::FFI::TopicPartition error=#{error.inspect} topic=#{topic.inspect} partition=#{partition} offset=#{offset}>"
+    end
   end
 end

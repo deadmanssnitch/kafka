@@ -154,6 +154,10 @@ module Kafka::FFI
       end
     end
 
+    def inspect
+      "#<Kafka::FFI::TopicPartitionList elements=#{elements.inspect}>"
+    end
+
     # Free all resources used by the list and the list itself. Usage it
     # dependent on the semantics of librdkafka, so make sure to only call on
     # TopicPartitionLists that are not owned by objects. Generally, if you
