@@ -56,33 +56,57 @@ module Kafka::FFI
     #
     # @param key [String] Config key to fetch the setting for.
     #
-    # @return [String, :unknown] Value for the key or :unknown if not already
-    #   set.
+    # @return [String, Block, :unknown] Value for the key or :unknown if not already
+    #   set. Calling get with a callback config key will return the configured
+    #   callback.
     def get(key)
       key = key.to_s
 
+      case key
+      when "background_event_cb"          then return @callbacks.fetch(:background_event_cb, :unknown)
+      when "dr_msg_cb"                    then return @callbacks.fetch(:dr_msg_cb, :unknown)
+      when "consume_cb"                   then return @callbacks.fetch(:consume_cb, :unknown)
+      when "rebalance_cb"                 then return @callbacks.fetch(:rebalance_cb, :unknown)
+      when "offset_commit_cb"             then return @callbacks.fetch(:offset_commit_cb, :unknown)
+      when "error_cb"                     then return @callbacks.fetch(:error_cb, :unknown)
+      when "throttle_cb"                  then return @callbacks.fetch(:throttle_cb, :unknown)
+      when "log_cb"                       then return @callbacks.fetch(:log_cb, :unknown)
+      when "stats_cb"                     then return @callbacks.fetch(:stats_cb, :unknown)
+      when "oauthbearer_token_refresh_cb" then return @callbacks.fetch(:oauthbearer_token_refresh_cb, :unknown)
+      when "socket_cb"                    then return @callbacks.fetch(:socket_cb, :unknown)
+      when "connect_cb"                   then return @callbacks.fetch(:connect_cb, :unknown)
+      when "closesocket_cb"               then return @callbacks.fetch(:closesocket_cb, :unknown)
+      when "open_cb"                      then return @callbacks.fetch(:open_cb, :unknown)
+      when "ssl.certificate.verify_cb"    then return @callbacks.fetch(:ssl_cert_verify_cb, :unknown)
+      end
+
       # Will contain the size of the value at key
-      size = ::FFI::MemoryPointer.new(:size_t)
+      begin
+        size = ::FFI::MemoryPointer.new(:size_t)
 
-      # Make an initial request for the size of buffer we need to allocate.
-      # When trying to make a guess at the potential size the code would often
-      # segfault due to rd_kafka_conf_get reallocating the buffer.
-      err = ::Kafka::FFI.rd_kafka_conf_get(self, key, ::FFI::Pointer::NULL, size)
-      if err != :ok
-        return err
+        # Make an initial request for the size of the buffer we need to
+        # allocate. When the buffer is not large enough rd_kafka_conf_get will
+        # reallocate the buffer which would cause a segfault.
+        err = ::Kafka::FFI.rd_kafka_conf_get(self, key, ::FFI::Pointer::NULL, size)
+        if err != :ok
+          return err
+        end
+
+        begin
+          # Allocate a string long enough to contain the whole value.
+          value = ::FFI::MemoryPointer.new(:char, size.read(:size_t))
+          err = ::Kafka::FFI.rd_kafka_conf_get(self, key, value, size)
+          if err != :ok
+            return err
+          end
+
+          value.read_string
+        ensure
+          value.free
+        end
+      ensure
+        size.free
       end
-
-      # Allocate a string long enough to contain the whole value.
-      value = ::FFI::MemoryPointer.new(:char, size.read(:size_t))
-      err = ::Kafka::FFI.rd_kafka_conf_get(self, key, value, size)
-      if err != :ok
-        return err
-      end
-
-      value.read_string
-    ensure
-      size.free if size
-      value.free if value
     end
 
     # Duplicate the current config
