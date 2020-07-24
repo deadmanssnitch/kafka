@@ -10,6 +10,7 @@ RSpec.describe Kafka::Producer::DeliveryReport do
       topic: nil,
       partition: nil,
       latency: nil,
+      broker_id: nil,
     })
   end
 
@@ -32,6 +33,7 @@ RSpec.describe Kafka::Producer::DeliveryReport do
     expect(message).to receive(:topic).and_return("events")
     expect(message).to receive(:partition).and_return(4)
     expect(message).to receive(:latency).and_return(123445)
+    expect(message).to receive(:broker_id).and_return(1001)
 
     report = Kafka::Producer::DeliveryReport.new
 
