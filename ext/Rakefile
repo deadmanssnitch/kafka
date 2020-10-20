@@ -5,8 +5,8 @@ require_relative "../lib/kafka/version"
 require "mini_portile2"
 require "fileutils"
 
-LIBRDKAFKA_VERSION  = "1.5.0"
-LIBRDKAFKA_CHECKSUM = "f7fee59fdbf1286ec23ef0b35b2dfb41031c8727c90ced6435b8cf576f23a656"
+LIBRDKAFKA_VERSION  = "1.5.2"
+LIBRDKAFKA_CHECKSUM = "ca3db90d04ef81ca791e55e9eed67e004b547b7adedf11df6c24ac377d4840c6"
 
 desc "Compile librdkafka v#{LIBRDKAFKA_VERSION}"
 task :default do
