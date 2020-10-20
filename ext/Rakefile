@@ -15,13 +15,11 @@ end
 
 desc "Clean up and remove build artifacts"
 task :clean do
-  Dir.chdir(__dir__) do
-    FileUtils.rm_rf([
-      "tmp",
-      "ports",
-      Dir.glob("librdkafka.*"),
-    ])
-  end
+  FileUtils.rm_rf([
+    File.join(__dir__, "tmp"),
+    File.join(__dir__, "ports"),
+    Dir.glob(File.join(__dir__, "librdkafka.*")),
+  ])
 end
 
 namespace :build do
