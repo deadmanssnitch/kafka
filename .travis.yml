@@ -5,6 +5,7 @@ rvm:
   - 2.5
   - 2.6
   - 2.7
+  - 3.0
   - ruby-head
 
 # Use a consistent Kafka version for each version of Ruby being tested.
