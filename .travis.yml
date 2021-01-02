@@ -30,6 +30,8 @@ jobs:
       env: KAFKA=2.5
     - rvm: ruby
       env: KAFKA=2.6
+    - rvm: ruby
+      env: KAFKA=2.7
 
 services:
   - docker
