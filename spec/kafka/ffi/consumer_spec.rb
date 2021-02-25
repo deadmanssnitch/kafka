@@ -68,7 +68,7 @@ RSpec.describe Kafka::FFI::Consumer do
     consumer.subscribe(["topic"], "foo", "bar", ["baz"])
 
     subs = consumer.subscription
-    expect(subs).to match(%w[topic foo bar baz])
+    expect(subs).to contain_exactly(*%w[topic foo bar baz])
   ensure
     consumer.destroy
   end
@@ -80,7 +80,7 @@ RSpec.describe Kafka::FFI::Consumer do
     # Retrieves the list of subscriptions
     subs = consumer.subscriptions
     expect(subs.size).to eq(2)
-    expect(subs).to match(["topic", "snitches"])
+    expect(subs).to contain_exactly(*["topic", "snitches"])
   ensure
     consumer.destroy
   end
