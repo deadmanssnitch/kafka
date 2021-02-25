@@ -10,7 +10,8 @@ module Kafka::FFI::Admin
     # object.
     #
     # @param name [String] Name of the topic to create
-    # @param partitions [Integer] Number of partitions in the topic
+    # @param partitions [Integer] Number of partitions in the topic. When
+    #   partitions is -1 use the broker side default number of partitions.
     #
     # @param replication_factor [Integer] Default replication factor for the
     #   topic's partitions.

@@ -12,8 +12,13 @@ RSpec.describe Kafka::FFI::Admin::NewTopic do
   end
 
   specify ".new with invalid options" do
-    expect { Kafka::FFI::Admin::NewTopic.new("snitches", -1, 1) }
+    expect { Kafka::FFI::Admin::NewTopic.new("snitches", -2, 1) }
       .to raise_error(ArgumentError, /num_partitions/)
+  end
+
+  specify ".new with broker default partitions" do
+    expect { Kafka::FFI::Admin::NewTopic.new(SecureRandom.uuid, -1, 1) }
+      .not_to raise_error
   end
 
   specify "#set_replica_assignment" do
