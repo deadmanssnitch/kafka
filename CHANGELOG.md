@@ -6,7 +6,7 @@
 * BREAKING: FFI Consumer, Producer, and Client now require a config
 * BREAKING: Kafka::FFI::Config.get with a callback key will return the callback
 * BREAKING: Kafka::FFI::Event#messages no longer allows passing a block
-* Update librdkafka to 1.5.0
+* Update librdkafka to 1.6.1
 * Fixes Kafka::FFI::Consumer#commit_message
 * Adds kip-511 for client name and version
 * Adds bindings for fnv1a partitioners
