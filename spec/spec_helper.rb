@@ -27,7 +27,7 @@ RSpec.configure do |config|
   # See: https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md
   def config(options = {})
     defaults = {
-      # Start with `docker-compose start`
+      # Start with `rake kafka:up`
       "bootstrap.servers" => "127.0.0.1:9092",
 
       # Let librdkafka figure out which version of Kafka it's talking to.
@@ -41,6 +41,9 @@ RSpec.configure do |config|
 
       # Always start at the beginning of the topic.
       "auto.offset.reset" => "earliest",
+
+      # Decrease log level to hide CONFWARN messages
+      "log_level": 3,
     }
 
     Kafka::Config.new(defaults.merge(options))
