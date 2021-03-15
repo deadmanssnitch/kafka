@@ -6,6 +6,7 @@
 * BREAKING: FFI Consumer, Producer, and Client now require a config
 * BREAKING: Kafka::FFI::Config.get with a callback key will return the callback
 * BREAKING: Kafka::FFI::Event#messages no longer allows passing a block
+* BREAKING: Kafka::FFI::Error is no longer an exception class
 * Update librdkafka to 1.6.1
 * Fixes Kafka::FFI::Consumer#commit_message
 * Adds kip-511 for client name and version
@@ -16,6 +17,13 @@
 ### Removal of Kafka::LIBRDKAFKA_VERSION
 
 Prefer to use Kafka::FFI.version to get the current version of librdkafka.
+
+### Change to Kafka::FFI::Error
+
+Librdkafka 1.5.0 introduced a new error type for the Transaction API that
+appears to be getting use in new APIs instead of the response error code. All
+exceptions in Kafka::FFI now extend from Kafka::Error instead of
+Kafka::FFI::Error.
 
 ## 0.5.2 / 2020-01-27
 

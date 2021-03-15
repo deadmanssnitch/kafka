@@ -420,9 +420,21 @@ module Kafka
     require "kafka/ffi/partition_metadata"
 
     # Errors
+
     attach_function :rd_kafka_err2str, [:error_code], :string
     attach_function :rd_kafka_err2name, [:error_code], :string
     attach_function :rd_kafka_last_error, [], :error_code
+
+    # Error Objects (v1.5.0+)
+
+    attach_function :rd_kafka_error_code, [Error], :error_code
+    attach_function :rd_kafka_error_name, [Error], :string
+    attach_function :rd_kafka_error_string, [Error], :string
+    attach_function :rd_kafka_error_is_fatal, [Error], :bool
+    attach_function :rd_kafka_error_is_retriable, [Error], :bool
+    attach_function :rd_kafka_error_txn_requires_abort, [Error], :bool
+    attach_function :rd_kafka_error_destroy, [Error], :void
+    attach_function :rd_kafka_error_new, [:error_code, :string, :varargs], Error
 
     # Version
     attach_function :rd_kafka_version, [], :int
