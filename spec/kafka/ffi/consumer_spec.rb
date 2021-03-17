@@ -147,7 +147,7 @@ RSpec.describe Kafka::FFI::Consumer do
       list.add(topic, 1)
 
       # Short timeout to force a timeout error
-      expect { consumer.committed(list, timeout: 1) }
+      expect { consumer.committed(list, timeout: 0) }
         .to raise_error(Kafka::ResponseError, "Local: Timed out")
 
       # Actually takes about 1s locally

@@ -194,9 +194,13 @@ RSpec.describe Kafka::FFI::Client do
       ]
 
       result = client.create_topics(requests, options: options)
+      expect(result).to be_a(Kafka::FFI::Admin::CreateTopicsResult)
+      expect(result).to be_successful
 
-      expect(result.length).to eq(2)
-      expect(result.map(&:error)).to eq([nil, nil])
+      res = result.topics
+      expect(res.length).to eq(2)
+      expect(res.map(&:error)).to eq([nil, nil])
+      expect(res.map(&:name)).to contain_exactly(*topics)
     ensure
       result.destroy
       requests.each(&:destroy)
@@ -215,10 +219,15 @@ RSpec.describe Kafka::FFI::Client do
     topic = SecureRandom.uuid
 
     delete = Kafka::FFI::Admin::DeleteTopic.new(topic)
-    result = client.delete_topics(delete)
 
-    expect(result.size).to eq(1)
-    expect(result.first.error.name).to eq("RD_KAFKA_RESP_ERR_UNKNOWN_TOPIC_OR_PART")
+    result = client.delete_topics(delete)
+    expect(result).to be_a(Kafka::FFI::Admin::DeleteTopicsResult)
+    expect(result).to be_successful
+
+    result.topics.tap do |topics|
+      expect(topics.size).to eq(1)
+      expect(topics[0].error.name).to eq("RD_KAFKA_RESP_ERR_UNKNOWN_TOPIC_OR_PART")
+    end
   ensure
     delete.destroy
     result.destroy
@@ -230,14 +239,172 @@ RSpec.describe Kafka::FFI::Client do
 
     with_topic do |topic|
       delete = Kafka::FFI::Admin::DeleteTopic.new(topic)
-      result = client.delete_topics(delete)
 
-      expect(result.length).to eq(1)
-      expect(result[0].topic).to eq(topic)
-      expect(result[0].error).to eq(nil)
+      result = client.delete_topics(delete)
+      expect(result).to be_a(Kafka::FFI::Admin::DeleteTopicsResult)
+      expect(result).to be_successful
+
+      result.topics.tap do |topics|
+        expect(topics.length).to eq(1)
+        expect(topics[0].topic).to eq(topic)
+        expect(topics[0].error).to eq(nil)
+      end
     ensure
       result.destroy
       delete.destroy
+    end
+  ensure
+    client.destroy
+  end
+
+  specify "#delete_groups" do
+    client = Kafka::FFI::Client.new(:producer, config)
+
+    with_topic(partitions: 1) do |topic|
+      group = SecureRandom.uuid
+
+      publish(topic, "payload")
+      consume(group, topic)
+
+      begin
+        delete = Kafka::FFI::Admin::DeleteGroup.new(group)
+
+        result = client.delete_groups(delete)
+        expect(result).to be_a(Kafka::FFI::Admin::DeleteGroupsResult)
+        expect(result).to be_successful
+
+        groups = result.groups
+        expect(groups.size).to eq(1)
+        expect(groups[0].name).to eq(group)
+        expect(groups[0].error).to be(nil)
+        expect(groups[0].partitions).to be(nil)
+      ensure
+        delete.destroy
+        result.destroy
+      end
+    end
+  ensure
+    client.destroy
+  end
+
+  specify "#delete_groups error" do
+    group = SecureRandom.uuid
+    client = Kafka::FFI::Client.new(:consumer, config)
+
+    begin
+      delete = Kafka::FFI::Admin::DeleteGroup.new(group)
+
+      result = client.delete_groups(delete)
+      expect(result).to be_a(Kafka::FFI::Admin::DeleteGroupsResult)
+      expect(result).to be_successful # error is per group
+
+      result.groups.tap do |groups|
+        expect(groups.size).to eq(1)
+        expect(groups[0].error).not_to be(nil)
+        expect(groups[0].name).to eq(group)
+        expect(groups[0].error.code).to eq(Kafka::FFI::RD_KAFKA_RESP_ERR_GROUP_ID_NOT_FOUND)
+      end
+    ensure
+      result.destroy
+      delete.destroy
+    end
+  ensure
+    client.destroy
+  end
+
+  specify "#delete_records" do
+    client = Kafka::FFI::Client.new(:producer, config)
+
+    with_topic(partitions: 1) do |topic|
+      5.times { |i| publish(topic, "payload: #{i}") }
+
+      client.metadata(local_only: false)
+
+      begin
+        tpl = Kafka::FFI::TopicPartitionList.new
+        tpl.add(topic, 0)
+        tpl.set_offset(topic, 0, 3)
+
+        op = Kafka::FFI::Admin::DeleteRecords.new(tpl)
+
+        result = client.delete_records(op)
+        expect(result).to be_a(Kafka::FFI::Admin::DeleteRecordsResult)
+        expect(result).to be_successful
+
+        offsets = result.offsets
+        expect(offsets.elements.size).to eq(1)
+
+        offsets.find(topic, 0).tap do |tp|
+          expect(tp.error).to be(nil)
+          expect(tp.offset).to eq(3)
+        end
+      ensure
+        result.destroy
+        tpl.destroy
+        op.destroy
+      end
+    end
+  ensure
+    client.destroy
+  end
+
+  specify "#delete_consumer_group_offsets" do
+    group = SecureRandom.uuid
+    client = Kafka::FFI::Client.new(:consumer, config("group.id" => group))
+
+    with_topic(partitions: 1) do |topic|
+      # Publish and consume from the topic to ensure an offset is committed.
+      publish(topic, "payload")
+      consume(group, topic)
+
+      # check the committed offset
+      begin
+        tpl = Kafka::FFI::TopicPartitionList.new
+        tpl.add(topic, 0)
+
+        res = client.committed(tpl)
+        expect(res.elements.size).to eq(1)
+        expect(res.elements[0].offset).to eq(1)
+      ensure
+        tpl.destroy
+      end
+
+      # delete the committed offset
+      begin
+        tpl = Kafka::FFI::TopicPartitionList.new
+        tpl.add(topic, 0)
+
+        delete = Kafka::FFI::Admin::DeleteConsumerGroupOffsets.new(group, tpl)
+
+        result = client.delete_consumer_group_offsets(delete)
+        expect(result).to be_a(Kafka::FFI::Admin::DeleteConsumerGroupOffsetsResult)
+        expect(result).to be_successful
+
+        result.groups.tap do |groups|
+          expect(groups.length).to eq(1)
+          expect(groups[0].name).to eq(group)
+          expect(groups[0].error).to eq(nil)
+
+          # Response will return the offset as being invalid
+          expect(groups[0].partitions).not_to be(nil)
+          expect(groups[0].partitions.find(topic, 0).offset).to eq(Kafka::FFI::RD_KAFKA_OFFSET_INVALID)
+        end
+      ensure
+        tpl.destroy
+        delete.destroy
+        result.destroy
+      end
+
+      # verify that the delete succeeded
+      begin
+        tpl = Kafka::FFI::TopicPartitionList.new
+        tpl.add(topic, 0)
+
+        m = client.committed(tpl)
+        expect(m.elements.first.offset).to eq(Kafka::FFI::RD_KAFKA_OFFSET_INVALID)
+      ensure
+        tpl.destroy
+      end
     end
   ensure
     client.destroy
@@ -253,8 +420,13 @@ RSpec.describe Kafka::FFI::Client do
       options.set_operation_timeout(2000) # Wait for propogation
 
       result = client.create_partitions(request, options: options)
-      expect(result.size).to eq(1)
-      expect(result[0].error).to be(nil)
+      expect(result).to be_a(Kafka::FFI::Admin::CreatePartitionsResult)
+      expect(result).to be_successful
+
+      result.topics.tap do |topics|
+        expect(topics.size).to eq(1)
+        expect(topics[0].error).to be(nil)
+      end
 
       tp = client.metadata.topic(topic)
       expect(tp).not_to be(nil)
@@ -275,8 +447,13 @@ RSpec.describe Kafka::FFI::Client do
       resource = Kafka::FFI::Admin::ConfigResource.new(:topic, topic)
 
       result = client.alter_configs(resource)
-      expect(result).not_to be(nil)
-      expect(result.size).to eq(1)
+      expect(result).to be_a(Kafka::FFI::Admin::AlterConfigsResult)
+      expect(result).to be_successful
+
+      result.resources.tap do |resources|
+        expect(resources.size).to eq(1)
+        expect(resources[0].name).to eq(topic)
+      end
     ensure
       resource.destroy
     end
@@ -290,13 +467,16 @@ RSpec.describe Kafka::FFI::Client do
     with_topic do |topic|
       resource = Kafka::FFI::Admin::ConfigResource.new(:topic, topic)
 
-      results = client.describe_configs(resource)
-      expect(results).not_to be(nil)
-      expect(results.size).to eq(1)
-      expect(results[0].name).to eq(topic)
+      result = client.describe_configs(resource)
+      expect(result).to be_a(Kafka::FFI::Admin::DescribeConfigsResult)
+
+      result.resources.tap do |resources|
+        expect(resources.size).to eq(1)
+        expect(resources[0].name).to eq(topic)
+      end
     ensure
       resource.destroy
-      results.destroy
+      result.destroy
     end
   ensure
     client.destroy

@@ -4,7 +4,6 @@ require "ffi"
 require "kafka/config"
 require "kafka/metadata"
 require "kafka/ffi/opaque_pointer"
-require "kafka/ffi/admin/result"
 
 module Kafka::FFI
   # Client is a handle to a configured librdkafka instance that begins
@@ -475,7 +474,7 @@ module Kafka::FFI
 
       event = queue.poll(timeout: timeout)
       if event
-        ::Kafka::FFI::Admin::Result.new(event)
+        ::Kafka::FFI::Admin::CreateTopicsResult.new(event)
       end
     ensure
       list.free
@@ -508,7 +507,99 @@ module Kafka::FFI
 
       event = queue.poll(timeout: timeout)
       if event
-        ::Kafka::FFI::Admin::Result.new(event)
+        ::Kafka::FFI::Admin::DeleteTopicsResult.new(event)
+      end
+    ensure
+      list.free
+      queue.destroy
+    end
+
+    # Delete one or more consumer groups.
+    #
+    # @param requests [Admin::DeleteGroup, Array<Admin::DeleteGroup>] List of
+    #   consumer groups to delete.
+    # @param options [Admin::AdminOptions] Admin API request options
+    # @param timeout [Integer] Time to wait in milliseconds for the deletion to
+    #   complete.
+    #
+    # @return [Array<Admin::DeleteGroup::Result>, nil]
+    def delete_groups(requests, options: nil, timeout: 5000)
+      requests = Array(requests)
+
+      list = ::FFI::MemoryPointer.new(:pointer, requests.length)
+      list.write_array_of_pointer(requests.map(&:pointer))
+
+      queue = ::Kafka::FFI::Queue.new(self)
+
+      ::Kafka::FFI.rd_kafka_DeleteGroups(self, list, requests.length, options, queue)
+
+      event = queue.poll(timeout: timeout)
+      if event
+        ::Kafka::FFI::Admin::DeleteGroupsResult.new(event)
+      end
+    ensure
+      list.free
+      queue.destroy
+    end
+
+    # Delete records (messages) in topic partitions older than the given
+    # offsets.
+    #
+    # @param requests [Admin::DeleteRecords, Array<Admin::DeleteRecords>]
+    #   details on which records should be deleted.
+    # @param options [Admin::AdminOptions] Admin API request options
+    # @param timeout [Integer] Time to wait in milliseconds for the deletion to
+    #   complete.
+    #
+    # @return [Array<Admin::DeleteRecords::Result>, nil]
+    def delete_records(requests, options: nil, timeout: 5000)
+      requests = Array(requests)
+
+      list = ::FFI::MemoryPointer.new(:pointer, requests.length)
+      list.write_array_of_pointer(requests.map(&:pointer))
+
+      queue = ::Kafka::FFI::Queue.new(self)
+
+      ::Kafka::FFI.rd_kafka_DeleteRecords(self, list, requests.length, options, queue)
+
+      event = queue.poll(timeout: timeout)
+      if event
+        ::Kafka::FFI::Admin::DeleteRecordsResult.new(event)
+      end
+    ensure
+      list.free
+      queue.destroy
+    end
+
+    # Delete committed offsets for a set of partitions in a consumer group.
+    # This will only succeed at the partition level if the group is not
+    # actively subscribed to the topic.
+    #
+    # @note Application is responsible for calling #destroy on the returned
+    #   results when done with them.
+    #
+    # @param request [Admin::DeleteConsumerGroupOffsets] List of group + topic
+    #   partitions committed offsets to delete.
+    # @parma options [Admin::AdminOptions] Admin API request options
+    # @param timeout [Integer] Time to wait in milliseconds for the deletion to
+    #   complete.
+    #
+    # @return [Array<Admin::DeleteConsumerGroupOffsets::Result>, nil] Response
+    #   from the cluster with details about the deletion of the list of topics
+    #   or any errors. Returns nil when the request times out.
+    def delete_consumer_group_offsets(requests, options: nil, timeout: 5000)
+      requests = Array(requests)
+
+      list = ::FFI::MemoryPointer.new(:pointer, requests.length)
+      list.write_array_of_pointer(requests.map(&:pointer))
+
+      queue = ::Kafka::FFI::Queue.new(self)
+
+      ::Kafka::FFI.rd_kafka_DeleteConsumerGroupOffsets(self, list, requests.length, options, queue)
+
+      event = queue.poll(timeout: timeout)
+      if event
+        ::Kafka::FFI::Admin::DeleteConsumerGroupOffsetsResult.new(event)
       end
     ensure
       list.free
@@ -544,7 +635,7 @@ module Kafka::FFI
 
       event = queue.poll(timeout: timeout)
       if event
-        ::Kafka::FFI::Admin::Result.new(event)
+        ::Kafka::FFI::Admin::CreatePartitionsResult.new(event)
       end
     ensure
       list.free
@@ -570,10 +661,9 @@ module Kafka::FFI
     #   to alter_configs since the changes must be sent to the broker specified
     #   in the resource.
     #
-    # @param resources [Admin::ConfigResource] Resource to alter configs for.
-    # @param resources [Array<Admin::ConfigResource>] List of resources with
-    #   their configs to update. At most one of type :broker is allowed per
-    #   call.
+    # @param resources [Admin::ConfigResource, Array<Admin::ConfigResource>]
+    #   One or more resources with their configs to update. At most one of type
+    #   :broker is allowed per call.
     # @param options [Admin::AdminOptions] Admin API request options
     # @param timeout [Integer] Time to wait in milliseconds for request to
     #   complete.
@@ -594,7 +684,7 @@ module Kafka::FFI
 
       event = queue.poll(timeout: timeout)
       if event
-        ::Kafka::FFI::Admin::Result.new(event)
+        ::Kafka::FFI::Admin::AlterConfigsResult.new(event)
       end
     ensure
       list.free
@@ -633,7 +723,7 @@ module Kafka::FFI
 
       event = queue.poll(timeout: timeout)
       if event
-        ::Kafka::FFI::Admin::Result.new(event)
+        ::Kafka::FFI::Admin::DescribeConfigsResult.new(event)
       end
     ensure
       list.free

@@ -69,7 +69,7 @@ module Kafka::FFI
     # @return [String] Configuration string for the event
     # @return [nil] Property not set or not applicable.
     def config_string
-      ::Kafka::FFI.rd_kafka_event_string(self)
+      ::Kafka::FFI.rd_kafka_event_config_string(self)
     end
 
     # Returns the error code for the event or nil if there was no error.
@@ -83,6 +83,29 @@ module Kafka::FFI
       if err != :ok
         ::Kafka::ResponseError.new(err, error_string)
       end
+    end
+
+    # Returns true when an error occurred at the event level. This only checks
+    # if there was an error attached to the event, some events have more
+    # granular errors embeded in their results. For example the
+    # Kafka::FFI::Admin::DeleteTopicsResult event has potential errors on each
+    # of the results included in #topics.
+    #
+    # @see #error
+    # @see #successful?
+    #
+    # @return [Boolean] event level error occurred
+    def error?
+      ::Kafka::FFI.rd_kafka_event_error(self) != :ok
+    end
+
+    # Returns true when the event does not have an attached error.
+    #
+    # @see #error?
+    #
+    # @return [Boolean] Event does not have an error
+    def successful?
+      !error?
     end
 
     # Returns a description of the error or nil when there is no error.
@@ -154,9 +177,10 @@ module Kafka::FFI
     #   - RD_KAFKA_EVENT_REBALANCE
     #   - RD_KAFKA_EVENT_OFFSET_COMMIT
     #
-    # @return [TopicPartitionList]
+    # @return [TopicPartitionList, nil]
     def topic_partition_list
-      ::Kafka::FFI.rd_kafka_event_topic_partition_list(self)
+      tpl = ::Kafka::FFI.rd_kafka_event_topic_partition_list(self)
+      tpl.null? ? nil : tpl
     end
 
     # Returns the topic partition from the Event.

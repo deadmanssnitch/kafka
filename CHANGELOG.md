@@ -1,4 +1,10 @@
-## Unreleased
+## 0.6.0 - Unreleased
+
+This release has several breaking changes that, normally, would require a major
+version bump. Most of the changes affect the Kafka::FFI module and should have
+a little to no impact on anyone using the higher level APIs. There remains a
+large surface area of librdkafka to implement and we don't plan to commit to
+API stability until we're close to feature parity.
 
 * BREAKING: Kafka::FFI::Client#metadata now returns Kafka::Metadata::Cluster
 * BREAKING: Kafka::FFI::Client#group_list now returns array of Kafka::Metadata::Group
@@ -7,6 +13,7 @@
 * BREAKING: Kafka::FFI::Config.get with a callback key will return the callback
 * BREAKING: Kafka::FFI::Event#messages no longer allows passing a block
 * BREAKING: Kafka::FFI::Error is no longer an exception class
+* BREAKING: Kafka::FFI::Client admin operations now return result types
 * Update librdkafka to 1.6.1
 * Fixes Kafka::FFI::Consumer#commit_message
 * Adds kip-511 for client name and version
@@ -24,6 +31,15 @@ Librdkafka 1.5.0 introduced a new error type for the Transaction API that
 appears to be getting use in new APIs instead of the response error code. All
 exceptions in Kafka::FFI now extend from Kafka::Error instead of
 Kafka::FFI::Error.
+
+### Kafka::FFI::Client admin operations now return result types
+
+Previously the admin API operations would return only the results of the
+operation (e.g. create_topics returns TopicResults). This turned out not to be
+a good mapping for all Admin API calls and makes it impossible to retrieve
+other information from the returned event. The result types now extend from
+Event similarly to how they are represented in librdkafka which gives access to
+the full context of the response.
 
 ## 0.5.2 / 2020-01-27
 

@@ -33,17 +33,14 @@ module Kafka
     #   due to multiple operations being done. Defaults to `socket.timeout.ms`
     #   config setting.
     #
-    # @return [nil] Create timed out
-    # @return [TopicResult] Response from the cluster with details about if the
-    #   topic was created or any errors.
+    # @return [Kafka::Admin::FFI::CreateTopicsResult, nil] Response from the
+    #   cluster with details about the new topic or any errors that occurred.
+    #   Returns nil when the operation timed out.
     def create_topic(name, partitions, replication_factor, wait: true, validate: false, timeout: nil)
       req = ::Kafka::FFI::Admin::NewTopic.new(name, partitions, replication_factor)
       opts = new_options(:create_topics, wait: wait, validate: validate, timeout: timeout)
 
-      res = @client.create_topics(req, options: opts)
-      if res
-        res[0]
-      end
+      @client.create_topics(req, options: opts)
     ensure
       opts.destroy
       req.destroy
@@ -61,17 +58,14 @@ module Kafka
     #   due to multiple operations being done. Defaults to `socket.timeout.ms`
     #   config setting.
     #
-    # @return [nil] Delete timed out
-    # @return [TopicResult] Response from the cluster with details about the
-    #   deletion or any errors.
+    # @return [Kafka::FFI::Admin::DeleteTopicsResult, nil] Response from the
+    #   cluster with details about the deletion or any errors. Returns nil when
+    #   the operation timed out.
     def delete_topic(name, wait: true, validate: false, timeout: nil)
       req = ::Kafka::FFI::Admin::DeleteTopic.new(name)
       opts = new_options(:create_topics, wait: wait, validate: validate, timeout: timeout)
 
-      res = @client.delete_topics(req, options: opts)
-      if res
-        res[0]
-      end
+      @client.delete_topics(req, options: opts)
     ensure
       opts.destroy
       req.destroy

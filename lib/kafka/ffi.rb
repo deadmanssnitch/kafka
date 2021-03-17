@@ -247,38 +247,44 @@ module Kafka
     RD_KAFKA_OFFSET_STORED    = -1000
     RD_KAFKA_OFFSET_INVALID   = -1001
 
-    RD_KAFKA_EVENT_NONE                      =  0x00
-    RD_KAFKA_EVENT_DR                        =  0x01
-    RD_KAFKA_EVENT_FETCH                     =  0x02
-    RD_KAFKA_EVENT_LOG                       =  0x04
-    RD_KAFKA_EVENT_ERROR                     =  0x08
-    RD_KAFKA_EVENT_REBALANCE                 =  0x10
-    RD_KAFKA_EVENT_OFFSET_COMMIT             =  0x20
-    RD_KAFKA_EVENT_STATS                     =  0x40
-    RD_KAFKA_EVENT_CREATETOPICS_RESULT       =   100
-    RD_KAFKA_EVENT_DELETETOPICS_RESULT       =   101
-    RD_KAFKA_EVENT_CREATEPARTITIONS_RESULT   =   102
-    RD_KAFKA_EVENT_ALTERCONFIGS_RESULT       =   103
-    RD_KAFKA_EVENT_DESCRIBECONFIGS_RESULT    =   104
-    RD_KAFKA_EVENT_OAUTHBEARER_TOKEN_REFRESH = 0x100
+    RD_KAFKA_EVENT_NONE                              =  0x00
+    RD_KAFKA_EVENT_DR                                =  0x01
+    RD_KAFKA_EVENT_FETCH                             =  0x02
+    RD_KAFKA_EVENT_LOG                               =  0x04
+    RD_KAFKA_EVENT_ERROR                             =  0x08
+    RD_KAFKA_EVENT_REBALANCE                         =  0x10
+    RD_KAFKA_EVENT_OFFSET_COMMIT                     =  0x20
+    RD_KAFKA_EVENT_STATS                             =  0x40
+    RD_KAFKA_EVENT_CREATETOPICS_RESULT               =   100
+    RD_KAFKA_EVENT_DELETETOPICS_RESULT               =   101
+    RD_KAFKA_EVENT_CREATEPARTITIONS_RESULT           =   102
+    RD_KAFKA_EVENT_ALTERCONFIGS_RESULT               =   103
+    RD_KAFKA_EVENT_DESCRIBECONFIGS_RESULT            =   104
+    RD_KAFKA_EVENT_DELETERECORDS_RESULT              =   105
+    RD_KAFKA_EVENT_DELETEGROUPS_RESULT               =   106
+    RD_KAFKA_EVENT_DELETECONSUMERGROUPOFFSETS_RESULT =   107
+    RD_KAFKA_EVENT_OAUTHBEARER_TOKEN_REFRESH         = 0x100
 
     # @see rd_kafka_event_type_t
     enum :event_type, [
-      :none,                       RD_KAFKA_EVENT_NONE,
-      :dr,                         RD_KAFKA_EVENT_DR,
-      :delivery,                   RD_KAFKA_EVENT_DR, # Alias for dr (delivery report)
-      :fetch,                      RD_KAFKA_EVENT_FETCH,
-      :log,                        RD_KAFKA_EVENT_LOG,
-      :error,                      RD_KAFKA_EVENT_ERROR,
-      :rebalance,                  RD_KAFKA_EVENT_REBALANCE,
-      :offset_commit,              RD_KAFKA_EVENT_OFFSET_COMMIT,
-      :stats,                      RD_KAFKA_EVENT_STATS,
-      :create_topics,              RD_KAFKA_EVENT_CREATETOPICS_RESULT,
-      :delete_topics,              RD_KAFKA_EVENT_DELETETOPICS_RESULT,
-      :create_partitions,          RD_KAFKA_EVENT_CREATEPARTITIONS_RESULT,
-      :alter_configs,              RD_KAFKA_EVENT_ALTERCONFIGS_RESULT,
-      :describe_configs,           RD_KAFKA_EVENT_DESCRIBECONFIGS_RESULT,
-      :oauth_bearer_token_refresh, RD_KAFKA_EVENT_OAUTHBEARER_TOKEN_REFRESH,
+      :none,                         RD_KAFKA_EVENT_NONE,
+      :dr,                           RD_KAFKA_EVENT_DR,
+      :delivery,                     RD_KAFKA_EVENT_DR, # Alias for dr (delivery report)
+      :fetch,                        RD_KAFKA_EVENT_FETCH,
+      :log,                          RD_KAFKA_EVENT_LOG,
+      :error,                        RD_KAFKA_EVENT_ERROR,
+      :rebalance,                    RD_KAFKA_EVENT_REBALANCE,
+      :offset_commit,                RD_KAFKA_EVENT_OFFSET_COMMIT,
+      :stats,                        RD_KAFKA_EVENT_STATS,
+      :create_topics,                RD_KAFKA_EVENT_CREATETOPICS_RESULT,
+      :delete_topics,                RD_KAFKA_EVENT_DELETETOPICS_RESULT,
+      :create_partitions,            RD_KAFKA_EVENT_CREATEPARTITIONS_RESULT,
+      :alter_configs,                RD_KAFKA_EVENT_ALTERCONFIGS_RESULT,
+      :describe_configs,             RD_KAFKA_EVENT_DESCRIBECONFIGS_RESULT,
+      :oauth_bearer_token_refresh,   RD_KAFKA_EVENT_OAUTHBEARER_TOKEN_REFRESH,
+      :delete_records,               RD_KAFKA_EVENT_DELETERECORDS_RESULT,
+      :delete_groups,                RD_KAFKA_EVENT_DELETEGROUPS_RESULT,
+      :delete_consumer_group_offets, RD_KAFKA_EVENT_DELETECONSUMERGROUPOFFSETS_RESULT,
     ]
 
     RD_KAFKA_MSG_STATUS_NOT_PERSISTED      = 0
@@ -663,6 +669,7 @@ module Kafka
     attach_function :rd_kafka_queue_destroy, [Queue], :void
 
     # Event
+
     attach_function :rd_kafka_event_type, [Event], :event_type
     attach_function :rd_kafka_event_name, [Event], :string
 
@@ -683,11 +690,15 @@ module Kafka
     # Event casting
     #   Each of these functions will type check the Event to see if it is the
     #   desired type, returning nil if it is not.
-    attach_function :rd_kafka_event_CreateTopics_result, [Event], Event
-    attach_function :rd_kafka_event_DeleteTopics_result, [Event], Event
-    attach_function :rd_kafka_event_CreatePartitions_result, [Event], Event
-    attach_function :rd_kafka_event_AlterConfigs_result, [Event], Event
-    attach_function :rd_kafka_event_DescribeConfigs_result, [Event], Event
+
+    attach_function :rd_kafka_event_CreateTopics_result, [Event], Admin::CreateTopicsResult
+    attach_function :rd_kafka_event_DeleteTopics_result, [Event], Admin::DeleteTopicsResult
+    attach_function :rd_kafka_event_CreatePartitions_result, [Event], Admin::CreatePartitionsResult
+    attach_function :rd_kafka_event_AlterConfigs_result, [Event], Admin::AlterConfigsResult
+    attach_function :rd_kafka_event_DescribeConfigs_result, [Event], Admin::DescribeConfigsResult
+    attach_function :rd_kafka_event_DeleteGroups_result, [Event], Admin::DeleteGroupsResult
+    attach_function :rd_kafka_event_DeleteRecords_result, [Event], Admin::DeleteRecordsResult
+    attach_function :rd_kafka_event_DeleteConsumerGroupOffsets_result, [Event], Admin::DeleteConsumerGroupOffsetsResult
 
     # Topics
     attach_function :rd_kafka_topic_new, [Client, :topic, TopicConfig], Topic
@@ -783,21 +794,51 @@ module Kafka
     attach_function :rd_kafka_topic_result_error_string, [Admin::TopicResult], :string
     attach_function :rd_kafka_topic_result_name, [Admin::TopicResult], :topic
 
-    # DeleteTopics / DeleteTopic
+    # DeleteTopic(s)
+
     attach_function :rd_kafka_DeleteTopics, [Client, :pointer, :size_t, Admin::AdminOptions, Queue], :void
     attach_function :rd_kafka_DeleteTopics_result_topics, [Event, :pointer], :pointer
     attach_function :rd_kafka_DeleteTopic_new, [:topic], Admin::DeleteTopic
     attach_function :rd_kafka_DeleteTopic_destroy, [Admin::DeleteTopic], :void
     attach_function :rd_kafka_DeleteTopic_destroy_array, [:pointer, :size_t], :void
 
+    # GroupResult
+
+    attach_function :rd_kafka_group_result_error, [Admin::GroupResult], Error.by_ref
+    attach_function :rd_kafka_group_result_name, [Admin::GroupResult], :string
+    attach_function :rd_kafka_group_result_partitions, [Admin::GroupResult], TopicPartitionList.by_ref
+
+    # DeleteGroup(s)
+
+    attach_function :rd_kafka_DeleteGroups, [Client, :pointer, :size_t, Admin::AdminOptions, Queue], :void
+    attach_function :rd_kafka_DeleteGroup_new, [:string], Admin::DeleteGroup
+    attach_function :rd_kafka_DeleteGroup_destroy, [Admin::DeleteGroup], :void
+    attach_function :rd_kafka_DeleteGroup_destroy_array, [:pointer, :size_t], :void
+    attach_function :rd_kafka_DeleteGroups_result_groups, [Event, :pointer], :pointer
+
+    # DeleteRecords
+
+    attach_function :rd_kafka_DeleteRecords, [Client, :pointer, :size_t, Admin::AdminOptions, Queue], :void
+    attach_function :rd_kafka_DeleteRecords_new, [TopicPartitionList.by_ref], Admin::DeleteRecords
+    attach_function :rd_kafka_DeleteRecords_destroy, [Admin::DeleteRecords.by_ref], :void
+    attach_function :rd_kafka_DeleteRecords_destroy_array, [:pointer, :size_t], :void
+    attach_function :rd_kafka_DeleteRecords_result_offsets, [Event], TopicPartitionList.by_ref
+
+    # DeleteConsumeGroupOffsets
+
+    attach_function :rd_kafka_DeleteConsumerGroupOffsets, [Client, :pointer, :size_t, Admin::AdminOptions, Queue], :void
+    attach_function :rd_kafka_DeleteConsumerGroupOffsets_new, [:string, TopicPartitionList.by_ref], Admin::DeleteConsumerGroupOffsets
+    attach_function :rd_kafka_DeleteConsumerGroupOffsets_result_groups, [Event, :pointer], :pointer
+    attach_function :rd_kafka_DeleteConsumerGroupOffsets_destroy, [Admin::DeleteConsumerGroupOffsets], :void
+    attach_function :rd_kafka_DeleteConsumerGroupOffsets_destroy_array, [:pointer, :size_t], :void
+
     # CreatePartitions / NewPartitions
+
     attach_function :rd_kafka_CreatePartitions, [Client, :pointer, :size_t, Admin::AdminOptions, Queue], :void
     attach_function :rd_kafka_CreatePartitions_result_topics, [Event, :pointer], :pointer
 
     attach_function :rd_kafka_NewPartitions_new, [:topic, :size_t, :pointer, :size_t], Admin::NewPartitions
-
     attach_function :rd_kafka_NewPartitions_set_replica_assignment, [Admin::NewPartitions, :partition, :pointer, :size_t, :pointer, :size_t], :error_code
-
     attach_function :rd_kafka_NewPartitions_destroy, [Admin::NewPartitions], :void
     attach_function :rd_kafka_NewPartitions_destroy_array, [:pointer, :size_t], :void
   end

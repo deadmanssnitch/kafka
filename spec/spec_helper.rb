@@ -121,7 +121,7 @@ RSpec.configure do |config|
         "-b", "127.0.0.1:9092",
         "-t", topic,
 
-        # Publish to a specific partition (-1
+        # Publish to a specific partition (default to random partitioner)
         "-p", (partition || -1),
       ].tap do |c|
         if key
@@ -138,7 +138,10 @@ RSpec.configure do |config|
     nil
   end
 
+  # Fetch reads `count` messages from the given topic starting at `offset`.
+  #
   # @param topic [String] Name of the topic to consume from
+  # @param count [Integer] Number of messages to read
   # @param offset [String, int] Offset or relative offset to start at.
   #    beginning | end | stored
   #    <value>   (absolute offset)
@@ -149,7 +152,7 @@ RSpec.configure do |config|
   def fetch(topic, count: 1, offset: -1, timeout: 4)
     cmd = Shellwords.join([
       # Use timeout to limit how long kafkacat can wait for messages to be
-      # visible. This usually happens quickly be is proving to be quite
+      # visible. This usually happens quickly but is proving to be quite
       # variable.
       "timeout", timeout,
 
@@ -157,6 +160,55 @@ RSpec.configure do |config|
       "kafkacat", "-C", "-q",
       "-b", "127.0.0.1:9092",
       "-t", topic,
+      "-o", offset,
+
+      # Fetch at most `count` messages
+      "-c", count,
+
+      # Print the message(s) out as JSON so we get metadata as well as the
+      # payload.
+      "-J",
+    ])
+
+    # Exit 124 is returned by `timeout` when the command times out.
+    out, err, status = Open3.capture3(cmd)
+    if !status.success? && status.exitstatus != 124
+      expect(status).to be_success, err
+    end
+
+    out.each_line.map do |line|
+      next if line.empty?
+
+      KafkacatMessage.new(line)
+    end.compact
+  end
+
+  # Consume uses the high level balanced consumer to read messages from one or
+  # more topics as the given consumer group. Consume will commit the offsets
+  # for any messages read by the group.
+  #
+  # @param group [String] Consumer group id
+  # @param topic [String, Array<String>] Name of the topic(s) to consume from
+  # @param count [Integer] Number of messages to read
+  # @param offset [String, int] Offset or relative offset to start at.
+  #    beginning | end | stored
+  #    <value>   (absolute offset)
+  #    -<value>  (relative offset from end)
+  #    s@<value> (timestamp in ms to start at)
+  #    e@<value> (timestamp in ms to stop at (not included))
+  # @param timeout [Number] Maximum time to wait in seconds
+  def consume(group, topics, count: 1, offset: -1, timeout: 4)
+    cmd = Shellwords.join([
+      # Use timeout to limit how long kafkacat can wait for messages to be
+      # visible. This usually happens quickly but is proving to be quite
+      # variable.
+      "timeout", timeout,
+
+      # Call kafkacat to fetch message(s)
+      "kafkacat", "-C", "-q",
+      "-b", "127.0.0.1:9092",
+
+      "-G", group, Array(topics).join(","),
       "-o", offset,
 
       # Fetch at most `count` messages
