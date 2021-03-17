@@ -688,7 +688,7 @@ module Kafka
     attach_function :rd_kafka_event_error, [Event], :error_code
     attach_function :rd_kafka_event_error_string, [Event], :string
     attach_function :rd_kafka_event_error_is_fatal, [Event], :bool
-    # :rd_kafka_event_opaque
+    attach_function :rd_kafka_event_opaque, [Event], Opaque
     attach_function :rd_kafka_event_debug_contexts, [Event, :pointer, :size_t], :int
     attach_function :rd_kafka_event_log, [Event, :pointer, :pointer, :pointer], :int
     attach_function :rd_kafka_event_stats, [Event], :string
@@ -751,7 +751,7 @@ module Kafka
     attach_function :rd_kafka_AdminOptions_set_operation_timeout, [Admin::AdminOptions, :timeout_ms, :pointer, :size_t], :error_code
     attach_function :rd_kafka_AdminOptions_set_validate_only, [Admin::AdminOptions, :bool, :pointer, :size_t], :error_code
     attach_function :rd_kafka_AdminOptions_set_broker, [Admin::AdminOptions, :broker_id, :pointer, :size_t], :error_code
-    # :rd_kafka_AdminOptions_set_opaque
+    attach_function :rd_kafka_AdminOptions_set_opaque, [Admin::AdminOptions, Opaque], :void
     attach_function :rd_kafka_AdminOptions_destroy, [Admin::AdminOptions], :void
 
     ## DescribeConfigs

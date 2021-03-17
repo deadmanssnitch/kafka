@@ -416,12 +416,16 @@ RSpec.describe Kafka::FFI::Client do
     with_topic(partitions: 1) do |topic|
       request = Kafka::FFI::Admin::NewPartitions.new(topic, 3)
 
+      opaque = Kafka::FFI::Opaque.new("opaque")
+
       options = Kafka::FFI::Admin::AdminOptions.new(client, :create_partitions)
       options.set_operation_timeout(2000) # Wait for propogation
+      options.set_opaque(opaque)
 
       result = client.create_partitions(request, options: options)
       expect(result).to be_a(Kafka::FFI::Admin::CreatePartitionsResult)
       expect(result).to be_successful
+      expect(result.opaque).to eq(opaque)
 
       result.topics.tap do |topics|
         expect(topics.size).to eq(1)

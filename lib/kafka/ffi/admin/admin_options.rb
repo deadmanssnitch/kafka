@@ -61,6 +61,19 @@ module Kafka::FFI::Admin
       error.free
     end
 
+    # Set an application object which will be available on the operation's
+    # result event.
+    #
+    # @param opaque [Kafka::FFI::Opaque] Opaque object to store into the admin
+    #   options.
+    def set_opaque(opaque)
+      if !opaque.is_a?(::Kafka::FFI::Opaque)
+        raise ArgumentError, "opaque must be a Kafka::FFI::Opaque"
+      end
+
+      ::Kafka::FFI.rd_kafka_AdminOptions_set_opaque(self, opaque)
+    end
+
     # Tell the broker to only validate the request without actually performing
     # the operation.
     #
@@ -113,6 +126,7 @@ module Kafka::FFI::Admin
     alias operation_timeout= set_operation_timeout
     alias validate_only= set_validate_only
     alias broker= set_broker
+    alias opaque= set_opaque
 
     def destroy
       ::Kafka::FFI.rd_kafka_AdminOptions_destroy(self)
