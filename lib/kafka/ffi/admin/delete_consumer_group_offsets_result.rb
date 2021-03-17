@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-require "kafka/ffi/event"
-
 module Kafka::FFI::Admin
   class DeleteConsumerGroupOffsetsResult < ::Kafka::FFI::Event
+    event_type :delete_consumer_group_offets
+
     def self.new(event)
       ::Kafka::FFI.rd_kafka_event_DeleteConsumerGroupOffsets_result(event)
     end

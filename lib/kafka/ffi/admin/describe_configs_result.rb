@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-require "kafka/ffi/event"
-
 module Kafka::FFI::Admin
   class DescribeConfigsResult < ::Kafka::FFI::Event
+    event_type :describe_configs
+
     def self.new(event)
       ::Kafka::FFI.rd_kafka_event_DescribeConfigs_result(event)
     end

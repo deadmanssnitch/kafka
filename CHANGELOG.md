@@ -11,6 +11,7 @@ API stability until we're close to feature parity.
 * BREAKING: Removed Kafka::LIBRDKAFKA_VERSION and Kafka::LIBRDKAFKA_CHECKSUM
 * BREAKING: FFI Consumer, Producer, and Client now require a config
 * BREAKING: Kafka::FFI::Config.get with a callback key will return the callback
+* BREAKING: Kafka::FFI::Event has be split into multiple subtypes
 * BREAKING: Kafka::FFI::Event#messages no longer allows passing a block
 * BREAKING: Kafka::FFI::Error is no longer an exception class
 * BREAKING: Kafka::FFI::Client admin operations now return result types

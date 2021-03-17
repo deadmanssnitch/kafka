@@ -1,10 +1,11 @@
 # frozen_string_literal: true
 
-require "kafka/ffi/event"
 require "kafka/ffi/admin/topic_result"
 
 module Kafka::FFI::Admin
   class CreatePartitionsResult < ::Kafka::FFI::Event
+    event_type :create_partitions
+
     def self.new(event)
       ::Kafka::FFI.rd_kafka_event_CreatePartitions_result(event)
     end

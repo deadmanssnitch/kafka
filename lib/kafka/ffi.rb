@@ -269,7 +269,6 @@ module Kafka
     enum :event_type, [
       :none,                         RD_KAFKA_EVENT_NONE,
       :dr,                           RD_KAFKA_EVENT_DR,
-      :delivery,                     RD_KAFKA_EVENT_DR, # Alias for dr (delivery report)
       :fetch,                        RD_KAFKA_EVENT_FETCH,
       :log,                          RD_KAFKA_EVENT_LOG,
       :error,                        RD_KAFKA_EVENT_ERROR,
@@ -424,6 +423,15 @@ module Kafka
     require "kafka/ffi/topic_metadata"
     require "kafka/ffi/broker_metadata"
     require "kafka/ffi/partition_metadata"
+
+    require "kafka/ffi/log_event"
+    require "kafka/ffi/error_event"
+    require "kafka/ffi/fetch_event"
+    require "kafka/ffi/stats_event"
+    require "kafka/ffi/rebalance_event"
+    require "kafka/ffi/offset_commit_event"
+    require "kafka/ffi/delivery_report_event"
+    require "kafka/ffi/oauth_bearer_token_refresh_event"
 
     # Errors
 
@@ -681,6 +689,7 @@ module Kafka
     attach_function :rd_kafka_event_error_string, [Event], :string
     attach_function :rd_kafka_event_error_is_fatal, [Event], :bool
     # :rd_kafka_event_opaque
+    attach_function :rd_kafka_event_debug_contexts, [Event, :pointer, :size_t], :int
     attach_function :rd_kafka_event_log, [Event, :pointer, :pointer, :pointer], :int
     attach_function :rd_kafka_event_stats, [Event], :string
     attach_function :rd_kafka_event_topic_partition_list, [Event], TopicPartitionList.by_ref

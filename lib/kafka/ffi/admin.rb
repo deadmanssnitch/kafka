@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "kafka/ffi/event"
+
 module Kafka::FFI
   module Admin
     require "kafka/ffi/admin/group_result"

@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-require "kafka/ffi/event"
-
 module Kafka::FFI::Admin
   class AlterConfigsResult < ::Kafka::FFI::Event
+    event_type :alter_configs
+
     def self.new(event)
       ::Kafka::FFI.rd_kafka_event_AlterConfigs_result(event)
     end

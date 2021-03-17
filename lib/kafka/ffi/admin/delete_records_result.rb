@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-require "kafka/ffi/event"
-
 module Kafka::FFI::Admin
   class DeleteRecordsResult < ::Kafka::FFI::Event
+    event_type :delete_records
+
     def self.new(event)
       ::Kafka::FFI.rd_kafka_event_DeleteRecords_result(event)
     end
