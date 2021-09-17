@@ -1,0 +1,49 @@
+name: Test
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  ruby:
+    name: Ruby ${{ matrix.ruby }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby:
+          - 2.5
+          - 2.6
+          - 2.7
+          - 3.0
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ${{ matrix.ruby }}
+        bundler-cache: true
+
+    # Run tests against the latest version of Kafka in spec/support
+    - name: Setup
+      run: |
+        bundle exec rake kafka:up
+
+        mkdir -p $HOME/bin
+        echo "$HOME/bin" >> $GITHUB_PATH
+
+        # Use kafkacat from Docker to ensure a recent version is installed
+        docker pull edenhill/kafkacat:1.6.0
+        echo 'docker run -i --rm --network=host edenhill/kafkacat:1.6.0 "$@"' > $HOME/bin/kafkacat
+        chmod +x $HOME/bin/kafkacat
+
+        echo "--color --require './spec/support/running_documentation_formatter.rb' --format RunningDocumentationFormatter --warnings" > .rspec
+
+    - name: Build librdkafka extension
+      run: bundle exec rake ext
+
+    - name: Run specs
+      run: bundle exec rake
