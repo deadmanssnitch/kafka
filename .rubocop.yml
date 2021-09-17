@@ -5,6 +5,7 @@ AllCops:
     - "bin/*"
     - "ext/tmp/*"
     - "ext/ports/*"
+    - "vendor/bundle/**/*"
 
 require:
   - rubocop-performance
