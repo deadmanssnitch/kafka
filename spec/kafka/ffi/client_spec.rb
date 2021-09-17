@@ -70,7 +70,7 @@ RSpec.describe Kafka::FFI::Client do
       expect(md.topics.size).to eq(1)
 
       expect(md.broker_id).to be >= 1001
-      expect(md.broker_name).to match(/127\.0\.0\.1:9092\/\d+/)
+      expect(md.broker_name).to match(%r{127\.0\.0\.1:9092/\d+})
       expect(md.brokers.size).to eq(1)
 
       md.brokers.first.tap do |broker|

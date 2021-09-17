@@ -80,7 +80,7 @@ RSpec.describe Kafka::FFI::Consumer do
     # Retrieves the list of subscriptions
     subs = consumer.subscriptions
     expect(subs.size).to eq(2)
-    expect(subs).to contain_exactly(*["topic", "snitches"])
+    expect(subs).to contain_exactly("topic", "snitches")
   ensure
     consumer.destroy
   end

@@ -16,9 +16,9 @@ module Kafka::FFI
     # Returns true or false if the Event represents a fatal error.
     #
     # @return [Boolean] There is an error for the Event and it is fatal.
-    def is_fatal
+    def fatal?
       error? && ::Kafka::FFI.rd_kafka_event_error_is_fatal(self)
     end
-    alias fatal? is_fatal
+    alias is_fatal fatal?
   end
 end

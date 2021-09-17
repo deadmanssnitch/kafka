@@ -43,7 +43,7 @@ RSpec.configure do |config|
       "auto.offset.reset" => "earliest",
 
       # Decrease log level to hide CONFWARN messages
-      "log_level": 3,
+      "log_level" => 3,
     }
 
     Kafka::Config.new(defaults.merge(options))

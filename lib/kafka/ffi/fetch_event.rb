@@ -30,4 +30,3 @@ module Kafka::FFI
     end
   end
 end
-

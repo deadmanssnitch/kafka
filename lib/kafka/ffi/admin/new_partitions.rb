@@ -74,4 +74,3 @@ module Kafka::FFI::Admin
     end
   end
 end
-

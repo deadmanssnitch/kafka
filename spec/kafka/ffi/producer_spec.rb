@@ -25,7 +25,7 @@ RSpec.describe Kafka::FFI::Producer do
 
   # Verify that the partition argument is applied to publication.
   it "can produce a message to a specific partition" do
-    cfg = config("partitioner": "murmur2")
+    cfg = config(partitioner: "murmur2")
     producer = Kafka::FFI::Producer.new(cfg)
 
     with_topic(partitions: 5) do |topic|

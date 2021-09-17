@@ -47,15 +47,13 @@ module Kafka::FFI::Admin
       count.free
     end
 
-    # rubocop:disable Naming/PredicateName
-
     # Returns true if the config property is read-only on the broker. Only
     # returns a boolean when called on a ConfigEntry from a DescribeConfigs
     # result.
     #
     # @return [nil] ConfigEntry was not returned by DescribeConfigs
     # @return [Boolean] If the property is read only
-    def is_read_only
+    def read_only?
       val = ::Kafka::FFI.rd_kafka_ConfigEntry_is_read_only(self)
       val == -1 ? nil : val == 1
     end
@@ -65,7 +63,7 @@ module Kafka::FFI::Admin
     #
     # @return [nil] ConfigEntry was not returned by DescribeConfigs
     # @return [Boolean] If the property is set to default
-    def is_default
+    def default?
       val = ::Kafka::FFI.rd_kafka_ConfigEntry_is_default(self)
       val == -1 ? nil : val == 1
     end
@@ -75,7 +73,7 @@ module Kafka::FFI::Admin
     #
     # @return [nil] ConfigEntry was not returned by DescribeConfigs
     # @return [Boolean] If the property is set to default
-    def is_sensitive
+    def sensitive?
       val = ::Kafka::FFI.rd_kafka_ConfigEntry_is_sensitive(self)
       val == -1 ? nil : val == 1
     end
@@ -83,15 +81,15 @@ module Kafka::FFI::Admin
     # Returns true if the entry is a synonym for another config option.
     #
     # @return [Boolean]
-    def is_synonym
+    def synonym?
       ::Kafka::FFI.rd_kafka_ConfigEntry_is_sensitive(self) == 1
     end
 
-    # rubocop:enable Naming/PredicateName
-
-    alias read_only? is_read_only
-    alias default?   is_default
-    alias sensitive? is_sensitive
-    alias synonym?   is_synonym
+    # Alias Ruby style predicates (e.g. read_only?) to their rdkafka method
+    # names (e.g. is_read_only).
+    alias is_read_only read_only?
+    alias is_default   default?
+    alias is_sensitive sensitive?
+    alias is_synonym   synonym?
   end
 end

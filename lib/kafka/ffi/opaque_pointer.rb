@@ -62,6 +62,8 @@ module Kafka::FFI
       end
 
       def inherited(subclass)
+        super
+
         subclass.native_type :pointer
       end
     end

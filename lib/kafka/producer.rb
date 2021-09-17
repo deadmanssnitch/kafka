@@ -22,7 +22,7 @@ module Kafka
       config = config.dup
 
       # Configure callbacks
-      config.on_delivery_report(&method(:on_delivery_report))
+      config.on_delivery_report { |*args| on_delivery_report(*args) }
 
       @client = ::Kafka::FFI::Producer.new(config)
 

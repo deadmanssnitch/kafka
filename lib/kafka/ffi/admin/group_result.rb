@@ -17,7 +17,8 @@ module Kafka::FFI::Admin
     #
     # @see #error
     #
-    # @return [Boolean] True when an error occurred or false if 
+    # @return [Boolean] True when an error occurred or false if the command
+    #   succeeded.
     def error?
       !error.nil?
     end

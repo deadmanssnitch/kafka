@@ -52,18 +52,20 @@ module Kafka::FFI
     # usable.
     #
     # @return [Boolean] True when the error is fatal
-    def is_fatal
+    def fatal?
       ::Kafka::FFI.rd_kafka_error_is_fatal(self)
     end
-    alias fatal? is_fatal
 
     # Indicates if the operation that errored can be retried.
     #
     # @return [Boolean] True when the operation can be retried
-    def is_retriable
+    def retriable?
       ::Kafka::FFI.rd_kafka_error_is_retriable(self)
     end
-    alias retriable? is_retriable
+
+    # Alias Ruby style predicates to their librdkafka style method names.
+    alias is_retriable retriable?
+    alias is_fatal     fatal?
 
     # Returns true if the transaction error must be aborted by the client.
     #

@@ -8,7 +8,7 @@ module Kafka
   #
   # @see rdkafka.h RD_KAFKA_RESP_ERR_*
   # @see rdkafka.h rd_kafka_resp_err_t
-  class ::Kafka::ResponseError < Error
+  class ResponseError < Error
     def self.new(code, message = nil)
       klass =
         case code
@@ -34,7 +34,8 @@ module Kafka
 
     def initialize(code, message = nil)
       @code = code
-      @message = message
+
+      super(message || ::Kafka::FFI.rd_kafka_err2str(@code))
     end
 
     # Returns the librdkafka error constant for this error.
@@ -52,13 +53,6 @@ module Kafka
     # @return [false] Error was returned by the cluster
     def internal?
       code < 0
-    end
-
-    # Returns a human readable error description
-    #
-    # @return [String] Human readable description of the error.
-    def to_s
-      @message || ::Kafka::FFI.rd_kafka_err2str(@code)
     end
   end
 

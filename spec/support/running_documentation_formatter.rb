@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "rspec/core/formatters/documentation_formatter"
 
 # RunningDocumentationFormatter is an rspec formatter designed to print the
@@ -14,17 +16,17 @@ class RunningDocumentationFormatter < RSpec::Core::Formatters::DocumentationForm
     output.puts "#{current_indentation}#{notification.example.description.strip}"
   end
 
-  private 
+  private
 
-  def passed_output(example)
+  def passed_output(_example)
     RSpec::Core::Formatters::ConsoleCodes.wrap("#{current_indentation}  success", :success)
   end
 
-  def pending_output(example, message)
+  def pending_output(_example, message)
     RSpec::Core::Formatters::ConsoleCodes.wrap("#{current_indentation}  (PENDING: #{message})", :pending)
   end
 
-  def failure_output(example)
+  def failure_output(_example)
     RSpec::Core::Formatters::ConsoleCodes.wrap("#{current_indentation}  (FAILED - #{next_failure_index})", :failure)
   end
 end

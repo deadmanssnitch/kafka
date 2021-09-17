@@ -32,7 +32,7 @@ module Kafka
     #   to complete. Total request execution time may be longer than timeout
     #   due to multiple operations being done. Defaults to `socket.timeout.ms`
     #   config setting.
-    # @param topic_config [Hash] Topic level configuration. 
+    # @param topic_config [Hash] Topic level configuration.
     #
     # @return [Kafka::Admin::FFI::CreateTopicsResult, nil] Response from the
     #   cluster with details about the new topic or any errors that occurred.
@@ -41,7 +41,7 @@ module Kafka
       req = ::Kafka::FFI::Admin::NewTopic.new(name, partitions, replication_factor)
       opts = new_options(:create_topics, wait: wait, validate: validate, timeout: timeout)
 
-      topic_config.each_pair {|k,v| req.set_config(k.to_s,v.to_s) }
+      topic_config.each_pair { |k, v| req.set_config(k.to_s, v.to_s) }
       @client.create_topics(req, options: opts)
     ensure
       opts.destroy
