@@ -75,7 +75,12 @@ jobs:
         path: ext/
 
     - name: Run specs
-      run: bundle exec rake
+      uses: nick-invision/retry@v2
+      with:
+        timeout_minutes: 5
+        max_attempts: 3
+        retry_on: error
+        command: bundle exec rake
 
   kafka:
     name: Kafka ${{ matrix.kafka }}
@@ -128,4 +133,9 @@ jobs:
         path: ext/
 
     - name: Run specs
-      run: bundle exec rake
+      uses: nick-invision/retry@v2
+      with:
+        timeout_minutes: 5
+        max_attempts: 3
+        retry_on: error
+        command: bundle exec rake
