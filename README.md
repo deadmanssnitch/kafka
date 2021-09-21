@@ -1,6 +1,6 @@
 # Kafka
 
-[![Build Status](https://travis-ci.com/deadmanssnitch/kafka.svg?branch=master)](https://travis-ci.com/deadmanssnitch/kafka)
+[![Build Status](https://github.com/deadmanssnitch/kafka/actions/workflows/tests.yml/badge.svg)](https://github.com/deadmanssnitch/kafka/actions/workflows/tests.yml)
 [![Gem Version](https://badge.fury.io/rb/kafka.svg)](https://badge.fury.io/rb/kafka)
 [![Documentation](https://img.shields.io/badge/-Documentation-success)](https://deadmanssnitch.com/opensource/kafka/docs/)
 
