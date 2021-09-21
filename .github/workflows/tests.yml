@@ -5,8 +5,30 @@ on:
   - pull_request
 
 jobs:
+  librdkafka:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ruby
+        bundler-cache: true
+
+    - name: Build librdkafka extension
+      run: bundle exec rake ext
+
+    - name: Upload librdkafka
+      uses: actions/upload-artifact@v2
+      with:
+        name: librdkafka.so
+        path: ext/librdkafka.so
+
   ruby:
     name: Ruby ${{ matrix.ruby }}
+    needs: librdkafka
     runs-on: ubuntu-latest
 
     strategy:
@@ -42,14 +64,17 @@ jobs:
 
         echo "--color --require './spec/support/running_documentation_formatter.rb' --format RunningDocumentationFormatter --warnings" > .rspec
 
-    - name: Build librdkafka extension
-      run: bundle exec rake ext
+    - uses: actions/download-artifact@v2
+      with:
+        name: librdkafka.so
+        path: ext/
 
     - name: Run specs
       run: bundle exec rake
 
   kafka:
     name: Kafka ${{ matrix.kafka }}
+    needs: librdkafka
     runs-on: ubuntu-latest
 
     strategy:
@@ -89,8 +114,10 @@ jobs:
 
         echo "--color --require './spec/support/running_documentation_formatter.rb' --format RunningDocumentationFormatter --warnings" > .rspec
 
-    - name: Build librdkafka extension
-      run: bundle exec rake ext
+    - uses: actions/download-artifact@v2
+      with:
+        name: librdkafka.so
+        path: ext/
 
     - name: Run specs
       run: bundle exec rake
