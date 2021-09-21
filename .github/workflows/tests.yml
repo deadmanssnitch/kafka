@@ -47,3 +47,50 @@ jobs:
 
     - name: Run specs
       run: bundle exec rake
+
+  kafka:
+    name: Kafka ${{ matrix.kafka }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        kafka:
+          - 2.1
+          - 2.2
+          - 2.3
+          - 2.4
+          - 2.5
+          - 2.6
+          - 2.7
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        # Use the latest stable version of Ruby
+        ruby-version: ruby
+        bundler-cache: true
+
+    # Run tests against the latest version of Kafka in spec/support
+    - name: Setup
+      run: |
+        bundle exec rake kafka:up
+
+        mkdir -p $HOME/bin
+        echo "$HOME/bin" >> $GITHUB_PATH
+
+        # Use kafkacat from Docker to ensure a recent version is installed
+        docker pull edenhill/kafkacat:1.6.0
+        echo 'docker run -i --rm --network=host edenhill/kafkacat:1.6.0 "$@"' > $HOME/bin/kafkacat
+        chmod +x $HOME/bin/kafkacat
+
+        echo "--color --require './spec/support/running_documentation_formatter.rb' --format RunningDocumentationFormatter --warnings" > .rspec
+
+    - name: Build librdkafka extension
+      run: bundle exec rake ext
+
+    - name: Run specs
+      run: bundle exec rake
