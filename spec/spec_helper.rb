@@ -207,8 +207,6 @@ RSpec.configure do |config|
       # Call kafkacat to fetch message(s)
       "kafkacat", "-C", "-q",
       "-b", "127.0.0.1:9092",
-
-      "-G", group, Array(topics).join(","),
       "-o", offset,
 
       # Fetch at most `count` messages
@@ -217,11 +215,18 @@ RSpec.configure do |config|
       # Print the message(s) out as JSON so we get metadata as well as the
       # payload.
       "-J",
+
+      # Use the high level consumer group subscribed to the set of topics.
+      "-G", group, *Array(topics),
     ])
 
-    # Exit 124 is returned by `timeout` when the command times out.
     out, err, status = Open3.capture3(cmd)
-    if !status.success? && status.exitstatus != 124
+    if !status.success?
+      # Exit 124 is returned by `timeout` when the command times out.
+      if status.exitstatus == 124
+        raise Timeout::Error, "consume exceeded timeout of #{timeout} seconds"
+      end
+
       expect(status).to be_success, err
     end
 
