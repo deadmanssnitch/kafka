@@ -64,6 +64,9 @@ jobs:
 
         echo "--color --require './spec/support/running_documentation_formatter.rb' --format RunningDocumentationFormatter --warnings" > .rspec
 
+        # Block until Kafka is ready
+        $HOME/bin/kafkacat -L -b 127.0.0.1:9092 -t __consumer_offsets -m 20 -q > /dev/null
+
     - uses: actions/download-artifact@v2
       with:
         name: librdkafka.so
@@ -113,6 +116,9 @@ jobs:
         chmod +x $HOME/bin/kafkacat
 
         echo "--color --require './spec/support/running_documentation_formatter.rb' --format RunningDocumentationFormatter --warnings" > .rspec
+
+        # Block until Kafka is ready
+        $HOME/bin/kafkacat -L -b 127.0.0.1:9092 -t __consumer_offsets -m 20 -q > /dev/null
 
     - uses: actions/download-artifact@v2
       with:
