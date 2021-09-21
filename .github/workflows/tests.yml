@@ -19,6 +19,8 @@ jobs:
 
     - name: Build librdkafka extension
       run: bundle exec rake ext
+      env:
+        MAKE: make -j3
 
     - name: Upload librdkafka
       uses: actions/upload-artifact@v2
