@@ -27,6 +27,7 @@ jobs:
       with:
         name: librdkafka.so
         path: ext/librdkafka.so
+        retention-days: 1
 
   ruby:
     name: Ruby ${{ matrix.ruby }}
