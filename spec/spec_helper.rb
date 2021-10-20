@@ -5,10 +5,12 @@ require "securerandom"
 require "timeout"
 require "open3"
 
-require "kafka"
-
 # Require supporting files in spec/support
 Dir[File.join(__dir__, "support/**/*.rb")].sort.each { |f| require f }
+
+# Require the library after all of the support files are loaded. Specifically
+# after simplecov is started otherwise some files incorrectly show no coverage.
+require "kafka"
 
 RSpec.configure do |config|
   # Disable RSpec exposing methods globally on `Module` and `main`
