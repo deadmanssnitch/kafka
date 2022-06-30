@@ -14,23 +14,6 @@ performance and general correctness.
 - Admin client
 - Object oriented librdkafka mappings for easy custom implementations
 
-## ⚠️ Project Status: Beta ⚠️
-
-This project is currently of BETA quality. Some APIs are still in flux and may
-change. There are also probably a number of subtle (and not so subtle) bugs and
-memory leaks.  Since this relies heavily on binding to librdkafka through FFI
-there are probably code paths which will cause segfaults or memory corruption.
-
-Working with Kafka::FFI directly has many sharp edges which are blunted by
-everything in the Kafka module.
-
-You (yes you!) can make a difference and help make this project better. Test
-against your application and traffic, implement missing functions (see
-`rake ffi:missing`), work with the API and make suggestions for improvements.
-All help is wanted and appreciated.
-
-Kafka is currently in production usage at [Dead Man's Snitch](https://deadmanssnitch.com).
-
 ## Installation
 
 Add this line to your application's Gemfile:
