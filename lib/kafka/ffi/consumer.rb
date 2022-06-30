@@ -341,5 +341,12 @@ module Kafka::FFI
 
       nil
     end
+
+    # Check if the Consumer has been closed
+    #
+    # @return [Boolean] True when the consumer has been closed
+    def closed?
+      ::Kafka::FFI.rd_kafka_consumer_closed(self)
+    end
   end
 end

@@ -81,5 +81,12 @@ module Kafka
       # that.
       @client.destroy
     end
+
+    # Returns true when the Consumer has been closed.
+    #
+    # @return [Boolean] True when the Consumer is closed.
+    def closed?
+      @client.closed?
+    end
   end
 end

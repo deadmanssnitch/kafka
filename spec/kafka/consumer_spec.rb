@@ -27,4 +27,11 @@ RSpec.describe Kafka::Consumer do
       consumer.close
     end
   end
+
+  specify "#closed?" do
+    consumer = Kafka::Consumer.new(config)
+
+    expect { consumer.close }
+      .to change(consumer, :closed?).from(false).to(true)
+  end
 end

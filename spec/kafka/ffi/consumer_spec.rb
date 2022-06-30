@@ -259,4 +259,11 @@ RSpec.describe Kafka::FFI::Consumer do
     client.destroy
     queue.destroy
   end
+
+  specify "#closed?" do
+    client = Kafka::FFI::Consumer.new(config)
+
+    expect { client.close }
+      .to change(client, :closed?).from(false).to(true)
+  end
 end

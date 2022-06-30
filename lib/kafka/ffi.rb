@@ -605,6 +605,8 @@ module Kafka
     attach_function :rd_kafka_consumer_poll, [Consumer, :timeout_ms], Message.by_ref, blocking: true
     attach_function :rd_kafka_poll_set_consumer, [Consumer], :error_code
     attach_function :rd_kafka_consumer_close, [Consumer], :error_code, blocking: true
+    attach_function :rd_kafka_consumer_close_queue, [Consumer, Queue], Error.by_ref
+    attach_function :rd_kafka_consumer_closed, [Consumer], :bool
 
     attach_function :rd_kafka_assign, [Consumer, TopicPartitionList.by_ref], :error_code
     attach_function :rd_kafka_assignment, [Consumer, :pointer], :error_code
