@@ -496,16 +496,6 @@ RSpec.describe Kafka::FFI::Client do
     queue.destroy if queue
   end
 
-  specify "#get_background_queue is nil with no configured background_event_cb" do
-    client = Kafka::FFI::Client.new(:producer, config)
-
-    queue = client.get_background_queue
-    expect(queue).to be(nil)
-  ensure
-    client.destroy
-    queue.destroy if queue
-  end
-
   specify "#set_log_queue" do
     # log.queue must be set to true otherwise segfault
     config = config("log.queue": true)
