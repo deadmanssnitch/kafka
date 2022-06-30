@@ -18,7 +18,10 @@ Bundler/OrderedGems:
   Enabled: true
   ConsiderPunctuation: true
 
-Gemspec/DateAssignment:
+Gemspec/RequireMFA:
+  Enabled: true
+
+Gemspec/DeprecatedAttributeAssignment:
   Enabled: true
 
 Layout/ArgumentAlignment:
@@ -167,7 +170,6 @@ Lint/OrAssignmentToConstant:
 
 Lint/SymbolConversion:
   Enabled: true
-  EnforcedStyle: consistent
 
 Lint/TripleQuotes:
   Enabled: true
@@ -182,6 +184,27 @@ Lint/AmbiguousOperatorPrecedence:
   Enabled: true
 
 Lint/IncompatibleIoSelectWithFiberScheduler:
+  Enabled: true
+
+Lint/RequireRelativeSelfPath:
+  Enabled: true
+
+Lint/UselessRuby2Keywords:
+  Enabled: true
+
+Lint/RefinementImportMethods:
+  Enabled: true
+
+Lint/ConstantOverwrittenInRescue:
+  Enabled: true
+
+Lint/NonAtomicFileOperation:
+  Enabled: true
+
+Security/IoMethods:
+  Enabled: true
+
+Security/CompoundHash:
   Enabled: true
 
 Style/AccessorGrouping:
@@ -314,6 +337,21 @@ Style/QuotedSymbols:
 Style/RedundantSelfAssignmentBranch:
   Enabled: true
 
+Style/FrozenStringLiteralComment:
+  Enabled: true
+
+Style/NumberedParameters:
+  Enabled: true
+
+Style/NumberedParametersLimit:
+  Enabled: true
+
+Style/SelectByRegexp:
+  Enabled: true
+
+Style/RedundantInitialize:
+  Enabled: true
+
 Layout/FirstHashElementIndentation:
   EnforcedStyle: consistent
 
@@ -325,6 +363,12 @@ Layout/MultilineMethodCallIndentation:
 
 Layout/EmptyLineBetweenDefs:
   AllowAdjacentOneLineDefs: true
+
+Layout/LineContinuationLeadingSpace:
+  Enabled: true
+
+Layout/LineContinuationSpacing:
+  Enabled: true
 
 Style/PercentLiteralDelimiters:
   PreferredDelimiters:
@@ -380,15 +424,52 @@ Style/HashConversion:
 Style/StringChars:
   Enabled: true
 
-Metrics/PerceivedComplexity:
-  Max: 14
+Style/OpenStructUse:
+  Enabled: true
+
+Style/FileRead:
+  Enabled: true
+
+Style/FileWrite:
+  Enabled: true
+
+Style/MapToHash:
+  Enabled: true
+
+Style/HashSyntax:
+  EnforcedShorthandSyntax: "never"
 
 # Disabled since we're binding to external code that we don't control and it's
 # that external code which primarily violates this check.
 Metrics/ParameterLists:
   Enabled: false
 
+Style/NestedFileDirname:
+  Enabled: true
+
+Style/FetchEnvVar:
+  Enabled: false
+
+Style/ObjectThen:
+  Enabled: true
+
+Style/EnvHome:
+  Enabled: true
+
+Style/MapCompactWithConditionalBlock:
+  Enabled: true
+
+Metrics/PerceivedComplexity:
+  Max: 16
+
 Naming/InclusiveLanguage:
+  Enabled: true
+
+Naming/BlockForwarding:
+  Enabled: true
+  EnforcedStyle: explicit
+
+Naming/MethodParameterName:
   Enabled: true
 
 Performance/AncestorsInclude:
@@ -440,6 +521,12 @@ Performance/RedundantSplitRegexpArgument:
   Enabled: true
 
 Performance/MapCompact:
+  Enabled: true
+
+Performance/ConcurrentMonotonicTime:
+  Enabled: true
+
+Performance/StringIdentifierArgument:
   Enabled: true
 
 #################

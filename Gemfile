@@ -4,7 +4,7 @@ source "https://rubygems.org"
 
 gem "simplecov"
 
-gem "rubocop", "1.21.0"
-gem "rubocop-performance", "1.11.5"
+gem "rubocop", "1.31.1"
+gem "rubocop-performance", "1.14.2"
 
 gemspec

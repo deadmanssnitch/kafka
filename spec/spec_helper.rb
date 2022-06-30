@@ -178,11 +178,11 @@ RSpec.configure do |config|
       expect(status).to be_success, err
     end
 
-    out.each_line.map do |line|
+    out.each_line.filter_map do |line|
       next if line.empty?
 
       KafkacatMessage.new(line)
-    end.compact
+    end
   end
 
   # Consume uses the high level balanced consumer to read messages from one or
@@ -232,10 +232,10 @@ RSpec.configure do |config|
       expect(status).to be_success, err
     end
 
-    out.each_line.map do |line|
+    out.each_line.filter_map do |line|
       next if line.empty?
 
       KafkacatMessage.new(line)
-    end.compact
+    end
   end
 end

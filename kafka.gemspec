@@ -24,6 +24,7 @@ Gem::Specification.new do |spec|
     "source_code_uri" => "https://github.com/deadmanssnitch/kafka",
     "documentation_uri" => "https://deadmanssnitch.com/opensource/kafka/docs/",
     "changelog_uri" => "https://github.com/deadmanssnitch/kafka/blob/master/CHANGELOG.md",
+    "rubygems_mfa_required" => "true",
   }
 
   # Specify which files should be added to the gem when it is released.
