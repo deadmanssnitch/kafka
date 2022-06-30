@@ -24,7 +24,9 @@ RSpec.describe Kafka::FFI::Client do
 
     # Mainly validate that the call is correct since the value can't be
     # determined before hand.
-    expect(client.cluster_id).not_to be_empty
+    id = client.cluster_id
+    expect(id).not_to be(nil)
+    expect(id).not_to be_empty
   ensure
     client.destroy
   end
