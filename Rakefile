@@ -85,17 +85,26 @@ end
 
 namespace :kafka do
   desc "Start an instance of Kafka running in docker"
-  task :up do
-    # Find the docker-compose file for the most recent version of Kafka in
-    # spec/support.
-    compose = Dir["spec/support/kafka-*.yml"].max
+  task :up, [:version] do |_, args|
+    compose =
+      if args[:version]
+        "spec/support/kafka-#{args[:version]}.yml"
+      else
+        # Find the docker-compose file for the most recent version of Kafka in
+        # spec/support.
+        Dir["spec/support/kafka-*.yml"].max
+      end
 
     sh "docker-compose -p ruby_kafka_dev -f #{compose} up -d"
   end
 
   desc "Shutdown the development Kafka instance"
   task :down do
-    compose = Dir["spec/support/kafka-*.yml"].max
-    sh "docker-compose -p ruby_kafka_dev -f #{compose} down"
+    sh "docker-compose -p ruby_kafka_dev down"
+  end
+
+  desc "Tail logs from the running Kafka instance"
+  task :logs do
+    exec "docker-compose -p ruby_kafka_dev logs -f"
   end
 end
