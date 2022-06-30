@@ -88,12 +88,13 @@ namespace :kafka do
   task :up, [:version] do |_, args|
     compose =
       case args[:version]
-      when nil, ""    then "spec/support/kafka-#{args[:version]}.yml"
+
+      # Find the docker-compose file for the most recent version of Kafka in
+      # spec/support.
+      when nil, ""    then Dir["spec/support/kafka-*.yml"].max
       when "redpanda" then "spec/support/redpanda.yml"
       else
-        # Find the docker-compose file for the most recent version of Kafka in
-        # spec/support.
-        Dir["spec/support/kafka-*.yml"].max
+        "spec/support/kafka-#{args[:version]}.yml"
       end
 
     sh "docker-compose -p ruby_kafka_dev -f #{compose} up -d"
