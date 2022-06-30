@@ -26,6 +26,15 @@ RSpec.configure do |config|
   #     --seed 1234
   config.order = "random"
 
+  config.around(:each, redpanda: false) do |example|
+    image = `docker ps --filter publish=9092 --format '{{ .Image }}'`
+    if image.include?("redpanda")
+      example.skip
+    else
+      example.run
+    end
+  end
+
   # See: https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md
   def config(options = {})
     defaults = {

@@ -314,7 +314,8 @@ RSpec.describe Kafka::FFI::Client do
     client.destroy
   end
 
-  specify "#delete_records" do
+  # redpanda: delete_records is not supported
+  specify "#delete_records", redpanda: false do
     client = Kafka::FFI::Client.new(:producer, config)
 
     with_topic(partitions: 1) do |topic|
@@ -350,7 +351,8 @@ RSpec.describe Kafka::FFI::Client do
     client.destroy
   end
 
-  specify "#delete_consumer_group_offsets" do
+  # redpanda: causes a segfault
+  specify "#delete_consumer_group_offsets", redpanda: false do
     group = SecureRandom.uuid
     client = Kafka::FFI::Client.new(:consumer, config("group.id" => group))
 

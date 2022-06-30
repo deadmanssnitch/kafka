@@ -1,0 +1,14 @@
+version: "3"
+
+services:
+  kafka:
+    image: "vectorized/redpanda"
+    command:
+      - redpanda start
+      - --smp 1
+      - --memory 512M
+      - --overprovisioned
+      - --node-id 1001
+      - --advertise-kafka-addr 127.0.0.1:9092
+    ports:
+      - "9092:9092"

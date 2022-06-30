@@ -87,8 +87,9 @@ namespace :kafka do
   desc "Start an instance of Kafka running in docker"
   task :up, [:version] do |_, args|
     compose =
-      if args[:version]
-        "spec/support/kafka-#{args[:version]}.yml"
+      case args[:version]
+      when nil, ""    then "spec/support/kafka-#{args[:version]}.yml"
+      when "redpanda" then "spec/support/redpanda.yml"
       else
         # Find the docker-compose file for the most recent version of Kafka in
         # spec/support.

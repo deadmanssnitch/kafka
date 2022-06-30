@@ -138,3 +138,52 @@ jobs:
         max_attempts: 3
         retry_on: error
         command: bundle exec rake
+
+  redpanda:
+    name: Redpanda
+    needs: librdkafka
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        # Use the latest stable version of Ruby
+        ruby-version: ruby
+        bundler-cache: true
+
+    # Run tests against the latest version of Kafka in spec/support
+    - name: Setup
+      run: |
+        bundle exec rake kafka:up[redpanda]
+
+        mkdir -p $HOME/bin
+        echo "$HOME/bin" >> $GITHUB_PATH
+
+        # Use kafkacat from Docker to ensure a recent version is installed
+        docker pull edenhill/kafkacat:1.6.0
+        echo 'docker run -i --rm --network=host edenhill/kafkacat:1.6.0 "$@"' > $HOME/bin/kafkacat
+        chmod +x $HOME/bin/kafkacat
+
+        echo "--color --require './spec/support/running_documentation_formatter.rb' --format RunningDocumentationFormatter --warnings" > .rspec
+
+        # Block until Kafka is ready
+        $HOME/bin/kafkacat -L -b 127.0.0.1:9092 -t __consumer_offsets -m 20 -q > /dev/null
+
+    - uses: actions/download-artifact@v2
+      with:
+        name: librdkafka.so
+        path: ext/
+
+    - name: Run specs
+      uses: nick-invision/retry@v2
+      with:
+        timeout_minutes: 5
+        max_attempts: 3
+        retry_on: error
+        command: bundle exec rake
