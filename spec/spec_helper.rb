@@ -145,7 +145,7 @@ RSpec.configure do |config|
   # @param key [String, nil] Partitioning key
   # @param partition [Integer, nil] Partition to publish to. Use -1 to publish
   #   to a random partition.
-  def publish(topic, payload, key: nil, partition: -1)
+  def publish(topic, payload, key: nil, partition: -1, headers: {})
     cmd = Shellwords.join(
       [
         "kafkacat", "-P",
@@ -157,6 +157,10 @@ RSpec.configure do |config|
       ].tap do |c|
         if key
           c.push("-k", key)
+        end
+
+        headers.transform_keys(&:to_s).each do |k, v|
+          c.push("-H", "#{k}=#{v}")
         end
       end,
     )

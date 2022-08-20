@@ -11,13 +11,14 @@ RSpec.describe Kafka::Consumer do
     with_topic do |topic|
       consumer.subscribe(topic)
 
-      publish(topic, "test")
+      publish(topic, "test", headers: { "foo" => "bar" })
 
       wait_for_assignments(consumer, topic: topic)
 
       received =
         consumer.poll(timeout: 5000) do |msg|
           expect(msg.payload).to eq("test")
+          expect(msg.headers.get("foo")).to eq("bar")
 
           true
         end
