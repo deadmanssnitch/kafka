@@ -44,7 +44,7 @@ trap("TERM") { @run = false }
         # timestamp to a Time.
         ts = Time.at(0, msg.timestamp, :millisecond).utc
 
-        puts format("%2d: %4d %8d %s %s => %s", i, msg.partition, msg.offset, msg.key, ts, msg.payload)
+        puts format("%2d: %4d %8d %s %s %s => %s", i, msg.partition, msg.offset, msg.key, ts, msg.headers, msg.payload)
 
         con.commit(msg, async: true)
       end
