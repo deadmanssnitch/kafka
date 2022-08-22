@@ -18,7 +18,7 @@ RSpec.describe Kafka::Consumer do
       received =
         consumer.poll(timeout: 5000) do |msg|
           expect(msg.payload).to eq("test")
-          expect(msg.headers.get("foo")).to eq("bar")
+          expect(msg.headers.get("foo")).to eq(["bar"])
 
           true
         end

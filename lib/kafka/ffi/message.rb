@@ -122,10 +122,11 @@ module Kafka::FFI
       err = ::Kafka::FFI.rd_kafka_message_headers(self, ptr)
       case err
       when :ok
-        if ptr.null?
+        addr = ptr.read_pointer
+        if addr.null?
           nil
         else
-          Message::Header.new(ptr)
+          Message::Header.new(addr)
         end
       when RD_KAFKA_RESP_ERR__NOENT
         # Messages does not have headers

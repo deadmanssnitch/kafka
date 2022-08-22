@@ -580,7 +580,7 @@ module Kafka
     attach_function :rd_kafka_message_latency, [Message.by_ref], :int64
     attach_function :rd_kafka_message_status, [Message.by_ref], :message_status
     attach_function :rd_kafka_message_broker_id, [Message.by_ref], :broker_id
-    attach_function :rd_kafka_message_headers, [Message.by_ref, Message::Header], :error_code
+    attach_function :rd_kafka_message_headers, [Message.by_ref, :pointer], :error_code
     attach_function :rd_kafka_message_detach_headers, [Message.by_ref, Message::Header], :error_code
     attach_function :rd_kafka_message_set_headers, [Message.by_ref, Message::Header], :void
     attach_function :rd_kafka_message_destroy, [Message.by_ref], :void
