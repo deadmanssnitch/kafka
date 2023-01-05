@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
@@ -23,7 +23,7 @@ jobs:
         MAKE: make -j3
 
     - name: Upload librdkafka
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: librdkafka.so
         path: ext/librdkafka.so
@@ -44,7 +44,7 @@ jobs:
           - 3.2
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
@@ -70,7 +70,7 @@ jobs:
         # Block until Kafka is ready
         $HOME/bin/kafkacat -L -b 127.0.0.1:9092 -t __consumer_offsets -m 20 -q > /dev/null
 
-    - uses: actions/download-artifact@v2
+    - uses: actions/download-artifact@v3
       with:
         name: librdkafka.so
         path: ext/
@@ -99,7 +99,7 @@ jobs:
           - 3.3
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
@@ -126,7 +126,7 @@ jobs:
         # Block until Kafka is ready
         $HOME/bin/kafkacat -L -b 127.0.0.1:9092 -t __consumer_offsets -m 20 -q > /dev/null
 
-    - uses: actions/download-artifact@v2
+    - uses: actions/download-artifact@v3
       with:
         name: librdkafka.so
         path: ext/
@@ -148,7 +148,7 @@ jobs:
       fail-fast: false
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
@@ -175,7 +175,7 @@ jobs:
         # Block until Kafka is ready
         $HOME/bin/kafkacat -L -b 127.0.0.1:9092 -t __consumer_offsets -m 20 -q > /dev/null
 
-    - uses: actions/download-artifact@v2
+    - uses: actions/download-artifact@v3
       with:
         name: librdkafka.so
         path: ext/
