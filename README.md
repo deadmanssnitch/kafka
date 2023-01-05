@@ -155,7 +155,7 @@ forking and rebuild them after forking the new process.
 
 ## Compatibility
 
-Kafka requires Ruby 2.7+ and is tested against Ruby 2.7+ and Kafka 2.6+.
+Kafka requires Ruby 2.7+ and is tested against Ruby 2.7+ and Kafka 2.8+.
 
 ## Development
 
