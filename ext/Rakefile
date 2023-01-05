@@ -5,8 +5,8 @@ require_relative "../lib/kafka/version"
 require "mini_portile2"
 require "fileutils"
 
-LIBRDKAFKA_VERSION  = "1.9.0"
-LIBRDKAFKA_CHECKSUM = "59b6088b69ca6cf278c3f9de5cd6b7f3fd604212cd1c59870bc531c54147e889"
+LIBRDKAFKA_VERSION  = "1.9.2"
+LIBRDKAFKA_CHECKSUM = "3fba157a9f80a0889c982acdd44608be8a46142270a389008b22d921be1198ad"
 
 desc "Compile librdkafka v#{LIBRDKAFKA_VERSION}"
 task :default do
@@ -30,7 +30,7 @@ namespace :build do
   def build(version:, checksum: nil)
     recipe = MiniPortile.new("librdkafka", version)
     recipe.files << {
-      url: "https://github.com/edenhill/librdkafka/archive/#{version}.tar.gz",
+      url: "https://github.com/confluentinc/librdkafka/archive/#{version}.tar.gz",
       sha256: checksum,
     }
     recipe.configure_options = ["--host=#{recipe.host}"]
