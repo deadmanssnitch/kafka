@@ -5,6 +5,8 @@ require "securerandom"
 require "timeout"
 require "open3"
 
+require "rspec/eventually"
+
 # Require supporting files in spec/support
 Dir[File.join(__dir__, "support/**/*.rb")].sort.each { |f| require f }
 
@@ -84,6 +86,19 @@ RSpec.configure do |config|
 
     begin
       admin.create_topic(topic, partitions, replicas, wait: true, timeout: nil)
+
+      # Wait until the topic has been created in Kafka.
+      Timeout.timeout(5) do
+        loop do
+          tpm = admin.metadata(local_only: false).topic(topic)
+
+          if tpm && tpm.error.nil?
+            break
+          end
+
+          sleep 0.25
+        end
+      end
 
       yield(topic)
     ensure

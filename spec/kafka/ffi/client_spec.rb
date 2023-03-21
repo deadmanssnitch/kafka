@@ -436,9 +436,10 @@ RSpec.describe Kafka::FFI::Client do
         expect(topics[0].error).to be(nil)
       end
 
-      tp = client.metadata.topic(topic)
-      expect(tp).not_to be(nil)
-      expect(tp.partitions.size).to eq(3)
+      expect do
+        tp = client.metadata.topic(topic)
+        tp && tp.partitions.size
+      end.to eventually(eq(3))
     ensure
       request.destroy
       options.destroy
