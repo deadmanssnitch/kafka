@@ -101,23 +101,25 @@ RSpec.describe Kafka::FFI::Consumer do
   end
 
   specify "#assign" do
-    consumer = Kafka::FFI::Consumer.new(config)
-
     with_topic(partitions: 9) do |topic|
-      consumer.subscribe(topic)
+      consumer = Kafka::FFI::Consumer.new(config)
 
-      list = Kafka::FFI::TopicPartitionList.new
-      list.add_range(topic, 0..3)
+      begin
+        consumer.subscribe(topic)
 
-      consumer.assign(list)
+        list = Kafka::FFI::TopicPartitionList.new
+        list.add_range(topic, 0..3)
 
-      assigned = consumer.assignment
-      expect(assigned).to eq({ topic => [0, 1, 2, 3] })
+        consumer.assign(list)
+
+        assigned = consumer.assignment
+        expect(assigned).to eq({ topic => [0, 1, 2, 3] })
+      ensure
+        list.destroy
+      end
     ensure
-      list.destroy
+      consumer.destroy
     end
-  ensure
-    consumer.destroy
   end
 
   specify "#assignment" do
