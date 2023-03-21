@@ -54,7 +54,7 @@ module Kafka
     #
     # @param wait [Boolean] Wait up to timeout milliseconds for topic creation
     #   to propogate to the cluster before returning.
-    # @param validate [Boolean] Only validate the request
+    #
     # @param timeout [Integer] Time to wait in milliseconds for each operation
     #   to complete. Total request execution time may be longer than timeout
     #   due to multiple operations being done. Defaults to `socket.timeout.ms`
@@ -63,13 +63,13 @@ module Kafka
     # @return [Kafka::FFI::Admin::DeleteTopicsResult, nil] Response from the
     #   cluster with details about the deletion or any errors. Returns nil when
     #   the operation timed out.
-    def delete_topic(name, wait: true, validate: false, timeout: nil)
+    def delete_topic(name, wait: true, timeout: nil)
       req = ::Kafka::FFI::Admin::DeleteTopic.new(name)
-      opts = new_options(:create_topics, wait: wait, validate: validate, timeout: timeout)
+      opts = new_options(:delete_topics, wait: wait, timeout: timeout)
 
       @client.delete_topics(req, options: opts)
     ensure
-      opts.destroy
+      opts.destroy if opts
       req.destroy
     end
 
@@ -84,7 +84,7 @@ module Kafka
     # @return [ConfigResource]
     def describe_config(type, name, wait: true, validate: false, timeout: nil)
       req = ::Kafka::FFI::Admin::ConfigResource.new(type, name)
-      opts = new_options(:create_topics, wait: wait, validate: validate, timeout: timeout)
+      opts = new_options(:describe_configs, wait: wait, validate: validate, timeout: timeout)
 
       res = @client.describe_configs(req, options: opts)
       if res
@@ -125,7 +125,10 @@ module Kafka
       end
 
       options.set_request_timeout(timeout)
-      options.set_validate_only(validate)
+
+      if validate
+        options.set_validate_only(validate)
+      end
 
       if wait
         options.set_operation_timeout(timeout)
