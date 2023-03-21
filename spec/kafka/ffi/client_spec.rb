@@ -352,7 +352,7 @@ RSpec.describe Kafka::FFI::Client do
   end
 
   # redpanda: causes a segfault
-  specify "#delete_consumer_group_offsets", redpanda: false do
+  specify "#delete_consumer_group_offsets" do
     group = SecureRandom.uuid
     client = Kafka::FFI::Client.new(:consumer, config("group.id" => group))
 
