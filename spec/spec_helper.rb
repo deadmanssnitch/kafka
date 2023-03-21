@@ -85,19 +85,24 @@ RSpec.configure do |config|
     admin = Kafka::Admin.new(config)
 
     begin
-      admin.create_topic(topic, partitions, replicas, wait: true, timeout: nil)
+      resp = admin.create_topic(topic, partitions, replicas, wait: true, timeout: nil)
+      resp.topics.each { |t| raise t.error if t.error }
+
+      # Track when the operation started
+      start ||= Time.now
 
       # Wait until the topic has been created in Kafka.
-      Timeout.timeout(5) do
-        loop do
-          tpm = admin.metadata(local_only: false).topic(topic)
-
-          if tpm && tpm.error.nil?
-            break
-          end
-
-          sleep 0.25
+      loop do
+        tpm = admin.metadata(local_only: false).topic(topic)
+        if tpm && tpm.error.nil?
+          break
         end
+
+        if (Time.now - start) > 10
+          raise Timeout::Error
+        end
+
+        sleep 0.25
       end
 
       yield(topic)
