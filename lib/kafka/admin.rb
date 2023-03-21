@@ -88,7 +88,7 @@ module Kafka
 
       res = @client.describe_configs(req, options: opts)
       if res
-        res[0]
+        res.resources[0]
       end
     ensure
       opts.destroy
