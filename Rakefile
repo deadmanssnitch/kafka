@@ -89,7 +89,7 @@ namespace :kafka do
     compose =
       case args[:version]
 
-      # Find the docker-compose file for the most recent version of Kafka in
+      # Find the Compose file for the most recent version of Kafka in
       # spec/support.
       when nil, ""    then Dir["spec/support/kafka-*.yml"].max
       when "redpanda" then "spec/support/redpanda.yml"
@@ -97,16 +97,16 @@ namespace :kafka do
         "spec/support/kafka-#{args[:version]}.yml"
       end
 
-    sh "docker-compose -p ruby_kafka_dev -f #{compose} up -d"
+    sh "docker compose -p ruby_kafka_dev -f #{compose} up -d"
   end
 
   desc "Shutdown the development Kafka instance"
   task :down do
-    sh "docker-compose -p ruby_kafka_dev down"
+    sh "docker compose -p ruby_kafka_dev down"
   end
 
   desc "Tail logs from the running Kafka instance"
   task :logs do
-    exec "docker-compose -p ruby_kafka_dev logs -f"
+    exec "docker compose -p ruby_kafka_dev logs -f"
   end
 end
