@@ -29,6 +29,22 @@ jobs:
         path: ext/librdkafka.so
         retention-days: 1
 
+  # Run Rubocop to make sure code confirms to the expected standard.
+  rubocop:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ruby
+        bundler-cache: true
+
+    - name: Rubocop
+      run: bundle exec rubocop
+
   ruby:
     name: Ruby ${{ matrix.ruby }}
     needs: librdkafka
