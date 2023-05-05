@@ -1,4 +1,4 @@
-name: Test
+name: CI
 
 on:
   - push
@@ -68,11 +68,8 @@ jobs:
         ruby-version: ${{ matrix.ruby }}
         bundler-cache: true
 
-    # Run tests against the latest version of Kafka in spec/support
-    - name: Setup
+    - name: Install kafkacat
       run: |
-        bundle exec rake kafka:up
-
         mkdir -p $HOME/bin
         echo "$HOME/bin" >> $GITHUB_PATH
 
@@ -81,7 +78,10 @@ jobs:
         echo 'docker run -i --rm --network=host edenhill/kafkacat:1.6.0 "$@"' > $HOME/bin/kafkacat
         chmod +x $HOME/bin/kafkacat
 
-        echo "--color --require './spec/support/running_documentation_formatter.rb' --format RunningDocumentationFormatter --warnings" > .rspec
+    # Run tests against the latest version of Kafka in spec/support
+    - name: Start Kafka
+      run: |
+        bundle exec rake kafka:up
 
         # Block until Kafka is ready
         $HOME/bin/kafkacat -L -b 127.0.0.1:9092 -t __consumer_offsets -m 20 -q > /dev/null
@@ -125,11 +125,8 @@ jobs:
         ruby-version: ruby
         bundler-cache: true
 
-    # Run tests against the latest version of Kafka in spec/support
-    - name: Setup
+    - name: Install kafkacat
       run: |
-        bundle exec rake kafka:up[${{ matrix.kafka }}]
-
         mkdir -p $HOME/bin
         echo "$HOME/bin" >> $GITHUB_PATH
 
@@ -138,7 +135,10 @@ jobs:
         echo 'docker run -i --rm --network=host edenhill/kafkacat:1.6.0 "$@"' > $HOME/bin/kafkacat
         chmod +x $HOME/bin/kafkacat
 
-        echo "--color --require './spec/support/running_documentation_formatter.rb' --format RunningDocumentationFormatter --warnings" > .rspec
+    # Run tests against the latest version of Kafka in spec/support
+    - name: Start Kafka
+      run: |
+        bundle exec rake kafka:up[${{ matrix.kafka }}]
 
         # Block until Kafka is ready
         $HOME/bin/kafkacat -L -b 127.0.0.1:9092 -t __consumer_offsets -m 20 -q > /dev/null
@@ -174,11 +174,8 @@ jobs:
         ruby-version: ruby
         bundler-cache: true
 
-    # Run tests against the latest version of Kafka in spec/support
-    - name: Setup
+    - name: Install kafkacat
       run: |
-        bundle exec rake kafka:up[redpanda]
-
         mkdir -p $HOME/bin
         echo "$HOME/bin" >> $GITHUB_PATH
 
@@ -187,7 +184,10 @@ jobs:
         echo 'docker run -i --rm --network=host edenhill/kafkacat:1.6.0 "$@"' > $HOME/bin/kafkacat
         chmod +x $HOME/bin/kafkacat
 
-        echo "--color --require './spec/support/running_documentation_formatter.rb' --format RunningDocumentationFormatter --warnings" > .rspec
+    # Run tests against the latest version of Kafka in spec/support
+    - name: Start Kafka
+      run: |
+        bundle exec rake kafka:up[redpanda]
 
         # Block until Kafka is ready
         $HOME/bin/kafkacat -L -b 127.0.0.1:9092 -t __consumer_offsets -m 20 -q > /dev/null

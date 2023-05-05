@@ -28,6 +28,14 @@ RSpec.configure do |config|
   #     --seed 1234
   config.order = "random"
 
+  # Default settings for GitHub Actions
+  if ENV["CI"] == "true"
+    # Using a formatter that prints out the step being run in as it helps with
+    # debugging segfaults.
+    config.formatter = RunningDocumentationFormatter
+    config.warnings = true
+  end
+
   config.around(:each, redpanda: false) do |example|
     image = `docker ps --filter publish=9092 --format '{{ .Image }}'`
     if image.include?("redpanda")
