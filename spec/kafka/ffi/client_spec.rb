@@ -36,7 +36,7 @@ RSpec.describe Kafka::FFI::Client do
 
     # https://issues.apache.org/jira/browse/KAFKA-1070
     expect(client.controller_id).to be_a(Integer)
-    expect(client.controller_id).to be >= 1001
+    expect(client.controller_id).to be(1).or be(1001)
   ensure
     client.destroy
   end
@@ -71,12 +71,12 @@ RSpec.describe Kafka::FFI::Client do
       expect(md).to be_a(Kafka::Metadata::Cluster)
       expect(md.topics.size).to eq(1)
 
-      expect(md.broker_id).to be >= 1001
+      expect(md.broker_id).to be(1).or be(1001)
       expect(md.broker_name).to match(%r{127\.0\.0\.1:9092/\d+})
       expect(md.brokers.size).to eq(1)
 
       md.brokers.first.tap do |broker|
-        expect(broker.id).to be >= 1001
+        expect(broker.id).to be(1).or be(1001)
         expect(broker.host).to eq("127.0.0.1")
         expect(broker.port).to eq(9092)
       end
@@ -92,13 +92,13 @@ RSpec.describe Kafka::FFI::Client do
         expect(part.id).to eq(index)
         expect(part.error).to be(nil)
         expect(part.error?).to be(false)
-        expect(part.leader).to be >= 1001
+        expect(part.leader).to be(1).or be(1001)
 
         expect(part.replicas.size).to eq(1)
-        expect(part.replicas[0]).to be >= 1001
+        expect(part.replicas[0]).to be(1).or be(1001)
 
         expect(part.in_sync_replicas.size).to eq(1)
-        expect(part.in_sync_replicas[0]).to be >= 1001
+        expect(part.in_sync_replicas[0]).to be(1).or be(1001)
       end
     end
   ensure
@@ -127,7 +127,7 @@ RSpec.describe Kafka::FFI::Client do
       expect(info.members).not_to be_empty
 
       info.broker.tap do |broker|
-        expect(broker.id).to be >= 1001
+        expect(broker.id).to be(1).or be(1001)
         expect(broker.host).to eq("127.0.0.1")
         expect(broker.port).to eq(9092)
       end
