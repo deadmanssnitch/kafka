@@ -109,4 +109,38 @@ namespace :kafka do
   task :logs do
     exec "docker compose -p ruby_kafka_dev logs -f"
   end
+
+  desc "Pull latest image(s) for all versions of Kafka and Redpanda"
+  task :pull, [:version] do |_, args|
+    config =
+      case args[:version]
+      when nil, ""
+        [ *Dir["spec/support/kafka-*.yml"], "spec/support/redpanda.yml" ]
+      when "redpanda"
+        [ "spec/support/redpanda.yml" ]
+      else
+        [ "spec/support/kafka-#{args[:version]}.yml" ]
+      end
+
+    config.each do |path|
+      sh "docker compose -f #{path} pull"
+    end
+  end
+
+  desc "Wait for Kafka to finish starting"
+  task :wait do
+    sh "kafkacat -L -b 127.0.0.1:9092 -t __consumer_offsets -m 30 -q > /dev/null"
+  end
+
+  desc "Run specs against a specific version of Kafka"
+  task :spec, [:version] do |_, args|
+    Rake::Task["kafka:down"].invoke
+    Rake::Task["kafka:up"].invoke(args[:version])
+    Rake::Task["kafka:wait"].invoke
+    Rake::Task["spec"].invoke
+
+    # Kafka will be cleanly shutdown if all of the previous tasks succeed. It
+    # doesn't appear there is a way to ensure this task is run.
+    Rake::Task["kafka:down"].invoke
+  end
 end
