@@ -12,7 +12,11 @@ task :ext do
   end
 end
 
-task default: [:ext, :spec]
+# Ensure the extension is built when running specs
+task spec: :ext
+
+# Running just `rake` will default to running the specs
+task default: :spec
 
 namespace :ffi do
   require "uri"
