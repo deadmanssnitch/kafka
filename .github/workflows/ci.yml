@@ -86,7 +86,7 @@ jobs:
         # Block until Kafka is ready
         $HOME/bin/kafkacat -L -b 127.0.0.1:9092 -t __consumer_offsets -m 20 -q > /dev/null
 
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4.1.7
       with:
         name: librdkafka.so
         path: ext/
@@ -144,7 +144,7 @@ jobs:
         # Block until Kafka is ready
         $HOME/bin/kafkacat -L -b 127.0.0.1:9092 -t __consumer_offsets -m 20 -q > /dev/null
 
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4.1.7
       with:
         name: librdkafka.so
         path: ext/
@@ -193,7 +193,7 @@ jobs:
         # Block until Kafka is ready
         $HOME/bin/kafkacat -L -b 127.0.0.1:9092 -t __consumer_offsets -m 20 -q > /dev/null
 
-    - uses: actions/download-artifact@v3
+    - uses: actions/download-artifact@v4.1.7
       with:
         name: librdkafka.so
         path: ext/
